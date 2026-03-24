@@ -1,5 +1,10 @@
-// ===== 아동 데이터 (데모용 — 나중에 DB로 교체) =====
-const students = [
+// ===== 출결 시스템 비밀번호 =====
+const ATT_PASSWORD = '1234';
+
+// ===== 아동 데이터 (localStorage 저장) =====
+const STUDENTS_KEY = 'att_students';
+
+const DEFAULT_STUDENTS = [
   { id: '0001', name: '홍길동', school: '증산초 1학년', parent: '010-1234-5678' },
   { id: '0002', name: '홍길동', school: '증산초 2학년', parent: '010-2345-6789' },
   { id: '0003', name: '홍길동', school: '수색초 1학년', parent: '010-3456-7890' },
@@ -11,6 +16,19 @@ const students = [
   { id: '0009', name: '홍길동', school: '증산중 2학년', parent: '010-9012-3456' },
   { id: '0010', name: '홍길동', school: '증산초 2학년', parent: '010-0123-4567' },
 ];
+
+function getStudents() {
+  const saved = localStorage.getItem(STUDENTS_KEY);
+  if (!saved) {
+    localStorage.setItem(STUDENTS_KEY, JSON.stringify(DEFAULT_STUDENTS));
+    return [...DEFAULT_STUDENTS];
+  }
+  return JSON.parse(saved);
+}
+
+function saveStudents(list) {
+  localStorage.setItem(STUDENTS_KEY, JSON.stringify(list));
+}
 
 // ===== 오늘 출결 기록 (localStorage) =====
 const TODAY_KEY = `att_${new Date().toISOString().split('T')[0]}`;
@@ -29,10 +47,54 @@ function updateClock() {
   const h = String(now.getHours()).padStart(2, '0');
   const m = String(now.getMinutes()).padStart(2, '0');
   const s = String(now.getSeconds()).padStart(2, '0');
-  document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+  const el = document.getElementById('clock');
+  if (el) el.textContent = `${h}:${m}:${s}`;
 }
 setInterval(updateClock, 1000);
 updateClock();
+
+// ===== 잠금 화면 =====
+let lockCode = '';
+
+function pressLock(n) {
+  if (lockCode.length >= 4) return;
+  lockCode += n;
+  updateLockDots();
+}
+
+function pressLockDelete() {
+  lockCode = lockCode.slice(0, -1);
+  updateLockDots();
+  document.getElementById('lockError').classList.add('hidden');
+}
+
+function updateLockDots() {
+  const dots = document.querySelectorAll('#lockDots .dot');
+  dots.forEach((dot, i) => {
+    dot.classList.toggle('filled', i < lockCode.length);
+  });
+}
+
+function pressLockConfirm() {
+  if (lockCode.length === 0) return;
+
+  if (lockCode === ATT_PASSWORD) {
+    showScreen('screenMain');
+    // 뒤로가기 방지: 히스토리에 상태 추가
+    history.pushState({ screen: 'main' }, '');
+    lockCode = '';
+    updateLockDots();
+    document.getElementById('lockError').classList.add('hidden');
+  } else {
+    document.getElementById('lockError').classList.remove('hidden');
+    lockCode = '';
+    updateLockDots();
+    // 흔들림 효과
+    const dots = document.getElementById('lockDots');
+    dots.classList.add('shake');
+    setTimeout(() => dots.classList.remove('shake'), 500);
+  }
+}
 
 // ===== 번호 입력 =====
 let inputCode = '';
@@ -50,7 +112,7 @@ function pressDelete() {
 
 function updateDisplay() {
   document.getElementById('inputNumber').textContent = inputCode;
-  const dots = document.querySelectorAll('.dot');
+  const dots = document.querySelectorAll('#inputDots .dot');
   dots.forEach((dot, i) => {
     dot.classList.toggle('filled', i < inputCode.length);
   });
@@ -60,6 +122,7 @@ function pressConfirm() {
   if (inputCode.length === 0) return;
 
   const code = inputCode.padStart(4, '0');
+  const students = getStudents();
   const student = students.find(s => s.id === code);
 
   if (!student) {
@@ -92,17 +155,14 @@ function recordAttendance(student) {
   let type, typeLabel;
 
   if (!records[student.id]) {
-    // 첫 번째 태그 = 등원
     records[student.id] = { inTime: timeStr, outTime: null };
     type = 'in';
     typeLabel = '등원 완료';
   } else if (!records[student.id].outTime) {
-    // 두 번째 태그 = 하원
     records[student.id].outTime = timeStr;
     type = 'out';
     typeLabel = '하원 완료';
   } else {
-    // 이미 등하원 모두 완료 — 하원 시간 갱신
     records[student.id].outTime = timeStr;
     type = 'out';
     typeLabel = '하원 시간 수정';
@@ -120,7 +180,6 @@ function showSuccess(student, type, typeLabel, timeStr) {
   document.getElementById('successType').textContent = typeLabel;
   document.getElementById('successTime').textContent = timeStr;
 
-  // 문자 발송 시뮬레이션
   const smsMsg = type === 'in'
     ? `📱 ${student.parent} → "${student.name} 학생이 ${timeStr}에 등원하였습니다."`
     : `📱 ${student.parent} → "${student.name} 학생이 ${timeStr}에 하원하였습니다."`;
@@ -130,7 +189,6 @@ function showSuccess(student, type, typeLabel, timeStr) {
   inputCode = '';
   updateDisplay();
 
-  // 3초 후 메인으로
   setTimeout(() => {
     showScreen('screenMain');
   }, 3000);
@@ -140,22 +198,30 @@ function showScreen(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
   document.getElementById(screenId).classList.remove('hidden');
 
-  // 관리 버튼 숨기기
+  // 관리 버튼: 메인 화면에서만 표시
   const toggle = document.getElementById('adminToggle');
-  toggle.style.display = screenId === 'screenAdmin' ? 'none' : 'block';
+  toggle.style.display = (screenId === 'screenMain') ? 'block' : 'none';
 
   if (screenId === 'screenAdmin') {
     renderAdmin();
   }
 }
 
-// ===== 관리자 화면 =====
-function toggleAdmin() {
-  const pw = prompt('관리자 비밀번호를 입력하세요');
-  if (pw === '1234') {
-    showScreen('screenAdmin');
-  } else if (pw !== null) {
-    alert('비밀번호가 틀렸습니다.');
+// ===== 관리 화면 =====
+function goAdmin() {
+  showScreen('screenAdmin');
+  switchAdminTab('records');
+}
+
+// 탭 전환
+function switchAdminTab(tab) {
+  document.getElementById('tabRecords').classList.toggle('active', tab === 'records');
+  document.getElementById('tabManage').classList.toggle('active', tab === 'manage');
+  document.getElementById('panelRecords').classList.toggle('hidden', tab !== 'records');
+  document.getElementById('panelManage').classList.toggle('hidden', tab !== 'manage');
+
+  if (tab === 'records') {
+    renderAdmin();
   }
 }
 
@@ -165,6 +231,7 @@ function renderAdmin() {
   document.getElementById('adminDate').textContent =
     `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${dayNames[now.getDay()]})`;
 
+  const students = getStudents();
   const records = getTodayRecords();
 
   let inCount = 0, outCount = 0, absentCount = 0;
@@ -228,8 +295,131 @@ function renderAdmin() {
   }).join('');
 }
 
+// ===== 아동 관리 (비밀번호 게이트) =====
+let manageUnlocked = false;
+let editingStudentId = null;
+
+function unlockManage() {
+  const pw = document.getElementById('managePw').value;
+  if (pw === ATT_PASSWORD) {
+    manageUnlocked = true;
+    document.getElementById('manageLock').classList.add('hidden');
+    document.getElementById('manageUnlocked').classList.remove('hidden');
+    document.getElementById('managePw').value = '';
+    document.getElementById('manageLockError').classList.add('hidden');
+    renderStudentList();
+  } else {
+    document.getElementById('manageLockError').classList.remove('hidden');
+  }
+}
+
+function renderStudentList() {
+  const students = getStudents();
+  const list = document.getElementById('manageStudentList');
+
+  if (students.length === 0) {
+    list.innerHTML = '<div class="manage-empty">등록된 아동이 없습니다</div>';
+    return;
+  }
+
+  list.innerHTML = students.map(s => `
+    <div class="manage-row">
+      <div class="manage-row-id">${s.id}</div>
+      <div class="manage-row-info">
+        <div class="manage-row-name">${s.name}</div>
+        <div class="manage-row-detail">${s.school} · ${s.parent}</div>
+      </div>
+      <div class="manage-row-actions">
+        <button class="manage-edit-btn" onclick="editStudent('${s.id}')">수정</button>
+        <button class="manage-del-btn" onclick="deleteStudent('${s.id}')">삭제</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addStudent() {
+  const id = document.getElementById('stuId').value.trim().padStart(4, '0');
+  const name = document.getElementById('stuName').value.trim();
+  const school = document.getElementById('stuSchool').value.trim();
+  const parent = document.getElementById('stuParent').value.trim();
+
+  if (!id || !name || !school || !parent) {
+    alert('모든 항목을 입력해주세요.');
+    return;
+  }
+
+  const students = getStudents();
+
+  if (editingStudentId) {
+    // 수정 모드
+    const idx = students.findIndex(s => s.id === editingStudentId);
+    if (idx !== -1) {
+      // 번호가 변경되었고 중복이면 거부
+      if (id !== editingStudentId && students.some(s => s.id === id)) {
+        alert('이미 사용 중인 번호입니다.');
+        return;
+      }
+      students[idx] = { id, name, school, parent };
+    }
+    editingStudentId = null;
+    document.getElementById('stuSubmitBtn').textContent = '추가';
+    document.getElementById('stuCancelBtn').classList.add('hidden');
+  } else {
+    // 추가 모드
+    if (students.some(s => s.id === id)) {
+      alert('이미 사용 중인 번호입니다.');
+      return;
+    }
+    students.push({ id, name, school, parent });
+  }
+
+  saveStudents(students);
+  clearStudentForm();
+  renderStudentList();
+}
+
+function editStudent(id) {
+  const students = getStudents();
+  const s = students.find(st => st.id === id);
+  if (!s) return;
+
+  editingStudentId = id;
+  document.getElementById('stuId').value = s.id;
+  document.getElementById('stuName').value = s.name;
+  document.getElementById('stuSchool').value = s.school;
+  document.getElementById('stuParent').value = s.parent;
+  document.getElementById('stuSubmitBtn').textContent = '저장';
+  document.getElementById('stuCancelBtn').classList.remove('hidden');
+
+  // 폼으로 스크롤
+  document.querySelector('.manage-form').scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelEditStudent() {
+  editingStudentId = null;
+  document.getElementById('stuSubmitBtn').textContent = '추가';
+  document.getElementById('stuCancelBtn').classList.add('hidden');
+  clearStudentForm();
+}
+
+function deleteStudent(id) {
+  if (!confirm('이 아동을 삭제하시겠습니까?')) return;
+  let students = getStudents();
+  students = students.filter(s => s.id !== id);
+  saveStudents(students);
+  renderStudentList();
+}
+
+function clearStudentForm() {
+  document.getElementById('stuId').value = '';
+  document.getElementById('stuName').value = '';
+  document.getElementById('stuSchool').value = '';
+  document.getElementById('stuParent').value = '';
+}
+
 // ===== 엑셀 내보내기 =====
 function exportCSV() {
+  const students = getStudents();
   const records = getTodayRecords();
   const today = new Date().toISOString().split('T')[0];
 
@@ -254,6 +444,16 @@ function exportCSV() {
   link.click();
 }
 
+// ===== 메인으로 돌아가기 (비밀번호 필요) =====
+function backToMain() {
+  const pw = prompt('비밀번호를 입력하세요');
+  if (pw === ATT_PASSWORD) {
+    window.location.href = 'index.html';
+  } else if (pw !== null) {
+    alert('비밀번호가 틀렸습니다.');
+  }
+}
+
 // ===== 초기화 =====
 function resetToday() {
   if (confirm('오늘 출결 기록을 모두 삭제하시겠습니까?')) {
@@ -261,3 +461,20 @@ function resetToday() {
     renderAdmin();
   }
 }
+
+// ===== 브라우저 뒤로가기 방지 =====
+// 초기 히스토리 상태 설정
+history.replaceState({ screen: 'lock' }, '');
+
+window.addEventListener('popstate', function(e) {
+  // 현재 메인(번호입력) 화면이면 뒤로가기 시 비밀번호 요구
+  const mainScreen = document.getElementById('screenMain');
+  if (mainScreen && !mainScreen.classList.contains('hidden')) {
+    // 히스토리를 다시 push해서 실제로 뒤로 가지 않게 함
+    history.pushState({ screen: 'main' }, '');
+    const pw = prompt('메인으로 돌아가려면 비밀번호를 입력하세요');
+    if (pw === ATT_PASSWORD) {
+      window.location.href = 'index.html';
+    }
+  }
+});

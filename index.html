@@ -19,11 +19,37 @@
       <li><a href="#pickup">픽업</a></li>
       <li><a href="#register">등록/상담</a></li>
     </ul>
-    <div class="nav-right">
-      <a href="attendance.html" class="nav-cta" style="text-decoration:none;">출결 시스템</a>
-      <button class="nav-admin-btn" id="navAdminBtn" onclick="toggleAdminLogin()">관리자 로그인</button>
-    </div>
   </nav>
+
+  <!-- 우상단 고정 버튼 -->
+  <div class="fixed-toolbar">
+    <a href="attendance.html" class="toolbar-btn toolbar-att">출결</a>
+    <button class="toolbar-btn toolbar-inbox admin-only" onclick="openInbox()">서류함 <span class="inbox-badge" id="inboxBadge">0</span></button>
+    <button class="toolbar-btn toolbar-admin" id="toolbarAdminBtn" onclick="toggleAdminLogin()">선생님 로그인</button>
+  </div>
+
+  <!-- 서류함 모달 -->
+  <div class="modal-overlay" id="inboxModal">
+    <div class="modal inbox-modal">
+      <div class="modal-title">제출 서류함</div>
+      <button class="modal-close-x" onclick="closeInbox()">&times;</button>
+
+      <div class="inbox-tabs">
+        <button class="inbox-tab active" onclick="switchInboxTab('all')">전체</button>
+        <button class="inbox-tab" onclick="switchInboxTab('absence')">결석/조퇴</button>
+        <button class="inbox-tab" onclick="switchInboxTab('medication')">투약 의뢰</button>
+        <button class="inbox-tab" onclick="switchInboxTab('register')">신규 등록</button>
+        <button class="inbox-tab" onclick="switchInboxTab('consult')">상담 신청</button>
+      </div>
+
+      <div class="inbox-list" id="inboxList">
+        <!-- JS로 렌더링 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 출력용 양식 (화면에 안 보이고 print 시에만 표시) -->
+  <div class="print-area" id="printArea"></div>
 
   <!-- 관리자 로그인 모달 -->
   <div class="modal-overlay" id="adminLoginModal">
@@ -190,43 +216,24 @@
     <h2 class="section-title">우리 아이들의<br>즐거운 하루</h2>
     <p class="section-desc">센터에서의 다양한 활동 사진을 확인하세요.</p>
 
+    <!-- 관리자: 활동 추가 -->
+    <div class="admin-only" style="margin-bottom:20px;">
+      <div class="card" style="padding:20px;">
+        <h4 style="font-weight:800; margin-bottom:12px;">활동 추가</h4>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">활동 제목</label><input type="text" id="galTitle" class="input-field" placeholder="봄맞이 미술 수업" /></div>
+          <div class="form-group"><label class="form-label">카테고리</label><input type="text" id="galCategory" class="input-field" placeholder="미술 활동" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">날짜</label><input type="date" id="galDate" class="input-field" /></div>
+          <div class="form-group"><label class="form-label">사진 업로드</label><input type="file" id="galPhoto" accept="image/*" multiple class="input-field" /></div>
+        </div>
+        <button class="btn-upload" onclick="addGalleryItem()">추가</button>
+      </div>
+    </div>
+
     <div class="gallery-grid" id="galleryGrid">
-      <div class="gallery-card">
-        <div class="gallery-img" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-          <span>미술 활동</span>
-        </div>
-        <div class="gallery-info">
-          <div class="gallery-title">봄맞이 미술 수업</div>
-          <div class="gallery-date">2026.03.20</div>
-        </div>
-      </div>
-      <div class="gallery-card">
-        <div class="gallery-img" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
-          <span>체육 활동</span>
-        </div>
-        <div class="gallery-info">
-          <div class="gallery-title">실내 체육 시간</div>
-          <div class="gallery-date">2026.03.18</div>
-        </div>
-      </div>
-      <div class="gallery-card">
-        <div class="gallery-img" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
-          <span>현장학습</span>
-        </div>
-        <div class="gallery-info">
-          <div class="gallery-title">봄 현장학습</div>
-          <div class="gallery-date">2026.03.15</div>
-        </div>
-      </div>
-      <div class="gallery-card">
-        <div class="gallery-img" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
-          <span>요리 활동</span>
-        </div>
-        <div class="gallery-info">
-          <div class="gallery-title">쿠키 만들기</div>
-          <div class="gallery-date">2026.03.12</div>
-        </div>
-      </div>
+      <!-- JS로 렌더링 -->
     </div>
   </section>
 
@@ -309,6 +316,13 @@
           <label class="form-label">첨부서류 (진단서, 진료확인서 등)</label>
           <input type="file" id="absFile" accept=".pdf,.jpg,.png" class="input-field" />
         </div>
+      </div>
+
+      <div class="form-consent">
+        <label class="consent-check">
+          <input type="checkbox" id="absConsent" />
+          <span><strong class="required-tag">[필수]</strong> 본인은 아동의 보호자로서 위 내용이 사실임을 확인하며, 센터 운영규정에 따라 사전 통보 없는 결석이 반복될 경우 이용에 제한이 있을 수 있음을 안내받았습니다.</span>
+        </label>
       </div>
 
       <div class="form-notice">
@@ -418,8 +432,23 @@
         </div>
       </div>
 
+      <div class="form-consent">
+        <label class="consent-check">
+          <input type="checkbox" id="medConsent1" />
+          <span><strong class="required-tag">[필수]</strong> 투약 시 발생할 수 있는 부작용(구토, 알레르기 반응, 졸음 등)에 대해 안내 받았으며, 부작용 발생 시 즉시 보호자에게 연락 후 투약을 중단함에 동의합니다.</span>
+        </label>
+        <label class="consent-check">
+          <input type="checkbox" id="medConsent2" />
+          <span><strong class="required-tag">[필수]</strong> 의사의 처방에 따른 정확한 약 정보(용량, 시간, 보관법)를 기재하였으며, 잘못된 정보 기재로 인한 문제 발생 시 보호자에게 책임이 있음을 확인합니다.</span>
+        </label>
+        <label class="consent-check">
+          <input type="checkbox" id="medConsent3" />
+          <span><strong class="required-tag">[필수]</strong> 아동의 건강 상태 변화(발열, 구토, 발진 등) 발생 시 센터에서 보호자에게 즉시 연락하며, 상황에 따라 119 신고 및 응급 조치를 취할 수 있음에 동의합니다.</span>
+        </label>
+      </div>
+
       <div class="form-notice">
-        <p>위 아동에 대한 투약을 의뢰하며, 투약 시 발생할 수 있는 부작용에 대해 안내 받았습니다.</p>
+        <p>위 아동에 대한 투약을 의뢰하며, 상기 안내사항을 모두 확인하였습니다.</p>
         <p class="form-date-line" id="medFormDate"></p>
         <div class="form-sign-row">
           <span>의뢰인(보호자): ___________  (서명)</span>
@@ -459,6 +488,25 @@
       <table class="pickup-table" id="pickupTable">
         <!-- JS로 렌더링 -->
       </table>
+    </div>
+
+    <!-- 관리자: 픽업 아동 추가 -->
+    <div class="admin-only" style="margin-top:20px;">
+      <div class="card" style="padding:20px;">
+        <h4 style="font-weight:800; margin-bottom:12px;">픽업 아동 관리</h4>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">이름</label><input type="text" id="pickupName" class="input-field" placeholder="홍길동" /></div>
+          <div class="form-group"><label class="form-label">학교/학년</label><input type="text" id="pickupSchool" class="input-field" placeholder="증산초 1학년" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">월</label><input type="text" id="pickupMon" class="input-field" placeholder="13:00" /></div>
+          <div class="form-group"><label class="form-label">화</label><input type="text" id="pickupTue" class="input-field" placeholder="13:00" /></div>
+          <div class="form-group"><label class="form-label">수</label><input type="text" id="pickupWed" class="input-field" placeholder="12:30" /></div>
+          <div class="form-group"><label class="form-label">목</label><input type="text" id="pickupThu" class="input-field" placeholder="13:00" /></div>
+          <div class="form-group"><label class="form-label">금</label><input type="text" id="pickupFri" class="input-field" placeholder="12:30" /></div>
+        </div>
+        <button class="btn-upload" onclick="addPickupStudent()">추가</button>
+      </div>
     </div>
   </section>
 
@@ -562,6 +610,21 @@
         </div>
       </div>
 
+      <div class="form-consent">
+        <label class="consent-check">
+          <input type="checkbox" id="regConsent1" />
+          <span><strong class="required-tag">[필수]</strong> 본인은 위 아동의 보호자로서 기재 내용이 사실임을 확인하며, 센터 이용규정 및 안전수칙을 준수할 것에 동의합니다.</span>
+        </label>
+        <label class="consent-check">
+          <input type="checkbox" id="regConsent2" />
+          <span><strong class="required-tag">[필수]</strong> 아동의 개인정보(성명, 생년월일, 건강정보 등)를 센터 운영 목적으로 수집·이용하는 것에 동의합니다. (보유기간: 퇴소 후 3년)</span>
+        </label>
+        <label class="consent-check">
+          <input type="checkbox" id="regConsent3" />
+          <span><strong class="optional-tag">[선택]</strong> 센터 활동 중 촬영된 사진·영상을 센터 홍보 및 기록 목적으로 활용하는 것에 동의합니다.</span>
+        </label>
+      </div>
+
       <div class="form-actions">
         <button class="btn-upload" onclick="submitRegister()">등록 신청</button>
       </div>
@@ -614,6 +677,13 @@
           <label class="form-label">상담 내용 상세</label>
           <textarea id="conDetail" class="input-field textarea" placeholder="상담 받고 싶은 내용을 자세히 적어주세요."></textarea>
         </div>
+      </div>
+
+      <div class="form-consent">
+        <label class="consent-check">
+          <input type="checkbox" id="conConsent" />
+          <span><strong class="required-tag">[필수]</strong> 상담 내용은 아동 지도 및 센터 운영 개선 목적으로만 활용되며, 상담 기록이 보관될 수 있음을 안내받았습니다.</span>
+        </label>
       </div>
 
       <div class="form-actions">

@@ -7,9 +7,12 @@ function toggleAdminLogin() {
     // 로그아웃
     isAdmin = false;
     document.body.classList.remove('admin-mode');
-    document.getElementById('navAdminBtn').textContent = '관리자 로그인';
-    document.getElementById('navAdminBtn').classList.remove('logged-in');
+    document.getElementById('toolbarAdminBtn').textContent = '선생님 로그인';
+    document.getElementById('toolbarAdminBtn').classList.remove('logged-in');
     renderNotices();
+    renderGallery();
+    renderPickupTable();
+    renderMedSchedule();
     return;
   }
   // 로그인 모달 열기
@@ -24,14 +27,16 @@ function doAdminLogin() {
   if (pw === ADMIN_PASSWORD) {
     isAdmin = true;
     document.body.classList.add('admin-mode');
-    document.getElementById('navAdminBtn').textContent = '로그아웃';
-    document.getElementById('navAdminBtn').classList.add('logged-in');
+    document.getElementById('toolbarAdminBtn').textContent = '선생님 로그아웃';
+    document.getElementById('toolbarAdminBtn').classList.add('logged-in');
     closeAdminModal();
     renderNotices();
     renderMealGrid();
     renderAttendance();
     renderMedSchedule();
     renderAbsenceList();
+    renderGallery();
+    renderPickupTable();
   } else {
     alert('비밀번호가 틀렸습니다.');
     document.getElementById('adminPwInput').value = '';
@@ -633,9 +638,22 @@ function submitAbsence() {
   const now = new Date();
   const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
 
+  const guardian = document.getElementById('absGuardian').value.trim();
+  const phone = document.getElementById('absPhone').value.trim();
+  const absDate = document.getElementById('absDate').value;
+  const consent = document.getElementById('absConsent');
+  if (!consent.checked) { alert('동의 항목에 체크해주세요.'); return; }
+
   absenceRecords.unshift({ type, name, school, reason, from, to, date: dateStr });
+  inboxItems.unshift({
+    type: 'absence', name: `${name} (${type})`, summary: `${reason} | ${from} ~ ${to}`, date: dateStr,
+    data: { type, name, school, guardian, phone, reason, from, to, absDate },
+    consents: ['운영규정 안내 동의']
+  });
+  updateInboxBadge();
   renderAbsenceList();
   alert('신청서가 제출되었습니다.');
+  consent.checked = false;
 }
 
 function printAbsence() {
@@ -688,9 +706,26 @@ function submitMedication() {
     return;
   }
 
+  const hospital = document.getElementById('medHospital') ? document.getElementById('medHospital').value.trim() : '';
+  const note = document.getElementById('medNote') ? document.getElementById('medNote').value.trim() : '';
+  const c1 = document.getElementById('medConsent1');
+  const c2 = document.getElementById('medConsent2');
+  const c3 = document.getElementById('medConsent3');
+  if (!c1.checked || !c2.checked || !c3.checked) { alert('모든 동의 항목에 체크해주세요.'); return; }
+
   medRecords.unshift({ name, drug, dose, time, symptom, from, to: to || from, storage });
+
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+  inboxItems.unshift({
+    type: 'medication', name: `${name} (${drug})`, summary: `${dose} · ${time} · ${from}~${to || from}`, date: dateStr,
+    data: { name, drug, dose, time, symptom, from, to: to || from, storage, hospital, note },
+    consents: ['부작용 안내 동의', '약 정보 책임 확인', '응급조치 동의']
+  });
+  updateInboxBadge();
   renderMedSchedule();
   alert('투약 의뢰서가 제출되었습니다.');
+  c1.checked = false; c2.checked = false; c3.checked = false;
 }
 
 function printMedication() {
@@ -732,7 +767,10 @@ function renderPickupTable() {
   });
   html += '</tr></thead><tbody>';
 
-  pickupStudents.forEach(s => {
+  if (isAdmin) html += '<th></th>';
+  html += '</tr></thead><tbody>';
+
+  pickupStudents.forEach((s, idx) => {
     html += `<tr><td class="pickup-name">${s.name}</td><td class="pickup-school">${s.school}</td>`;
     dayNames.forEach((day, i) => {
       const time = s.times[day] || '-';
@@ -747,11 +785,36 @@ function renderPickupTable() {
 
       html += `<td><span class="pickup-time">${time}</span>${status}</td>`;
     });
+    if (isAdmin) html += `<td><button class="delete-btn" onclick="deletePickupStudent(${idx})">삭제</button></td>`;
     html += '</tr>';
   });
 
   html += '</tbody>';
   document.getElementById('pickupTable').innerHTML = html;
+}
+
+function addPickupStudent() {
+  const name = document.getElementById('pickupName').value.trim();
+  const school = document.getElementById('pickupSchool').value.trim();
+  if (!name || !school) { alert('이름과 학교를 입력해주세요.'); return; }
+  pickupStudents.push({
+    name, school,
+    times: {
+      월: document.getElementById('pickupMon').value.trim() || '-',
+      화: document.getElementById('pickupTue').value.trim() || '-',
+      수: document.getElementById('pickupWed').value.trim() || '-',
+      목: document.getElementById('pickupThu').value.trim() || '-',
+      금: document.getElementById('pickupFri').value.trim() || '-',
+    }
+  });
+  ['pickupName','pickupSchool','pickupMon','pickupTue','pickupWed','pickupThu','pickupFri'].forEach(id => document.getElementById(id).value = '');
+  renderPickupTable();
+}
+
+function deletePickupStudent(idx) {
+  if (!confirm('이 아동을 픽업 목록에서 삭제하시겠습니까?')) return;
+  pickupStudents.splice(idx, 1);
+  renderPickupTable();
 }
 
 renderPickupTable();
@@ -775,7 +838,30 @@ function submitRegister() {
     return;
   }
 
+  const c1 = document.getElementById('regConsent1');
+  const c2 = document.getElementById('regConsent2');
+  const c3 = document.getElementById('regConsent3');
+  if (!c1.checked || !c2.checked) { alert('필수 동의 항목에 체크해주세요.'); return; }
+
+  const birth = document.getElementById('regChildBirth').value;
+  const gender = document.getElementById('regGender').value;
+  const school = document.getElementById('regSchool').value.trim();
+  const relation = document.getElementById('regRelation').value;
+  const emergency = document.getElementById('regEmergency').value.trim();
+  const address = document.getElementById('regAddress').value.trim();
+  const note = document.getElementById('regNote').value.trim();
+  const days = [...document.querySelectorAll('#regDays input:checked')].map(c => c.value).join(', ');
+
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+  inboxItems.unshift({
+    type: 'register', name: `${name} (신규등록)`, summary: `${school} · 보호자: ${guardian}`, date: dateStr,
+    data: { name, birth, gender, school, guardian, relation, phone, emergency, address, days, note },
+    consents: ['이용규정 동의', '개인정보 수집 동의', c3.checked ? '사진촬영 동의' : '사진촬영 미동의']
+  });
+  updateInboxBadge();
   alert(`${name} 아동의 이용 신청이 접수되었습니다.\n담당자 확인 후 연락드리겠습니다.`);
+  c1.checked = false; c2.checked = false; c3.checked = false;
 }
 
 function submitConsult() {
@@ -788,5 +874,277 @@ function submitConsult() {
     return;
   }
 
+  const conConsent = document.getElementById('conConsent');
+  if (!conConsent.checked) { alert('동의 항목에 체크해주세요.'); return; }
+
+  const conPhone = document.getElementById('conPhone').value.trim();
+  const conDate = document.getElementById('conDate').value;
+  const topic = document.getElementById('conTopic').value;
+
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+  inboxItems.unshift({
+    type: 'consult', name: `${child} (상담)`, summary: `${topic} · 보호자: ${guardian}`, date: dateStr,
+    data: { guardian, phone: conPhone, child, dateTime: conDate, topic, detail },
+    consents: ['상담기록 보관 동의']
+  });
+  updateInboxBadge();
   alert(`상담 신청이 접수되었습니다.\n담당 선생님이 확인 후 연락드리겠습니다.`);
+  conConsent.checked = false;
 }
+
+// ===== 갤러리 =====
+const GALLERY_GRADIENTS = [
+  'linear-gradient(135deg, #667eea, #764ba2)',
+  'linear-gradient(135deg, #f093fb, #f5576c)',
+  'linear-gradient(135deg, #4facfe, #00f2fe)',
+  'linear-gradient(135deg, #43e97b, #38f9d7)',
+  'linear-gradient(135deg, #fa709a, #fee140)',
+  'linear-gradient(135deg, #a18cd1, #fbc2eb)',
+];
+
+let galleryItems = [
+  { title: '봄맞이 미술 수업', category: '미술 활동', date: '2026.03.20', photo: null },
+  { title: '실내 체육 시간', category: '체육 활동', date: '2026.03.18', photo: null },
+  { title: '봄 현장학습', category: '현장학습', date: '2026.03.15', photo: null },
+  { title: '쿠키 만들기', category: '요리 활동', date: '2026.03.12', photo: null },
+];
+
+function renderGallery() {
+  const grid = document.getElementById('galleryGrid');
+  if (!grid) return;
+  grid.innerHTML = galleryItems.map((item, i) => {
+    const bg = item.photo
+      ? `background-image:url('${item.photo}'); background-size:cover; background-position:center;`
+      : `background: ${GALLERY_GRADIENTS[i % GALLERY_GRADIENTS.length]};`;
+    return `
+      <div class="gallery-card">
+        <div class="gallery-img" style="${bg}">
+          <span>${item.category}</span>
+        </div>
+        <div class="gallery-info">
+          <div class="gallery-title">${item.title}</div>
+          <div class="gallery-date">${item.date}</div>
+          ${isAdmin ? `<div class="notice-actions" style="display:flex;"><button class="delete-btn" onclick="deleteGalleryItem(${i})">삭제</button></div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function addGalleryItem() {
+  const title = document.getElementById('galTitle').value.trim();
+  const category = document.getElementById('galCategory').value.trim();
+  const dateVal = document.getElementById('galDate').value;
+  const fileInput = document.getElementById('galPhoto');
+
+  if (!title || !category) { alert('제목과 카테고리를 입력해주세요.'); return; }
+
+  const dateStr = dateVal ? dateVal.replace(/-/g, '.') : new Date().toISOString().split('T')[0].replace(/-/g, '.');
+
+  if (fileInput.files && fileInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      galleryItems.unshift({ title, category, date: dateStr, photo: e.target.result });
+      renderGallery();
+    };
+    reader.readAsDataURL(fileInput.files[0]);
+  } else {
+    galleryItems.unshift({ title, category, date: dateStr, photo: null });
+    renderGallery();
+  }
+
+  document.getElementById('galTitle').value = '';
+  document.getElementById('galCategory').value = '';
+  document.getElementById('galDate').value = '';
+  fileInput.value = '';
+}
+
+function deleteGalleryItem(idx) {
+  if (!confirm('이 활동을 삭제하시겠습니까?')) return;
+  galleryItems.splice(idx, 1);
+  renderGallery();
+}
+
+renderGallery();
+
+// ===== 서류함 시스템 =====
+let inboxItems = [];
+let currentInboxFilter = 'all';
+
+function updateInboxBadge() {
+  const badge = document.getElementById('inboxBadge');
+  if (badge) badge.textContent = inboxItems.length;
+}
+
+function openInbox() {
+  document.getElementById('inboxModal').classList.add('active');
+  renderInbox();
+}
+
+function closeInbox() {
+  document.getElementById('inboxModal').classList.remove('active');
+}
+
+function switchInboxTab(type) {
+  currentInboxFilter = type;
+  document.querySelectorAll('.inbox-tab').forEach(t => {
+    t.classList.toggle('active', t.textContent.includes(
+      type === 'all' ? '전체' : type === 'absence' ? '결석' : type === 'medication' ? '투약' : type === 'register' ? '등록' : '상담'
+    ));
+  });
+  renderInbox();
+}
+
+function renderInbox() {
+  const list = document.getElementById('inboxList');
+  if (!list) return;
+  const filtered = currentInboxFilter === 'all' ? inboxItems : inboxItems.filter(i => i.type === currentInboxFilter);
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="inbox-empty">제출된 서류가 없습니다</div>';
+    return;
+  }
+
+  const typeLabels = { absence: '결석/조퇴', medication: '투약 의뢰', register: '신규 등록', consult: '상담 신청' };
+
+  list.innerHTML = filtered.map((item) => {
+    const idx = inboxItems.indexOf(item);
+    const consentStr = item.consents ? item.consents.map(c => `<span class="inbox-consent-tag">✓ ${c}</span>`).join(' ') : '';
+    return `
+      <div class="inbox-item" onclick="printInboxItem(${idx})">
+        <span class="inbox-type ${item.type}">${typeLabels[item.type]}</span>
+        <div class="inbox-info">
+          <div class="inbox-name">${item.name}</div>
+          <div class="inbox-detail">${item.summary}</div>
+          ${consentStr ? `<div class="inbox-consents">${consentStr}</div>` : ''}
+        </div>
+        <span class="inbox-date">${item.date}</span>
+        <button class="inbox-print-btn" onclick="event.stopPropagation(); printInboxItem(${idx})">출력</button>
+      </div>
+    `;
+  }).join('');
+}
+
+// 출력 양식 생성
+function printInboxItem(idx) {
+  const item = inboxItems[idx];
+  if (!item) return;
+
+  const printArea = document.getElementById('printArea');
+  let html = '';
+
+  if (item.type === 'absence') {
+    html = `
+      <div class="print-header">
+        <div class="print-org">성산지역아동센터</div>
+        <div class="print-title">${item.data.type} 신청서</div>
+      </div>
+      <table>
+        <tr><th>신청 구분</th><td>${item.data.type}</td></tr>
+        <tr><th>아동 성명</th><td>${item.data.name}</td></tr>
+        <tr><th>소속 학교/학년</th><td>${item.data.school}</td></tr>
+        <tr><th>보호자 성명</th><td>${item.data.guardian || '-'}</td></tr>
+        <tr><th>보호자 연락처</th><td>${item.data.phone || '-'}</td></tr>
+        <tr><th>사유</th><td>${item.data.reason}</td></tr>
+        <tr><th>기간</th><td>${item.data.from} ~ ${item.data.to || item.data.from}</td></tr>
+        <tr><th>신청일</th><td>${item.data.absDate || item.date}</td></tr>
+      </table>
+      <div class="print-notice">
+        <p>※ 본인은 아동의 보호자로서 위 내용이 사실임을 확인하며, 센터 운영규정에 따라 사전 통보 없는 결석이 반복될 경우 이용에 제한이 있을 수 있음을 안내받았습니다.</p>
+        <p>위와 같은 사유로 ${item.data.type}을(를) 신청합니다.</p>
+      </div>
+      <div class="print-sign">
+        <p>${item.date}</p>
+        <p>신청인(보호자): ${item.data.guardian || '___________'} (서명)</p>
+      </div>
+      <div class="print-to">성산지역아동센터장 귀하</div>
+    `;
+  } else if (item.type === 'medication') {
+    html = `
+      <div class="print-header">
+        <div class="print-org">성산지역아동센터</div>
+        <div class="print-title">투약 의뢰서</div>
+      </div>
+      <table>
+        <tr><th>아동 성명</th><td>${item.data.name}</td></tr>
+        <tr><th>증상/진단명</th><td>${item.data.symptom}</td></tr>
+        <tr><th>처방 병원</th><td>${item.data.hospital || '-'}</td></tr>
+        <tr><th>약 이름</th><td>${item.data.drug}</td></tr>
+        <tr><th>투약 용량</th><td>${item.data.dose}</td></tr>
+        <tr><th>투약 시간</th><td>${item.data.time}</td></tr>
+        <tr><th>투약 기간</th><td>${item.data.from} ~ ${item.data.to || item.data.from}</td></tr>
+        <tr><th>보관 방법</th><td>${item.data.storage}</td></tr>
+        <tr><th>특이사항</th><td>${item.data.note || '-'}</td></tr>
+      </table>
+      <div class="print-notice">
+        <p>※ 투약 시 발생할 수 있는 부작용에 대해 안내 받았으며, 부작용 발생 시 투약 중단에 동의합니다.</p>
+        <p>※ 정확한 약 정보를 기재하였으며, 잘못된 정보 기재로 인한 책임은 보호자에게 있음을 확인합니다.</p>
+        <p>※ 건강 상태 변화 시 119 신고 및 응급 조치를 취할 수 있음에 동의합니다.</p>
+        <p>위 아동에 대한 투약을 의뢰하며, 상기 안내사항을 모두 확인하였습니다.</p>
+      </div>
+      <div class="print-sign">
+        <p>${item.date}</p>
+        <p>의뢰인(보호자): ___________ (서명)</p>
+      </div>
+      <div class="print-to">성산지역아동센터장 귀하</div>
+    `;
+  } else if (item.type === 'register') {
+    html = `
+      <div class="print-header">
+        <div class="print-org">성산지역아동센터</div>
+        <div class="print-title">이용 신청서</div>
+      </div>
+      <table>
+        <tr><th>아동 성명</th><td>${item.data.name}</td></tr>
+        <tr><th>생년월일</th><td>${item.data.birth || '-'}</td></tr>
+        <tr><th>성별</th><td>${item.data.gender || '-'}</td></tr>
+        <tr><th>소속 학교/학년</th><td>${item.data.school || '-'}</td></tr>
+        <tr><th>보호자 성명</th><td>${item.data.guardian}</td></tr>
+        <tr><th>관계</th><td>${item.data.relation || '-'}</td></tr>
+        <tr><th>보호자 연락처</th><td>${item.data.phone}</td></tr>
+        <tr><th>비상 연락처</th><td>${item.data.emergency || '-'}</td></tr>
+        <tr><th>주소</th><td>${item.data.address || '-'}</td></tr>
+        <tr><th>이용 희망 요일</th><td>${item.data.days || '-'}</td></tr>
+        <tr><th>특이사항</th><td>${item.data.note || '-'}</td></tr>
+      </table>
+      <div class="print-notice">
+        <p>※ 기재 내용이 사실임을 확인하며, 센터 이용규정 및 안전수칙을 준수할 것에 동의합니다.</p>
+        <p>※ 아동의 개인정보를 센터 운영 목적으로 수집·이용하는 것에 동의합니다. (보유기간: 퇴소 후 3년)</p>
+      </div>
+      <div class="print-sign">
+        <p>${item.date}</p>
+        <p>신청인(보호자): ${item.data.guardian || '___________'} (서명)</p>
+      </div>
+      <div class="print-to">성산지역아동센터장 귀하</div>
+    `;
+  } else if (item.type === 'consult') {
+    html = `
+      <div class="print-header">
+        <div class="print-org">성산지역아동센터</div>
+        <div class="print-title">상담 신청서</div>
+      </div>
+      <table>
+        <tr><th>신청자(보호자)</th><td>${item.data.guardian}</td></tr>
+        <tr><th>연락처</th><td>${item.data.phone || '-'}</td></tr>
+        <tr><th>아동 성명</th><td>${item.data.child}</td></tr>
+        <tr><th>희망 상담 일시</th><td>${item.data.dateTime || '-'}</td></tr>
+        <tr><th>상담 주제</th><td>${item.data.topic || '-'}</td></tr>
+        <tr><th>상담 내용</th><td style="white-space:pre-wrap;">${item.data.detail}</td></tr>
+      </table>
+      <div class="print-notice">
+        <p>※ 상담 내용은 아동 지도 및 센터 운영 개선 목적으로만 활용되며, 상담 기록이 보관될 수 있습니다.</p>
+      </div>
+      <div class="print-sign">
+        <p>${item.date}</p>
+        <p>신청인(보호자): ${item.data.guardian || '___________'} (서명)</p>
+      </div>
+      <div class="print-to">성산지역아동센터장 귀하</div>
+    `;
+  }
+
+  printArea.innerHTML = html;
+  setTimeout(() => window.print(), 100);
+}
+
+updateInboxBadge();

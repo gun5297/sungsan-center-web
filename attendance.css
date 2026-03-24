@@ -51,6 +51,82 @@ html, body {
   transform: scale(0.98);
 }
 
+.hidden {
+  display: none !important;
+}
+
+/* ===== LOCK SCREEN ===== */
+.lock-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.lock-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.lock-title {
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin-bottom: 8px;
+}
+
+.lock-subtitle {
+  font-size: 1rem;
+  color: var(--text-sub);
+  font-weight: 600;
+  margin-bottom: 28px;
+}
+
+.lock-dots {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.lock-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.lock-numpad {
+  margin-bottom: 32px;
+}
+
+.lock-back-link {
+  color: var(--text-sub);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.lock-back-link:hover {
+  color: var(--primary);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-10px); }
+  40% { transform: translateX(10px); }
+  60% { transform: translateX(-10px); }
+  80% { transform: translateX(10px); }
+}
+
+.shake {
+  animation: shake 0.4s ease;
+}
+
 /* ===== TOP BAR ===== */
 .top-bar {
   display: flex;
@@ -175,6 +251,31 @@ html, body {
   background: var(--primary-dark) !important;
 }
 
+/* ===== BACK TO MAIN ===== */
+.back-to-main {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--card);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: var(--font);
+  color: var(--text-sub);
+  text-decoration: none;
+  z-index: 100;
+  transition: all 0.2s ease;
+  opacity: 0.5;
+}
+
+.back-to-main:hover {
+  opacity: 1;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
 /* ===== SUCCESS SCREEN ===== */
 .success-content {
   width: 100%;
@@ -249,6 +350,10 @@ html, body {
 }
 
 /* ===== ADMIN SCREEN ===== */
+#screenAdmin {
+  overflow-y: auto;
+}
+
 .admin-header {
   padding: 20px 24px;
   border-bottom: 1px solid var(--border);
@@ -278,6 +383,41 @@ html, body {
   margin-top: 4px;
 }
 
+/* ===== ADMIN TABS ===== */
+.admin-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+}
+
+.admin-tab {
+  flex: 1;
+  padding: 14px 0;
+  border: none;
+  background: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: var(--font);
+  color: var(--text-sub);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.admin-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.admin-tab:hover {
+  color: var(--text);
+}
+
+.admin-tab-content {
+  /* overflow handled by parent */
+}
+
+/* ===== ADMIN SUMMARY & LIST ===== */
 .admin-summary {
   display: flex;
   gap: 12px;
@@ -311,8 +451,6 @@ html, body {
 
 .admin-list {
   padding: 0 24px;
-  overflow-y: auto;
-  max-height: calc(100vh - 300px);
 }
 
 .att-row {
@@ -437,10 +575,236 @@ html, body {
   z-index: 100;
   transition: all 0.2s ease;
   opacity: 0.5;
+  display: none;
 }
 
 .admin-toggle:hover {
   opacity: 1;
+}
+
+/* ===== MANAGE TAB (아동 관리) ===== */
+.manage-lock {
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.manage-lock-msg {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-bottom: 20px;
+}
+
+.manage-lock-input {
+  display: flex;
+  gap: 8px;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.manage-lock-input input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.manage-lock-input input:focus {
+  border-color: var(--primary);
+}
+
+.manage-lock-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.manage-lock-btn:hover {
+  background: var(--primary-dark);
+}
+
+.manage-lock-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-top: 12px;
+}
+
+/* 아동 등록 폼 */
+.manage-form {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.manage-form h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.manage-form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.manage-form-group {
+  flex: 1;
+}
+
+.manage-form-group label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-bottom: 4px;
+}
+
+.manage-form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.manage-form-group input:focus {
+  border-color: var(--primary);
+}
+
+.manage-form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.manage-add-btn {
+  padding: 10px 28px;
+  border: none;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.manage-add-btn:hover {
+  background: var(--primary-dark);
+}
+
+.manage-cancel-btn {
+  padding: 10px 28px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text-sub);
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.manage-cancel-btn:hover {
+  border-color: var(--text-sub);
+}
+
+/* 아동 목록 */
+.manage-student-list {
+  padding: 0 24px 24px;
+}
+
+.manage-empty {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--text-sub);
+  font-weight: 600;
+}
+
+.manage-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.manage-row-id {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.manage-row-info {
+  flex: 1;
+}
+
+.manage-row-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.manage-row-detail {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  margin-top: 2px;
+}
+
+.manage-row-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.manage-edit-btn,
+.manage-del-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.manage-edit-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.manage-del-btn {
+  color: var(--danger);
+  border-color: var(--danger-light);
+}
+
+.manage-del-btn:hover {
+  background: var(--danger-light);
 }
 
 /* ===== RESPONSIVE ===== */
@@ -465,6 +829,11 @@ html, body {
 
   .success-name {
     font-size: 1.8rem;
+  }
+
+  .manage-form-row {
+    flex-direction: column;
+    gap: 8px;
   }
 }
 

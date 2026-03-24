@@ -969,7 +969,38 @@ function deleteGalleryItem(idx) {
 renderGallery();
 
 // ===== 서류함 시스템 =====
-let inboxItems = [];
+let inboxItems = [
+  {
+    type: 'absence', name: '홍길동 (결석)', summary: '독감 (OO소아과 진료) | 2026-03-20 ~ 2026-03-21', date: '2026.03.19',
+    data: { type: '결석', name: '홍길동', school: '증산초 3학년', guardian: '홍부모', phone: '010-1234-5678', reason: '독감 (OO소아과 진료)', from: '2026-03-20', to: '2026-03-21', absDate: '2026-03-19' },
+    consents: ['운영규정 안내 동의']
+  },
+  {
+    type: 'absence', name: '홍길동 (조퇴)', summary: '치과 정기검진 | 2026-03-18', date: '2026.03.18',
+    data: { type: '조퇴', name: '홍길동', school: '수색초 2학년', guardian: '홍부모', phone: '010-2345-6789', reason: '치과 정기검진', from: '2026-03-18', to: '2026-03-18', absDate: '2026-03-18' },
+    consents: ['운영규정 안내 동의']
+  },
+  {
+    type: 'medication', name: '홍길동 (아목시실린)', summary: '1포 · 점심 식후 · 2026-03-22~2026-03-28', date: '2026.03.22',
+    data: { name: '홍길동', drug: '아목시실린', dose: '1포', time: '점심 식후', symptom: '중이염', from: '2026-03-22', to: '2026-03-28', storage: '실온 보관', hospital: 'OO소아과', note: '페니실린 알레르기 없음 확인' },
+    consents: ['부작용 안내 동의', '약 정보 책임 확인', '응급조치 동의']
+  },
+  {
+    type: 'medication', name: '홍길동 (타이레놀시럽)', summary: '5ml · 오후 간식 후 · 2026-03-24~2026-03-26', date: '2026.03.24',
+    data: { name: '홍길동', drug: '타이레놀시럽', dose: '5ml', time: '오후 간식 후', symptom: '감기/발열', from: '2026-03-24', to: '2026-03-26', storage: '실온 보관', hospital: 'XX의원', note: '' },
+    consents: ['부작용 안내 동의', '약 정보 책임 확인', '응급조치 동의']
+  },
+  {
+    type: 'register', name: '홍길동 (신규등록)', summary: '증산초 1학년 · 보호자: 홍부모', date: '2026.03.15',
+    data: { name: '홍길동', birth: '2019-05-12', gender: '남', school: '증산초 1학년', guardian: '홍부모', relation: '모', phone: '010-5678-9012', emergency: '010-9999-8888', address: '서울시 은평구 증산동 123-45', days: '월, 화, 수, 목, 금', note: '견과류 알레르기' },
+    consents: ['이용규정 동의', '개인정보 수집 동의', '사진촬영 동의']
+  },
+  {
+    type: 'consult', name: '홍길동 (상담)', summary: '교우 관계 · 보호자: 홍부모', date: '2026.03.23',
+    data: { guardian: '홍부모', phone: '010-3456-7890', child: '홍길동', dateTime: '2026-03-28T15:00', topic: '교우 관계', detail: '최근 친구와 다툼이 잦아졌다고 합니다. 학교에서도 비슷한 상황이 있는지, 센터에서 어떻게 지도하고 계신지 상담 받고 싶습니다.' },
+    consents: ['상담기록 보관 동의']
+  },
+];
 let currentInboxFilter = 'all';
 
 function updateInboxBadge() {

@@ -340,10 +340,12 @@
       </div>
     </div>
 
-    <!-- 제출 내역 -->
-    <h3 style="margin-top:40px; font-size:1.1rem; font-weight:800; letter-spacing:-0.02em;">제출 내역</h3>
-    <div class="notice-list" id="absenceList" style="margin-top:16px;">
-      <!-- JS로 렌더링 -->
+    <!-- 제출 내역 (선생님만) -->
+    <div class="admin-only">
+      <h3 style="margin-top:40px; font-size:1.1rem; font-weight:800; letter-spacing:-0.02em;">제출 내역</h3>
+      <div class="notice-list" id="absenceList" style="margin-top:16px;">
+        <!-- JS로 렌더링 -->
+      </div>
     </div>
   </section>
 
@@ -462,11 +464,13 @@
       </div>
     </div>
 
-    <!-- 투약 일정표 -->
-    <h3 style="margin-top:40px; font-size:1.1rem; font-weight:800; letter-spacing:-0.02em;">투약 일정표</h3>
-    <p style="font-size:0.85rem; color:var(--text-sub); margin:8px 0 20px;">현재 투약 중인 아동 목록입니다.</p>
-    <div class="med-schedule" id="medSchedule">
-      <!-- JS로 렌더링 -->
+    <!-- 투약 일정표 (선생님만) -->
+    <div class="admin-only">
+      <h3 style="margin-top:40px; font-size:1.1rem; font-weight:800; letter-spacing:-0.02em;">투약 일정표</h3>
+      <p style="font-size:0.85rem; color:var(--text-sub); margin:8px 0 20px;">현재 투약 중인 아동 목록입니다.</p>
+      <div class="med-schedule" id="medSchedule">
+        <!-- JS로 렌더링 -->
+      </div>
     </div>
   </section>
 

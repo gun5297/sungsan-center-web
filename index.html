@@ -19,8 +19,22 @@
       <li><a href="#pickup">픽업</a></li>
       <li><a href="#register">등록/상담</a></li>
     </ul>
-    <a href="attendance.html" class="nav-cta" style="text-decoration:none;">출결 시스템</a>
+    <div class="nav-right">
+      <a href="attendance.html" class="nav-cta" style="text-decoration:none;">출결 시스템</a>
+      <button class="nav-admin-btn" id="navAdminBtn" onclick="toggleAdminLogin()">관리자 로그인</button>
+    </div>
   </nav>
+
+  <!-- 관리자 로그인 모달 -->
+  <div class="modal-overlay" id="adminLoginModal">
+    <div class="modal" style="max-width:380px; text-align:center;">
+      <div class="modal-title">관리자 로그인</div>
+      <p style="color:var(--text-sub); font-size:0.9rem; margin-bottom:20px;">비밀번호를 입력하세요</p>
+      <input type="password" id="adminPwInput" class="input-field" placeholder="비밀번호" style="text-align:center; font-size:1.1rem;" />
+      <button class="btn-upload" onclick="doAdminLogin()" style="margin-top:12px;">로그인</button>
+      <button class="modal-close" onclick="closeAdminModal()">취소</button>
+    </div>
+  </div>
 
   <!-- HERO -->
   <section class="hero">
@@ -65,13 +79,8 @@
     <h2 class="section-title">가정통신문 &<br>공지사항</h2>
     <p class="section-desc">센터의 주요 안내사항과 가정통신문을 확인하세요.</p>
 
-    <!-- 선생님 잠금 해제 -->
-    <div class="teacher-lock" id="teacherLock">
-      <button class="btn-teacher-login" onclick="showPasswordPrompt()">선생님 로그인</button>
-    </div>
-
-    <!-- 업로드 폼 (선생님용, 기본 숨김) -->
-    <div class="upload-area" id="uploadArea" style="display:none;">
+    <!-- 업로드 폼 (관리자 전용, 기본 숨김) -->
+    <div class="upload-area admin-only" id="uploadArea">
       <div class="upload-form" id="teacherForm">
         <h3>가정통신문 업로드</h3>
         <input type="text" id="noticeTitle" placeholder="제목을 입력하세요" class="input-field" />
@@ -651,6 +660,9 @@
     <div class="footer-text">© 2026 성산지역아동센터. All rights reserved.</div>
     <div class="footer-text">서울시 은평구 증산서길 90 성산지역아동센터</div>
   </footer>
+
+  <!-- 관리자 모드 바 -->
+  <div class="admin-bar">관리자 모드 — 모든 정보를 수정할 수 있습니다</div>
 
   <script src="script.js"></script>
 

@@ -103,6 +103,113 @@ nav {
   color: var(--text);
 }
 
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-admin-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--card);
+  color: var(--text-sub);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font);
+  letter-spacing: -0.01em;
+}
+
+.nav-admin-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.nav-admin-btn.logged-in {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.nav-admin-btn.logged-in:hover {
+  background: var(--primary-dark);
+}
+
+/* 관리자 전용 요소 (기본 숨김) */
+.admin-only {
+  display: none !important;
+}
+
+body.admin-mode .admin-only {
+  display: block !important;
+}
+
+/* 관리자 모드 인디케이터 */
+.admin-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 24px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+  z-index: 999;
+  letter-spacing: -0.01em;
+}
+
+body.admin-mode .admin-bar {
+  display: block;
+}
+
+/* 수정/삭제 버튼 */
+.edit-btn, .delete-btn {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all var(--transition);
+}
+
+.edit-btn {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.edit-btn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.delete-btn {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.delete-btn:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+.notice-actions {
+  display: none;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+body.admin-mode .notice-actions {
+  display: flex;
+}
+
 .nav-cta {
   padding: 8px 20px;
   border: none;

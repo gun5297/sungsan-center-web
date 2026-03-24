@@ -1,3 +1,58 @@
+// ===== 관리자 모드 =====
+const ADMIN_PASSWORD = '1234';
+let isAdmin = false;
+
+function toggleAdminLogin() {
+  if (isAdmin) {
+    // 로그아웃
+    isAdmin = false;
+    document.body.classList.remove('admin-mode');
+    document.getElementById('navAdminBtn').textContent = '관리자 로그인';
+    document.getElementById('navAdminBtn').classList.remove('logged-in');
+    renderNotices();
+    return;
+  }
+  // 로그인 모달 열기
+  document.getElementById('adminLoginModal').classList.add('active');
+  const input = document.getElementById('adminPwInput');
+  input.value = '';
+  setTimeout(() => input.focus(), 100);
+}
+
+function doAdminLogin() {
+  const pw = document.getElementById('adminPwInput').value;
+  if (pw === ADMIN_PASSWORD) {
+    isAdmin = true;
+    document.body.classList.add('admin-mode');
+    document.getElementById('navAdminBtn').textContent = '로그아웃';
+    document.getElementById('navAdminBtn').classList.add('logged-in');
+    closeAdminModal();
+    renderNotices();
+    renderMealGrid();
+    renderAttendance();
+    renderMedSchedule();
+    renderAbsenceList();
+  } else {
+    alert('비밀번호가 틀렸습니다.');
+    document.getElementById('adminPwInput').value = '';
+    document.getElementById('adminPwInput').focus();
+  }
+}
+
+function closeAdminModal() {
+  document.getElementById('adminLoginModal').classList.remove('active');
+}
+
+// 엔터키로 로그인
+document.addEventListener('DOMContentLoaded', () => {
+  const pwInput = document.getElementById('adminPwInput');
+  if (pwInput) {
+    pwInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') doAdminLogin();
+    });
+  }
+});
+
 // ===== Fade-up animation on scroll =====
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
@@ -44,41 +99,6 @@ let notices = [
     file: null
   }
 ];
-
-// 선생님 비밀번호 (원하는 걸로 변경하세요)
-const TEACHER_PASSWORD = '1234';
-
-function showPasswordPrompt() {
-  const lockDiv = document.getElementById('teacherLock');
-  const btn = lockDiv.querySelector('.btn-teacher-login');
-  btn.style.display = 'none';
-
-  const prompt = document.createElement('div');
-  prompt.className = 'password-prompt';
-  prompt.innerHTML = `
-    <input type="password" id="pwInput" placeholder="비밀번호를 입력하세요" />
-    <button onclick="checkPassword()">확인</button>
-  `;
-  lockDiv.appendChild(prompt);
-
-  const input = document.getElementById('pwInput');
-  input.focus();
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') checkPassword();
-  });
-}
-
-function checkPassword() {
-  const input = document.getElementById('pwInput');
-  if (input.value === TEACHER_PASSWORD) {
-    document.getElementById('teacherLock').style.display = 'none';
-    document.getElementById('uploadArea').style.display = 'block';
-  } else {
-    alert('비밀번호가 틀렸습니다.');
-    input.value = '';
-    input.focus();
-  }
-}
 
 // 파일 선택
 document.getElementById('fileInput').addEventListener('change', function(e) {
@@ -131,8 +151,51 @@ function renderNotices() {
       <div class="notice-title">${n.title}</div>
       <div class="notice-preview">${n.content}</div>
       ${n.file ? `<div class="notice-file">📎 ${n.file}</div>` : ''}
+      <div class="notice-actions">
+        <button class="edit-btn" onclick="event.stopPropagation(); editNotice(${n.id})">수정</button>
+        <button class="delete-btn" onclick="event.stopPropagation(); deleteNotice(${n.id})">삭제</button>
+      </div>
     </div>
   `).join('');
+}
+
+function deleteNotice(id) {
+  if (!confirm('이 공지를 삭제하시겠습니까?')) return;
+  notices = notices.filter(n => n.id !== id);
+  renderNotices();
+}
+
+function editNotice(id) {
+  const notice = notices.find(n => n.id === id);
+  if (!notice) return;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay active';
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="modal-title">공지 수정</div>
+      <input type="text" class="input-field" id="editNoticeTitle" value="${notice.title}" />
+      <textarea class="input-field textarea" id="editNoticeContent">${notice.content}</textarea>
+      <select class="input-field select-field" id="editNoticeCategory">
+        <option value="공지" ${notice.category === '공지' ? 'selected' : ''}>공지사항</option>
+        <option value="통신문" ${notice.category === '통신문' ? 'selected' : ''}>가정통신문</option>
+        <option value="긴급" ${notice.category === '긴급' ? 'selected' : ''}>긴급 안내</option>
+      </select>
+      <button class="btn-upload" onclick="saveEditNotice(${id})" style="margin-top:12px;">저장</button>
+      <button class="modal-close" onclick="closeModal(this)">취소</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function saveEditNotice(id) {
+  const notice = notices.find(n => n.id === id);
+  if (!notice) return;
+  notice.title = document.getElementById('editNoticeTitle').value;
+  notice.content = document.getElementById('editNoticeContent').value;
+  notice.category = document.getElementById('editNoticeCategory').value;
+  document.querySelector('.modal-overlay.active .modal-close').click();
+  renderNotices();
 }
 
 function openNotice(id) {
@@ -490,15 +553,25 @@ function renderAttendance() {
 
   const statusLabel = { present: '출석', absent: '결석', late: '지각' };
 
-  document.getElementById('attendanceList').innerHTML = students.map(s => `
+  document.getElementById('attendanceList').innerHTML = students.map((s, i) => `
     <div class="att-item">
       <div class="att-avatar ${s.status}">${s.name.charAt(0)}</div>
       <div>
         <div class="att-name">${s.name}</div>
         <div class="att-status">${statusLabel[s.status]}</div>
       </div>
+      ${isAdmin ? `<select class="input-field" style="width:auto;padding:6px 10px;margin:0;font-size:0.75rem;" onchange="changeAttStatus(${i}, this.value)">
+        <option value="present" ${s.status==='present'?'selected':''}>출석</option>
+        <option value="absent" ${s.status==='absent'?'selected':''}>결석</option>
+        <option value="late" ${s.status==='late'?'selected':''}>지각</option>
+      </select>` : ''}
     </div>
   `).join('');
+}
+
+function changeAttStatus(index, status) {
+  students[index].status = status;
+  renderAttendance();
 }
 
 renderAttendance();
@@ -580,7 +653,7 @@ let medRecords = [
 function renderMedSchedule() {
   const el = document.getElementById('medSchedule');
   if (!el) return;
-  el.innerHTML = medRecords.map(r => `
+  el.innerHTML = medRecords.map((r, i) => `
     <div class="med-card">
       <div class="med-avatar">${r.name.charAt(0)}</div>
       <div class="med-info">
@@ -589,8 +662,15 @@ function renderMedSchedule() {
       </div>
       <div class="med-time-badge">${r.time}</div>
       <div class="med-period">${r.from} ~ ${r.to}</div>
+      ${isAdmin ? `<button class="delete-btn" onclick="deleteMed(${i})">삭제</button>` : ''}
     </div>
   `).join('');
+}
+
+function deleteMed(index) {
+  if (!confirm('이 투약 기록을 삭제하시겠습니까?')) return;
+  medRecords.splice(index, 1);
+  renderMedSchedule();
 }
 
 function submitMedication() {

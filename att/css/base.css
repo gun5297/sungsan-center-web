@@ -20,7 +20,14 @@
   --danger: #ef4444;
   --danger-light: #fee2e2;
   --warning: #f59e0b;
+  --warning-light: #fff8e1;
   --border: #eee;
+  --bg-sub: #f5f5f5;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --font: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 

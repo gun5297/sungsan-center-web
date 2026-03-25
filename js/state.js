@@ -2,6 +2,7 @@
 // 여러 훅에서 공유하는 상태를 구독 패턴으로 관리
 
 let isAdmin = false;
+let currentUser = null;
 const listeners = [];
 
 export function getIsAdmin() {
@@ -15,4 +16,12 @@ export function setIsAdmin(value) {
 
 export function onAdminChange(fn) {
   listeners.push(fn);
+}
+
+export function getCurrentUser() {
+  return currentUser;
+}
+
+export function setCurrentUser(user) {
+  currentUser = user;
 }

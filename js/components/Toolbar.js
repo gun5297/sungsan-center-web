@@ -11,7 +11,7 @@ export function Toolbar() {
       <button class="toolbar-btn toolbar-inbox admin-only" onclick="openInbox()">서류함 <span class="inbox-badge" id="inboxBadge">0</span></button>
       <button class="toolbar-btn toolbar-mysubmit logged-only" onclick="openMySubmissions()">내 제출 이력</button>
       <a href="mypage.html" class="toolbar-btn toolbar-mypage logged-only">마이페이지</a>
-      <button class="toolbar-btn toolbar-admin" id="toolbarAdminBtn" onclick="toggleAdminLogin()">로그인</button>
+      <a href="javascript:toggleAdminLogin()" class="toolbar-btn toolbar-admin" id="toolbarAdminBtn">로그인</a>
     </div>
   </div>
 

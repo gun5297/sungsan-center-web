@@ -1,16 +1,20 @@
-// ===== useMedication: 투약 관리 =====
-import { initialMedRecords } from '../data/sampleData.js';
+// ===== useMedication: 투약 관리 (Firestore) =====
 import { formatDate } from '../utils.js';
 import { getIsAdmin } from '../state.js';
-import { addInboxItem, updateInboxBadge } from './useInbox.js';
+import { subscribeMedications, createMedication, deleteMedication as deleteMedicationFS } from '../../firebase/services/medicationService.js';
+import { addInboxItem } from '../../firebase/services/inboxService.js';
 
-let medRecords = [...initialMedRecords];
+let medRecords = [];
 
 export function renderMedSchedule() {
   const el = document.getElementById('medSchedule');
   if (!el) return;
   const admin = getIsAdmin();
-  el.innerHTML = medRecords.map((r, i) => `
+  if (medRecords.length === 0) {
+    el.innerHTML = '<div class="empty-state">투약 중인 아동이 없습니다</div>';
+    return;
+  }
+  el.innerHTML = medRecords.map((r) => `
     <div class="med-card">
       <div class="med-avatar">${r.name.charAt(0)}</div>
       <div class="med-info">
@@ -19,18 +23,18 @@ export function renderMedSchedule() {
       </div>
       <div class="med-time-badge">${r.time}</div>
       <div class="med-period">${r.from} ~ ${r.to}</div>
-      ${admin ? `<button class="delete-btn" onclick="deleteMed(${i})">삭제</button>` : ''}
+      ${admin ? `<button class="delete-btn" onclick="deleteMed('${r.id}')">삭제</button>` : ''}
     </div>
   `).join('');
 }
 
-export function deleteMed(index) {
+export async function deleteMed(id) {
   if (!confirm('이 투약 기록을 삭제하시겠습니까?')) return;
-  medRecords.splice(index, 1);
-  renderMedSchedule();
+  await deleteMedicationFS(id);
+  // 실시간 구독이 자동으로 renderMedSchedule() 호출
 }
 
-export function submitMedication() {
+export async function submitMedication() {
   const name = document.getElementById('medName').value.trim();
   const drug = document.getElementById('medDrug').value.trim();
   const dose = document.getElementById('medDose').value.trim();
@@ -52,18 +56,18 @@ export function submitMedication() {
   const c3 = document.getElementById('medConsent3');
   if (!c1.checked || !c2.checked || !c3.checked) { alert('모든 동의 항목에 체크해주세요.'); return; }
 
-  medRecords.unshift({ name, drug, dose, time, symptom, from, to: to || from, storage });
+  await createMedication({ name, drug, dose, time, symptom, hospital, from, to: to || from, storage, note });
 
   const dateStr = formatDate(new Date());
-  addInboxItem({
+  await addInboxItem({
     type: 'medication', name: `${name} (${drug})`, summary: `${dose} · ${time} · ${from}~${to || from}`, date: dateStr,
     data: { name, drug, dose, time, symptom, from, to: to || from, storage, hospital, note },
     consents: ['부작용 안내 동의', '약 정보 책임 확인', '응급조치 동의']
   });
-  updateInboxBadge();
-  renderMedSchedule();
+
   alert('투약 의뢰서가 제출되었습니다.');
   c1.checked = false; c2.checked = false; c3.checked = false;
+  // 실시간 구독이 자동으로 renderMedSchedule() 호출
 }
 
 export function printMedication() {
@@ -71,7 +75,15 @@ export function printMedication() {
 }
 
 export function initMedication() {
-  renderMedSchedule();
+  // 로딩 표시
+  const el = document.getElementById('medSchedule');
+  if (el) el.innerHTML = '<div class="loading-state">투약 일정 불러오는 중</div>';
+
+  // Firestore 실시간 구독
+  subscribeMedications((data) => {
+    medRecords = data;
+    renderMedSchedule();
+  });
 }
 
 // window에 노출

@@ -12,6 +12,10 @@ let notices = [];
 export function renderNotices() {
   const list = document.getElementById('noticeList');
   if (!list) return;
+  if (notices.length === 0) {
+    list.innerHTML = '<div class="empty-state">등록된 공지사항이 없습니다</div>';
+    return;
+  }
   list.innerHTML = notices.map(n => `
     <div class="notice-card" onclick="openNotice('${n.id}')">
       <div class="notice-header">
@@ -120,6 +124,10 @@ export function initNotices() {
       document.getElementById('fileName').textContent = file.name;
     }
   });
+
+  // 로딩 표시
+  const list = document.getElementById('noticeList');
+  if (list) list.innerHTML = '<div class="loading-state">공지사항 불러오는 중</div>';
 
   // Firestore 실시간 구독
   subscribeNotices((data) => {

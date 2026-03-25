@@ -1,16 +1,26 @@
-// ===== useGallery: 활동 갤러리 =====
-import { initialGalleryItems, GALLERY_GRADIENTS } from '../data/sampleData.js';
+// ===== useGallery: 활동 갤러리 (Firestore + Storage) =====
+import { GALLERY_GRADIENTS } from '../data/sampleData.js';
 import { getIsAdmin } from '../state.js';
+import {
+  subscribeGallery,
+  createGalleryItem,
+  uploadPhoto,
+  deleteGalleryItem as deleteGalleryItemFS
+} from '../../firebase/services/galleryService.js';
 
-let galleryItems = [...initialGalleryItems];
+let galleryItems = [];
 
 export function renderGallery() {
   const grid = document.getElementById('galleryGrid');
   if (!grid) return;
   const admin = getIsAdmin();
+  if (galleryItems.length === 0) {
+    grid.innerHTML = '<div class="empty-state">등록된 활동이 없습니다</div>';
+    return;
+  }
   grid.innerHTML = galleryItems.map((item, i) => {
-    const bg = item.photo
-      ? `background-image:url('${item.photo}'); background-size:cover; background-position:center;`
+    const bg = item.photoUrl
+      ? `background-image:url('${item.photoUrl}'); background-size:cover; background-position:center;`
       : `background: ${GALLERY_GRADIENTS[i % GALLERY_GRADIENTS.length]};`;
     return `
       <div class="gallery-card">
@@ -20,14 +30,14 @@ export function renderGallery() {
         <div class="gallery-info">
           <div class="gallery-title">${item.title}</div>
           <div class="gallery-date">${item.date}</div>
-          ${admin ? `<div class="notice-actions gallery-actions"><button class="delete-btn" onclick="deleteGalleryItem(${i})">삭제</button></div>` : ''}
+          ${admin ? `<div class="notice-actions gallery-actions"><button class="delete-btn" onclick="deleteGalleryItem('${item.id}', '${item.photoUrl || ''}')">삭제</button></div>` : ''}
         </div>
       </div>
     `;
   }).join('');
 }
 
-export function addGalleryItem() {
+export async function addGalleryItem() {
   const title = document.getElementById('galTitle').value.trim();
   const category = document.getElementById('galCategory').value.trim();
   const dateVal = document.getElementById('galDate').value;
@@ -37,32 +47,36 @@ export function addGalleryItem() {
 
   const dateStr = dateVal ? dateVal.replace(/-/g, '.') : new Date().toISOString().split('T')[0].replace(/-/g, '.');
 
+  let photoUrl = null;
   if (fileInput.files && fileInput.files[0]) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      galleryItems.unshift({ title, category, date: dateStr, photo: e.target.result });
-      renderGallery();
-    };
-    reader.readAsDataURL(fileInput.files[0]);
-  } else {
-    galleryItems.unshift({ title, category, date: dateStr, photo: null });
-    renderGallery();
+    photoUrl = await uploadPhoto(fileInput.files[0]);
   }
+
+  await createGalleryItem({ title, category, date: dateStr, photoUrl });
 
   document.getElementById('galTitle').value = '';
   document.getElementById('galCategory').value = '';
   document.getElementById('galDate').value = '';
   fileInput.value = '';
+  // 실시간 구독이 자동으로 renderGallery() 호출
 }
 
-export function deleteGalleryItem(idx) {
+export async function deleteGalleryItem(id, photoUrl) {
   if (!confirm('이 활동을 삭제하시겠습니까?')) return;
-  galleryItems.splice(idx, 1);
-  renderGallery();
+  await deleteGalleryItemFS(id, photoUrl || null);
+  // 실시간 구독이 자동으로 renderGallery() 호출
 }
 
 export function initGallery() {
-  renderGallery();
+  // 로딩 표시
+  const grid = document.getElementById('galleryGrid');
+  if (grid) grid.innerHTML = '<div class="loading-state">갤러리 불러오는 중</div>';
+
+  // Firestore 실시간 구독
+  subscribeGallery((data) => {
+    galleryItems = data;
+    renderGallery();
+  });
 }
 
 // window에 노출

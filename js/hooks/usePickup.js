@@ -1,10 +1,10 @@
-// ===== usePickup: 저학년 픽업 일정표 =====
-import { initialPickupStudents } from '../data/sampleData.js';
+// ===== usePickup: 저학년 픽업 일정표 (Firestore) =====
 import { getWeekDates, isSameDay } from '../utils.js';
 import { getIsAdmin } from '../state.js';
+import { subscribePickups, createPickup, deletePickup as deletePickupFS } from '../../firebase/services/pickupService.js';
 
 let pickupWeekOffset = 0;
-const pickupStudents = [...initialPickupStudents];
+let pickupStudents = [];
 
 export function changePickupWeek(delta) {
   pickupWeekOffset += delta;
@@ -30,10 +30,10 @@ export function renderPickupTable() {
   if (admin) html += '<th></th>';
   html += '</tr></thead><tbody>';
 
-  pickupStudents.forEach((s, idx) => {
+  pickupStudents.forEach((s) => {
     html += `<tr><td class="pickup-name">${s.name}</td><td class="pickup-school">${s.school}</td>`;
     dayNames.forEach((day, i) => {
-      const time = s.times[day] || '-';
+      const time = (s.times && s.times[day]) || '-';
       const d = dates[i];
       const isToday = isSameDay(d, today);
       const isPast = d < new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -45,7 +45,7 @@ export function renderPickupTable() {
 
       html += `<td><span class="pickup-time">${time}</span>${status}</td>`;
     });
-    if (admin) html += `<td><button class="delete-btn" onclick="deletePickupStudent(${idx})">삭제</button></td>`;
+    if (admin) html += `<td><button class="delete-btn" onclick="deletePickupStudent('${s.id}')">삭제</button></td>`;
     html += '</tr>';
   });
 
@@ -53,11 +53,12 @@ export function renderPickupTable() {
   document.getElementById('pickupTable').innerHTML = html;
 }
 
-export function addPickupStudent() {
+export async function addPickupStudent() {
   const name = document.getElementById('pickupName').value.trim();
   const school = document.getElementById('pickupSchool').value.trim();
   if (!name || !school) { alert('이름과 학교를 입력해주세요.'); return; }
-  pickupStudents.push({
+
+  await createPickup({
     name, school,
     times: {
       월: document.getElementById('pickupMon').value.trim() || '-',
@@ -68,17 +69,21 @@ export function addPickupStudent() {
     }
   });
   ['pickupName','pickupSchool','pickupMon','pickupTue','pickupWed','pickupThu','pickupFri'].forEach(id => document.getElementById(id).value = '');
-  renderPickupTable();
+  // 실시간 구독이 자동으로 renderPickupTable() 호출
 }
 
-export function deletePickupStudent(idx) {
+export async function deletePickupStudent(id) {
   if (!confirm('이 아동을 픽업 목록에서 삭제하시겠습니까?')) return;
-  pickupStudents.splice(idx, 1);
-  renderPickupTable();
+  await deletePickupFS(id);
+  // 실시간 구독이 자동으로 renderPickupTable() 호출
 }
 
 export function initPickup() {
-  renderPickupTable();
+  // Firestore 실시간 구독
+  subscribePickups((data) => {
+    pickupStudents = data;
+    renderPickupTable();
+  });
 }
 
 // window에 노출

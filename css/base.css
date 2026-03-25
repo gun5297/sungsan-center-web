@@ -264,9 +264,9 @@ body.admin-mode .notice-actions {
   display: flex;
 }
 
-/* 갤러리 삭제 버튼 (admin-mode 없이도 표시) */
+/* 갤러리 삭제 버튼 */
 .gallery-actions {
-  display: flex !important;
+  display: flex;
 }
 
 /* ===== 공통 유틸리티 ===== */
@@ -309,6 +309,33 @@ body.admin-mode .notice-actions {
 .btn-refresh:hover {
   border-color: var(--primary);
   color: var(--primary);
+}
+
+/* ===== LOADING STATE ===== */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 0;
+  color: var(--text-light);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.loading-state::before {
+  content: '';
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ===== ANIMATION ===== */

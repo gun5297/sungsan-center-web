@@ -1,11 +1,16 @@
-// ===== useInbox: 서류함 시스템 =====
-import { initialInboxItems } from '../data/sampleData.js';
+// ===== useInbox: 서류함 시스템 (Firestore) =====
+import {
+  subscribeInbox,
+  addInboxItem as addInboxItemFS,
+  deleteInboxItem as deleteInboxItemFS
+} from '../../firebase/services/inboxService.js';
 
-let inboxItems = [...initialInboxItems];
+let inboxItems = [];
 let currentInboxFilter = 'all';
 
-export function addInboxItem(item) {
-  inboxItems.unshift(item);
+// 외부(useAbsence, useMedication 등)에서 호출
+export async function addInboxItem(item) {
+  return await addInboxItemFS(item);
 }
 
 export function getInboxItems() {
@@ -49,10 +54,9 @@ export function renderInbox() {
   const typeLabels = { absence: '결석/조퇴', medication: '투약 의뢰', register: '신규 등록', consult: '상담 신청' };
 
   list.innerHTML = filtered.map((item) => {
-    const idx = inboxItems.indexOf(item);
     const consentStr = item.consents ? item.consents.map(c => `<span class="inbox-consent-tag">✓ ${c}</span>`).join(' ') : '';
     return `
-      <div class="inbox-item" onclick="printInboxItem(${idx})">
+      <div class="inbox-item" onclick="printInboxItem('${item.id}')">
         <span class="inbox-type ${item.type}">${typeLabels[item.type]}</span>
         <div class="inbox-info">
           <div class="inbox-name">${item.name}</div>
@@ -60,14 +64,21 @@ export function renderInbox() {
           ${consentStr ? `<div class="inbox-consents">${consentStr}</div>` : ''}
         </div>
         <span class="inbox-date">${item.date}</span>
-        <button class="inbox-print-btn" onclick="event.stopPropagation(); printInboxItem(${idx})">출력</button>
+        <button class="inbox-print-btn" onclick="event.stopPropagation(); printInboxItem('${item.id}')">출력</button>
+        <button class="delete-btn" onclick="event.stopPropagation(); deleteInboxItemById('${item.id}')">삭제</button>
       </div>
     `;
   }).join('');
 }
 
-export function printInboxItem(idx) {
-  const item = inboxItems[idx];
+export async function deleteInboxItemById(id) {
+  if (!confirm('이 서류를 삭제하시겠습니까?')) return;
+  await deleteInboxItemFS(id);
+  // 실시간 구독이 자동으로 renderInbox() 호출
+}
+
+export function printInboxItem(id) {
+  const item = inboxItems.find(i => i.id === id);
   if (!item) return;
 
   const printArea = document.getElementById('printArea');
@@ -187,7 +198,15 @@ export function printInboxItem(idx) {
 }
 
 export function initInbox() {
-  updateInboxBadge();
+  // Firestore 실시간 구독
+  subscribeInbox((data) => {
+    inboxItems = data;
+    updateInboxBadge();
+    // 모달이 열려있으면 즉시 갱신
+    if (document.getElementById('inboxModal')?.classList.contains('active')) {
+      renderInbox();
+    }
+  });
 }
 
 // window에 노출
@@ -195,3 +214,4 @@ window.openInbox = openInbox;
 window.closeInbox = closeInbox;
 window.switchInboxTab = switchInboxTab;
 window.printInboxItem = printInboxItem;
+window.deleteInboxItemById = deleteInboxItemById;

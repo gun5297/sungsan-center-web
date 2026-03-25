@@ -41,7 +41,7 @@ export function initAdmin() {
       setCurrentUser({ email: user.email, uid: user.uid });
       document.body.classList.add('admin-mode');
       if (btn) {
-        btn.textContent = `${user.email} 로그아웃`;
+        btn.textContent = '로그아웃';
         btn.classList.add('logged-in');
       }
     } else {

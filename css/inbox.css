@@ -149,6 +149,12 @@
   color: var(--primary);
 }
 
+#inboxModal .inbox-item .delete-btn {
+  padding: 6px 10px;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
 #inboxModal .inbox-consents {
   display: flex;
   flex-wrap: wrap;

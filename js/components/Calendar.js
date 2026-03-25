@@ -22,7 +22,10 @@ export function Calendar() {
     <div class="calendar" id="calendar"></div>
 
     <div class="day-schedule" id="daySchedule">
-      <h3 class="day-title" id="dayTitle">날짜를 선택하세요</h3>
+      <div class="day-schedule-header">
+        <h3 class="day-title" id="dayTitle">날짜를 선택하세요</h3>
+        <button class="edit-schedule-btn admin-only" onclick="openScheduleEditor()">수정</button>
+      </div>
       <div class="timetable" id="timetable"></div>
     </div>
   </section>

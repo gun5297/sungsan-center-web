@@ -3,7 +3,7 @@
 
 let isAdmin = false;
 let currentUser = null;
-let userRole = null; // 'director' | 'teacher' | 'social_worker' | null
+let userRole = null; // 'admin' | 'general' | (legacy: 'director' | 'teacher' | 'social_worker') | null
 const listeners = [];
 
 export function getIsAdmin() {
@@ -35,12 +35,17 @@ export function setUserRole(role) {
   userRole = role;
 }
 
-// 센터장 여부
+// 관리자 여부 (admin 또는 레거시 director/teacher/social_worker)
 export function isDirector() {
-  return userRole === 'director';
+  return userRole === 'admin' || userRole === 'director' || userRole === 'teacher' || userRole === 'social_worker';
 }
 
-// 선생님 이상 (선생님 + 센터장) — 게시판 CRUD 가능
+// 관리 권한 (admin 역할 전체 — 레거시 호환 포함)
 export function canManage() {
-  return userRole === 'director' || userRole === 'teacher';
+  return userRole === 'admin' || userRole === 'director' || userRole === 'teacher' || userRole === 'social_worker';
+}
+
+// 로그인 여부 (역할이 설정되어 있으면 로그인 상태)
+export function isLoggedIn() {
+  return userRole !== null;
 }

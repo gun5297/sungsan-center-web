@@ -17,11 +17,6 @@
     right: 12px;
   }
 
-  .toolbar-btn {
-    font-size: 0.75rem;
-    padding: 8px 14px;
-  }
-
   #hero .stats {
     grid-template-columns: repeat(2, 1fr);
     margin-top: -20px;
@@ -124,11 +119,6 @@
   .fixed-toolbar {
     top: 70px;
     right: 10px;
-  }
-
-  .toolbar-btn {
-    font-size: 0.7rem;
-    padding: 7px 12px;
   }
 
   #meal .meal-grid {

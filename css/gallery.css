@@ -49,3 +49,32 @@
   font-size: 0.8rem;
   color: var(--text-sub);
 }
+
+/* 갤러리 인증 벽 (비로그인 사용자) */
+#gallery .gallery-auth-wall {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+#gallery .gallery-auth-icon {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+}
+
+#gallery .gallery-auth-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+#gallery .gallery-auth-desc {
+  font-size: 0.88rem;
+  color: var(--text-sub);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}

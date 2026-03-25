@@ -12,7 +12,10 @@ import { noticesCol } from '../collections.js';
 import {
   doc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-import { db } from '../config.js';
+import {
+  ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-storage.js";
+import { db, storage } from '../config.js';
 
 // 실시간 구독 — callback(notices[])
 export function subscribeNotices(callback) {
@@ -30,10 +33,17 @@ export async function getNotices() {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
+// 첨부파일 업로드 → Storage URL 반환
+export async function uploadNoticeFile(file) {
+  const storageRef = ref(storage, `notices/${Date.now()}_${file.name}`);
+  await uploadBytes(storageRef, file);
+  return await getDownloadURL(storageRef);
+}
+
 // 생성
-export async function createNotice({ title, content, category, date, file }) {
+export async function createNotice({ title, content, category, date, file, fileUrl }) {
   return await addDoc(noticesCol, {
-    title, content, category, date, file,
+    title, content, category, date, file, fileUrl: fileUrl || null,
     createdAt: serverTimestamp()
   });
 }

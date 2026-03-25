@@ -7,7 +7,7 @@ export function LoginForm() {
 
       <div class="auth-card">
         <div class="form-header">
-          <div class="form-doc-title">선생님 로그인</div>
+          <div class="form-doc-title">로그인</div>
         </div>
 
         <div id="loginError" class="auth-error" style="display:none;"></div>

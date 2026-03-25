@@ -1,4 +1,4 @@
-// ===== SignupForm 컴포넌트 (선생님 회원가입 폼) =====
+// ===== SignupForm 컴포넌트 (회원가입 폼) =====
 export function SignupForm() {
   return `
   <div class="auth-page">
@@ -7,7 +7,7 @@ export function SignupForm() {
 
       <div class="auth-card">
         <div class="form-header">
-          <div class="form-doc-title">선생님 회원가입</div>
+          <div class="form-doc-title">회원가입</div>
         </div>
 
         <div id="signupError" class="auth-error" style="display:none;"></div>
@@ -42,12 +42,16 @@ export function SignupForm() {
             </div>
             <div class="form-group">
               <label class="form-label">직책</label>
-              <select id="signupRole" class="input-field select-field">
-                <option value="teacher">선생님</option>
-                <option value="social_worker">사회복무요원</option>
-                <option value="director">센터장</option>
+              <select id="signupRole" class="input-field select-field" onchange="toggleAdminPwField()">
+                <option value="general">일반 (학부모)</option>
+                <option value="admin">관리자</option>
               </select>
             </div>
+          </div>
+
+          <div class="form-group" id="adminPasswordGroup" style="display:none;">
+            <label class="form-label">관리자 인증 비밀번호</label>
+            <input type="password" id="signupAdminPw" class="input-field" placeholder="관리자 인증 비밀번호 입력" />
           </div>
 
           <div class="form-consent">

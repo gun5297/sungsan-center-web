@@ -15,7 +15,7 @@ const DEFAULT_USERS = [
     name: '박센터장',
     role: 'director',
     phone: '010-0000-1111',
-    position: '센터장',
+    position: '관리자',
     createdAt: '2026-01-01',
     approved: true,
   },

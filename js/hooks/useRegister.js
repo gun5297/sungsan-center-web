@@ -35,14 +35,25 @@ export async function submitRegister() {
   const days = [...document.querySelectorAll('#regDays input:checked')].map(c => c.value).join(', ');
 
   const dateStr = formatDate(new Date());
-  await addInboxItem({
-    type: 'register', name: `${name} (신규등록)`, summary: `${school} · 보호자: ${guardian}`, date: dateStr,
-    data: { name, birth, gender, school, guardian, relation, phone, emergency, address, days, note },
-    consents: ['이용규정 동의', '개인정보 수집 동의', c3.checked ? '사진촬영 동의' : '사진촬영 미동의']
-  });
+  try {
+    await addInboxItem({
+      type: 'register', name: `${name} (신규등록)`, summary: `${school} · 보호자: ${guardian}`, date: dateStr,
+      data: { name, birth, gender, school, guardian, relation, phone, emergency, address, days, note },
+      consents: ['이용규정 동의', '개인정보 수집 동의', c3.checked ? '사진촬영 동의' : '사진촬영 미동의']
+    });
 
-  alert(`${name} 아동의 이용 신청이 접수되었습니다.\n담당자 확인 후 연락드리겠습니다.`);
-  c1.checked = false; c2.checked = false; c3.checked = false;
+    alert(`${name} 아동의 이용 신청이 접수되었습니다.\n담당자 확인 후 연락드리겠습니다.`);
+    c1.checked = false; c2.checked = false; c3.checked = false;
+    // 폼 초기화
+    ['regChildName', 'regGuardian', 'regPhone', 'regChildBirth', 'regSchool', 'regEmergency', 'regAddress', 'regNote'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.querySelectorAll('#regDays input:checked').forEach(c => c.checked = false);
+  } catch (e) {
+    console.error('제출 오류:', e);
+    alert('제출 중 오류가 발생했습니다. 다시 시도해 주세요.');
+  }
 }
 
 export async function submitConsult() {
@@ -63,14 +74,24 @@ export async function submitConsult() {
   const topic = document.getElementById('conTopic').value;
 
   const dateStr = formatDate(new Date());
-  await addInboxItem({
-    type: 'consult', name: `${child} (상담)`, summary: `${topic} · 보호자: ${guardian}`, date: dateStr,
-    data: { guardian, phone: conPhone, child, dateTime: conDate, topic, detail },
-    consents: ['상담기록 보관 동의']
-  });
+  try {
+    await addInboxItem({
+      type: 'consult', name: `${child} (상담)`, summary: `${topic} · 보호자: ${guardian}`, date: dateStr,
+      data: { guardian, phone: conPhone, child, dateTime: conDate, topic, detail },
+      consents: ['상담기록 보관 동의']
+    });
 
-  alert(`상담 신청이 접수되었습니다.\n담당 선생님이 확인 후 연락드리겠습니다.`);
-  conConsent.checked = false;
+    alert(`상담 신청이 접수되었습니다.\n담당 선생님이 확인 후 연락드리겠습니다.`);
+    conConsent.checked = false;
+    // 폼 초기화
+    ['conGuardian', 'conChild', 'conDetail', 'conPhone'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+  } catch (e) {
+    console.error('제출 오류:', e);
+    alert('제출 중 오류가 발생했습니다. 다시 시도해 주세요.');
+  }
 }
 
 // window에 노출

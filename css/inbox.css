@@ -28,18 +28,6 @@
   flex-direction: column;
 }
 
-#inboxModal .modal-close-x {
-  position: absolute;
-  top: 16px;
-  right: 20px;
-  border: none;
-  background: none;
-  font-size: 1.6rem;
-  color: var(--text-sub);
-  cursor: pointer;
-  line-height: 1;
-}
-
 #inboxModal .inbox-tabs {
   display: flex;
   gap: 4px;
@@ -132,8 +120,9 @@
   flex-shrink: 0;
 }
 
-#inboxModal .inbox-print-btn {
-  padding: 6px 14px;
+#inboxModal .inbox-print-btn,
+#inboxModal .inbox-item .delete-btn {
+  padding: 6px 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-xs);
   background: var(--card);
@@ -143,6 +132,10 @@
   cursor: pointer;
   flex-shrink: 0;
   transition: all var(--transition);
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #inboxModal .inbox-print-btn:hover {
@@ -151,9 +144,7 @@
 }
 
 #inboxModal .inbox-item .delete-btn {
-  padding: 6px 10px;
-  font-size: 0.7rem;
-  flex-shrink: 0;
+  border-color: var(--danger-light);
 }
 
 #inboxModal .inbox-consents {

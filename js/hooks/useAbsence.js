@@ -44,16 +44,24 @@ export async function submitAbsence() {
   const consent = document.getElementById('absConsent');
   if (!consent.checked) { alert('동의 항목에 체크해주세요.'); return; }
 
-  await createAbsence({ type, name, school, guardian, reason, from, to, phone, date: dateStr });
-  await addInboxItem({
-    type: 'absence', name: `${name} (${type})`, summary: `${reason} | ${from} ~ ${to}`, date: dateStr,
-    data: { type, name, school, guardian, phone, reason, from, to, absDate },
-    consents: ['운영규정 안내 동의']
-  });
-
-  alert('신청서가 제출되었습니다.');
-  consent.checked = false;
-  // 실시간 구독이 자동으로 renderAbsenceList() 호출
+  try {
+    await createAbsence({ type, name, school, guardian, reason, from, to, phone, date: dateStr });
+    await addInboxItem({
+      type: 'absence', name: `${name} (${type})`, summary: `${reason} | ${from} ~ ${to}`, date: dateStr,
+      data: { type, name, school, guardian, phone, reason, from, to, absDate },
+      consents: ['운영규정 안내 동의']
+    });
+    alert('신청서가 제출되었습니다.');
+    consent.checked = false;
+    // 폼 초기화
+    ['absName', 'absSchool', 'absGuardian', 'absReason', 'absPhone'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+  } catch (e) {
+    console.error('제출 오류:', e);
+    alert('제출 중 오류가 발생했습니다. 다시 시도해 주세요.');
+  }
 }
 
 export function printAbsence() {

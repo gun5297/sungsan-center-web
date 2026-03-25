@@ -68,6 +68,18 @@ const observer = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
+// --- FAB 메뉴 토글 (모바일) ---
+window.toggleToolbarMenu = function() {
+  document.getElementById('fixedToolbar').classList.toggle('open');
+};
+
+// 모바일에서 메뉴 버튼 클릭 시 메뉴 닫기
+document.querySelectorAll('.toolbar-menu .toolbar-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('fixedToolbar').classList.remove('open');
+  });
+});
+
 // --- 4단계: 각 훅 초기화 (DOM이 이미 마운트된 후 실행) ---
 initAdmin();
 initNotices();

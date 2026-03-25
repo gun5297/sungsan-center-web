@@ -1,6 +1,6 @@
 // ===== 사용자 Firestore 서비스 =====
 // users/{uid} = { email, name, role, approved, phone, createdAt }
-// role: 'director' | 'teacher' | 'social_worker'
+// role: 'admin' | 'general' (legacy: 'director' | 'teacher' | 'social_worker' → treated as admin)
 
 import { db } from '../config.js';
 import {
@@ -14,12 +14,13 @@ export async function getUserDoc(uid) {
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 }
 
-// 사용자 문서 생성
+// 사용자 문서 생성 (admin은 자동 승인, general은 관리자 승인 필요)
 export async function createUserDoc(uid, { email, name, role, phone }) {
+  const isAdminRole = role === 'admin' || role === 'director' || role === 'teacher' || role === 'social_worker';
   const ref = doc(db, 'users', uid);
   await setDoc(ref, {
     email, name, role, phone,
-    approved: role === 'director', // 센터장은 자동 승인
+    approved: isAdminRole, // 관리자 역할은 자동 승인
     createdAt: serverTimestamp()
   });
 }
@@ -30,7 +31,7 @@ export async function updateUserDoc(uid, data) {
   await updateDoc(ref, data);
 }
 
-// 승인 대기 중인 계정 목록 (센터장용)
+// 승인 대기 중인 계정 목록 (관리자용)
 export async function getPendingUsers() {
   const q = query(collection(db, 'users'), where('approved', '==', false));
   const snap = await getDocs(q);
@@ -49,9 +50,22 @@ export async function rejectUser(uid) {
   await updateDoc(ref, { approved: false, rejected: true });
 }
 
-// director가 한 명도 없으면 true (첫 가입자 = 센터장)
+// 관리자가 한 명도 없으면 true (첫 가입자 = 관리자)
+// admin 및 레거시 director 역할 모두 확인
 export async function hasNoDirector() {
-  const q = query(collection(db, 'users'), where('role', '==', 'director'));
-  const snap = await getDocs(q);
-  return snap.empty;
+  const qAdmin = query(collection(db, 'users'), where('role', '==', 'admin'));
+  const snapAdmin = await getDocs(qAdmin);
+  if (!snapAdmin.empty) return false;
+
+  const qDirector = query(collection(db, 'users'), where('role', '==', 'director'));
+  const snapDirector = await getDocs(qDirector);
+  if (!snapDirector.empty) return false;
+
+  const qTeacher = query(collection(db, 'users'), where('role', '==', 'teacher'));
+  const snapTeacher = await getDocs(qTeacher);
+  if (!snapTeacher.empty) return false;
+
+  const qSW = query(collection(db, 'users'), where('role', '==', 'social_worker'));
+  const snapSW = await getDocs(qSW);
+  return snapSW.empty;
 }

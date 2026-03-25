@@ -13,6 +13,10 @@ export function Meal() {
     </div>
 
     <div class="meal-grid" id="mealGrid"></div>
+
+    <div style="text-align:center;margin-top:16px;">
+      <button class="edit-schedule-btn admin-only" onclick="openMealEditor()">식단 수정</button>
+    </div>
   </section>
 
   <div class="divider"></div>

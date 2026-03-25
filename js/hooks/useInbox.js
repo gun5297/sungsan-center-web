@@ -73,8 +73,13 @@ export function renderInbox() {
 
 export async function deleteInboxItemById(id) {
   if (!confirm('이 서류를 삭제하시겠습니까?')) return;
-  await deleteInboxItemFS(id);
-  // 실시간 구독이 자동으로 renderInbox() 호출
+  try {
+    await deleteInboxItemFS(id);
+    // 실시간 구독이 자동으로 renderInbox() 호출
+  } catch (e) {
+    console.error('삭제 오류:', e);
+    alert('삭제 중 오류가 발생했습니다. 다시 시도해 주세요.');
+  }
 }
 
 export function printInboxItem(id) {

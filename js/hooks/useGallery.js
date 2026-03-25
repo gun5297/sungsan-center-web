@@ -1,6 +1,6 @@
 // ===== useGallery: 활동 갤러리 (Firestore + Storage) =====
 import { GALLERY_GRADIENTS } from '../data/sampleData.js';
-import { getIsAdmin } from '../state.js';
+import { getIsAdmin, isLoggedIn } from '../state.js';
 import {
   subscribeGallery,
   createGalleryItem,
@@ -10,7 +10,22 @@ import {
 
 let galleryItems = [];
 
+function updateGalleryVisibility() {
+  const authWall = document.getElementById('galleryAuthWall');
+  const grid = document.getElementById('galleryGrid');
+  if (!authWall || !grid) return;
+
+  if (isLoggedIn()) {
+    authWall.style.display = 'none';
+    grid.style.display = '';
+  } else {
+    authWall.style.display = '';
+    grid.style.display = 'none';
+  }
+}
+
 export function renderGallery() {
+  updateGalleryVisibility();
   const grid = document.getElementById('galleryGrid');
   if (!grid) return;
   const admin = getIsAdmin();
@@ -47,18 +62,23 @@ export async function addGalleryItem() {
 
   const dateStr = dateVal ? dateVal.replace(/-/g, '.') : new Date().toISOString().split('T')[0].replace(/-/g, '.');
 
-  let photoUrl = null;
-  if (fileInput.files && fileInput.files[0]) {
-    photoUrl = await uploadPhoto(fileInput.files[0]);
+  try {
+    let photoUrl = null;
+    if (fileInput.files && fileInput.files[0]) {
+      photoUrl = await uploadPhoto(fileInput.files[0]);
+    }
+
+    await createGalleryItem({ title, category, date: dateStr, photoUrl });
+
+    document.getElementById('galTitle').value = '';
+    document.getElementById('galCategory').value = '';
+    document.getElementById('galDate').value = '';
+    fileInput.value = '';
+    alert('활동이 추가되었습니다.');
+  } catch (e) {
+    console.error('갤러리 추가 실패:', e);
+    alert('추가 중 오류가 발생했습니다: ' + e.message);
   }
-
-  await createGalleryItem({ title, category, date: dateStr, photoUrl });
-
-  document.getElementById('galTitle').value = '';
-  document.getElementById('galCategory').value = '';
-  document.getElementById('galDate').value = '';
-  fileInput.value = '';
-  // 실시간 구독이 자동으로 renderGallery() 호출
 }
 
 export async function deleteGalleryItem(id, photoUrl) {

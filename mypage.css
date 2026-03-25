@@ -1,83 +1,97 @@
 /* ===== 마이페이지 CSS ===== */
+
+/* 카드 컨테이너 */
 .mypage-card {
   background: #fff;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: 0 2px 8px rgba(45,35,25,0.07);
+  border-radius: 20px;
+  padding: 36px 32px;
+  box-shadow: 0 4px 20px rgba(45,35,25,0.06);
   border: 1px solid #ede6df;
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
 }
 
 .mypage-card.mt {
-  margin-top: 16px;
+  margin-top: 20px;
 }
 
+/* 프로필 헤더 */
 .mypage-header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #ede6df;
+  gap: 20px;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f0ebe5;
 }
 
 .mypage-avatar {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  background: #fff0eb;
-  color: #ff7854;
-  font-size: 1.4rem;
+  background: linear-gradient(135deg, #ff7854, #ff9a76);
+  color: #fff;
+  font-size: 1.5rem;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(255,120,84,0.3);
 }
 
 .mypage-name {
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
-  margin-bottom: 4px;
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+  color: #2d2319;
 }
 
 .mypage-role-badge {
   display: inline-block;
-  padding: 4px 12px;
+  padding: 4px 14px;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
+.mypage-role-badge.role-admin,
 .mypage-role-badge.role-director {
   background: #fff0eb;
   color: #ff7854;
 }
 
-.mypage-role-badge.role-teacher {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
-
+.mypage-role-badge.role-general,
+.mypage-role-badge.role-teacher,
 .mypage-role-badge.role-social_worker {
-  background: #e3f2fd;
-  color: #1565c0;
+  background: #f0f4f8;
+  color: #5a6872;
 }
 
+/* 정보 리스트 */
 .mypage-info-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 0;
+  margin-bottom: 24px;
+  background: #faf8f5;
+  border-radius: 14px;
+  overflow: hidden;
 }
 
 .mypage-info-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 16px 20px;
   font-size: 0.9rem;
+  border-bottom: 1px solid #f0ebe5;
+}
+
+.mypage-info-row:last-child {
+  border-bottom: none;
 }
 
 .mypage-info-label {
@@ -88,24 +102,27 @@
 }
 
 .mypage-info-value {
-  font-weight: 600;
+  font-weight: 700;
   text-align: right;
   word-break: break-all;
+  color: #2d2319;
 }
 
+/* 권한 박스 */
 .mypage-permission-box {
-  background: #faf5f0;
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 20px;
+  background: #faf8f5;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 24px;
 }
 
 .mypage-permission-title {
   font-size: 0.8rem;
   font-weight: 800;
   color: #8c7e72;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   letter-spacing: -0.01em;
+  text-transform: uppercase;
 }
 
 .permission-list {
@@ -114,15 +131,16 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .permission-list li {
   font-size: 0.85rem;
   font-weight: 600;
   color: #2d2319;
-  padding-left: 16px;
+  padding-left: 20px;
   position: relative;
+  line-height: 1.5;
 }
 
 .permission-list li::before {
@@ -133,13 +151,35 @@
   font-weight: 800;
 }
 
+/* 버튼 영역 */
 .mypage-actions {
   display: flex;
   gap: 12px;
 }
 
+.mypage-actions .btn-upload,
+.mypage-actions .btn-secondary-sm {
+  flex: 1;
+  margin-top: 0;
+}
+
+.mypage-back-link {
+  display: block;
+  text-align: center;
+  margin-top: 16px;
+  font-size: 0.85rem;
+  color: #8c7e72;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.mypage-back-link:hover {
+  color: #ff7854;
+}
+
+/* 승인 대기 섹션 */
 .mypage-section-title {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   margin-bottom: 16px;
@@ -152,20 +192,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: 10px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 11px;
   background: #ef5350;
   color: #fff;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 800;
 }
 
 .pending-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .pending-item {
@@ -173,20 +213,26 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px;
-  background: #faf5f0;
-  border-radius: 10px;
+  padding: 16px;
+  background: #faf8f5;
+  border-radius: 12px;
+  transition: background 0.2s;
+}
+
+.pending-item:hover {
+  background: #f5efe8;
 }
 
 .pending-name {
   font-size: 0.95rem;
   font-weight: 700;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
 }
 
 .pending-detail {
   font-size: 0.78rem;
   color: #8c7e72;
+  line-height: 1.4;
 }
 
 .pending-actions {
@@ -198,7 +244,7 @@
 .approve-btn {
   padding: 8px 16px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #e8f5e9;
   color: #2e7d32;
   font-size: 0.8rem;
@@ -206,7 +252,7 @@
   cursor: pointer;
   font-family: inherit;
   transition: all 0.2s;
-  min-height: 36px;
+  min-height: 38px;
 }
 
 .approve-btn:hover {
@@ -215,9 +261,9 @@
 }
 
 .reject-btn {
-  padding: 8px 14px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   background: #fce4ec;
   color: #ef5350;
   font-size: 0.8rem;
@@ -225,7 +271,7 @@
   cursor: pointer;
   font-family: inherit;
   transition: all 0.2s;
-  min-height: 36px;
+  min-height: 38px;
 }
 
 .reject-btn:hover {
@@ -233,21 +279,90 @@
   color: #fff;
 }
 
+/* 정보 수정 모달 */
+.edit-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.edit-modal-overlay.active {
+  display: flex;
+}
+
+.edit-modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  animation: modalSlideUp 0.3s ease;
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.edit-modal .modal-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.edit-modal .form-group {
+  margin-bottom: 16px;
+}
+
+.edit-modal .form-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #8c7e72;
+  margin-bottom: 6px;
+}
+
+.edit-modal .input-field {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.edit-modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.edit-modal-actions .btn-upload,
+.edit-modal-actions .btn-secondary-sm {
+  flex: 1;
+  height: 48px;
+  margin-top: 0;
+}
+
 /* 승인 대기 화면 */
 .auth-pending {
   text-align: center;
-  padding: 20px 0;
+  padding: 24px 0;
 }
 
 .auth-pending-icon {
-  font-size: 2.5rem;
-  margin-bottom: 12px;
+  font-size: 2.8rem;
+  margin-bottom: 16px;
 }
 
 .auth-pending-title {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 800;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   letter-spacing: -0.02em;
 }
 
@@ -256,4 +371,49 @@
   color: #8c7e72;
   line-height: 1.7;
   margin-bottom: 16px;
+}
+
+/* 반응형 */
+@media (max-width: 480px) {
+  .mypage-card {
+    padding: 28px 20px;
+    border-radius: 16px;
+  }
+
+  .mypage-header {
+    gap: 16px;
+  }
+
+  .mypage-avatar {
+    width: 52px;
+    height: 52px;
+    font-size: 1.3rem;
+  }
+
+  .mypage-name {
+    font-size: 1.15rem;
+  }
+
+  .mypage-info-row {
+    padding: 14px 16px;
+    font-size: 0.85rem;
+  }
+
+  .pending-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .pending-actions {
+    width: 100%;
+  }
+
+  .pending-actions button {
+    flex: 1;
+  }
+
+  .edit-modal {
+    padding: 28px 20px;
+  }
 }

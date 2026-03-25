@@ -58,6 +58,8 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 a {
@@ -112,20 +114,27 @@ ul {
 }
 
 /* ===== 공통 버튼 ===== */
-.btn-upload {
+.btn-upload,
+.btn-secondary-sm {
   width: 100%;
-  padding: 14px;
+  height: 48px;
   border: none;
   border-radius: var(--radius-sm);
-  background: var(--primary);
-  color: #fff;
   font-size: 0.95rem;
   font-weight: 700;
   font-family: var(--font);
   cursor: pointer;
   transition: all var(--transition);
-  margin-top: 8px;
   letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-upload {
+  background: var(--primary);
+  color: #fff;
+  margin-top: 8px;
 }
 
 .btn-upload:hover {
@@ -134,18 +143,9 @@ ul {
 }
 
 .btn-secondary-sm {
-  width: 100%;
-  padding: 14px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
   background: var(--card);
   color: var(--text);
-  font-size: 0.95rem;
-  font-weight: 700;
-  font-family: var(--font);
-  cursor: pointer;
-  transition: all var(--transition);
-  letter-spacing: -0.01em;
 }
 
 .btn-secondary-sm:hover {
@@ -233,7 +233,10 @@ input[type="file"].input-field {
   cursor: pointer;
   font-family: var(--font);
   transition: all var(--transition);
-  min-height: 36px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .edit-btn {
@@ -429,4 +432,64 @@ body.admin-mode .notice-actions {
 
 .modal-close:hover {
   background: var(--border);
+}
+
+/* 모달 내 버튼 행 통일 */
+.modal .btn-upload,
+.modal .btn-secondary-sm,
+.modal .modal-close {
+  margin-top: 0;
+  padding: 14px;
+  flex: 1;
+}
+
+.modal .btn-upload {
+  width: auto;
+}
+
+.modal .modal-close {
+  width: auto;
+}
+
+/* 모달 닫기 X 버튼 (공통) */
+.modal-close-x {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: var(--bg-sub);
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 0;
+}
+
+.modal-close-x::before,
+.modal-close-x::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+}
+
+.modal-close-x::before {
+  transform: rotate(45deg);
+}
+
+.modal-close-x::after {
+  transform: rotate(-45deg);
+}
+
+.modal-close-x:hover {
+  background: var(--border);
+  color: var(--text);
 }

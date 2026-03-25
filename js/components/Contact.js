@@ -12,16 +12,6 @@ export function Contact() {
         <div class="contact-title">센터 대표</div>
         <div class="contact-info">02-XXX-XXXX</div>
       </a>
-      <a href="tel:010-XXXX-XXXX" class="contact-card">
-        <div class="contact-icon">👩‍🏫</div>
-        <div class="contact-title">담임 선생님</div>
-        <div class="contact-info">010-XXXX-XXXX</div>
-      </a>
-      <a href="tel:119" class="contact-card">
-        <div class="contact-icon">🚑</div>
-        <div class="contact-title">긴급 연락</div>
-        <div class="contact-info">119 / 112</div>
-      </a>
       <a href="https://pf.kakao.com/" class="contact-card" target="_blank">
         <div class="contact-icon">💬</div>
         <div class="contact-title">카카오톡 상담</div>

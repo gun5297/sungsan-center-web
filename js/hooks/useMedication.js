@@ -30,8 +30,13 @@ export function renderMedSchedule() {
 
 export async function deleteMed(id) {
   if (!confirm('이 투약 기록을 삭제하시겠습니까?')) return;
-  await deleteMedicationFS(id);
-  // 실시간 구독이 자동으로 renderMedSchedule() 호출
+  try {
+    await deleteMedicationFS(id);
+    // 실시간 구독이 자동으로 renderMedSchedule() 호출
+  } catch (e) {
+    console.error('삭제 오류:', e);
+    alert('삭제 중 오류가 발생했습니다. 다시 시도해 주세요.');
+  }
 }
 
 export async function submitMedication() {
@@ -56,18 +61,27 @@ export async function submitMedication() {
   const c3 = document.getElementById('medConsent3');
   if (!c1.checked || !c2.checked || !c3.checked) { alert('모든 동의 항목에 체크해주세요.'); return; }
 
-  await createMedication({ name, drug, dose, time, symptom, hospital, from, to: to || from, storage, note });
+  try {
+    await createMedication({ name, drug, dose, time, symptom, hospital, from, to: to || from, storage, note });
 
-  const dateStr = formatDate(new Date());
-  await addInboxItem({
-    type: 'medication', name: `${name} (${drug})`, summary: `${dose} · ${time} · ${from}~${to || from}`, date: dateStr,
-    data: { name, drug, dose, time, symptom, from, to: to || from, storage, hospital, note },
-    consents: ['부작용 안내 동의', '약 정보 책임 확인', '응급조치 동의']
-  });
+    const dateStr = formatDate(new Date());
+    await addInboxItem({
+      type: 'medication', name: `${name} (${drug})`, summary: `${dose} · ${time} · ${from}~${to || from}`, date: dateStr,
+      data: { name, drug, dose, time, symptom, from, to: to || from, storage, hospital, note },
+      consents: ['부작용 안내 동의', '약 정보 책임 확인', '응급조치 동의']
+    });
 
-  alert('투약 의뢰서가 제출되었습니다.');
-  c1.checked = false; c2.checked = false; c3.checked = false;
-  // 실시간 구독이 자동으로 renderMedSchedule() 호출
+    alert('투약 의뢰서가 제출되었습니다.');
+    c1.checked = false; c2.checked = false; c3.checked = false;
+    // 폼 초기화
+    ['medName', 'medDrug', 'medDose', 'medSymptom', 'medHospital', 'medNote'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+  } catch (e) {
+    console.error('제출 오류:', e);
+    alert('제출 중 오류가 발생했습니다. 다시 시도해 주세요.');
+  }
 }
 
 export function printMedication() {

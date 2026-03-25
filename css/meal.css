@@ -52,3 +52,173 @@
   color: var(--text-sub);
   line-height: 1.6;
 }
+
+#meal .edit-schedule-btn {
+  padding: 10px 24px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text-sub);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all var(--transition);
+}
+
+#meal .edit-schedule-btn:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* 식단 수정 모달 */
+.meal-editor-modal {
+  max-width: 480px !important;
+  width: 90%;
+}
+
+.meal-editor-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.meal-editor-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.meal-cal-header {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  padding: 6px 0;
+}
+
+.meal-cal-day {
+  text-align: center;
+  padding: 10px 4px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.meal-cal-day:hover:not(.empty) {
+  background: var(--bg-sub);
+}
+
+.meal-cal-day.empty {
+  cursor: default;
+}
+
+.meal-cal-day.today {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+}
+
+.meal-cal-day.has-meal::after {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--primary);
+  margin: 2px auto 0;
+}
+
+.meal-cal-day.today.has-meal::after {
+  background: #fff;
+}
+
+.meal-cal-day.weekend {
+  color: var(--text-light);
+}
+
+.meal-dot {
+  display: none;
+}
+
+/* 날짜별 식단 수정 */
+.meal-day-editor {
+  padding: 8px 0;
+}
+
+.meal-day-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.meal-day-label {
+  font-size: 1.1rem;
+  font-weight: 800;
+  min-width: 100px;
+  text-align: center;
+  letter-spacing: -0.02em;
+}
+
+.meal-day-editor .form-group {
+  margin-bottom: 16px;
+}
+
+.meal-day-editor .form-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-bottom: 6px;
+}
+
+.meal-day-editor .textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* 식단 모달 버튼 통일 */
+.meal-day-editor .btn-upload,
+.meal-day-editor .btn-secondary-sm {
+  flex: 1;
+  padding: 14px;
+  margin-top: 0;
+}
+
+.meal-editor-modal .month-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--card);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+
+.meal-editor-modal .month-btn:hover {
+  background: var(--bg-sub);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.meal-editor-modal .month-label {
+  font-size: 1.1rem;
+  font-weight: 800;
+  min-width: 120px;
+  text-align: center;
+}

@@ -26,7 +26,7 @@ export function getCurrentUser() {
 
 export function setCurrentUser(user) {
   currentUser = user;
-  window.__currentUser = user; // 감사 로그용 전역 접근
+  // window.__currentUser 제거 — auditService는 firebase/auth.js의 auth.currentUser를 직접 사용
 }
 
 export function getUserRole() {

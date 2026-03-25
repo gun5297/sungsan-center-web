@@ -3,6 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://www.gstatic.com;
+    style-src 'self' 'unsafe-inline';
+    font-src 'self' data:;
+    connect-src 'self'
+      https://*.googleapis.com
+      https://*.firebaseio.com
+      https://*.firebaseapp.com
+      https://firestore.googleapis.com
+      https://identitytoolkit.googleapis.com
+      https://securetoken.googleapis.com
+      wss://*.firebaseio.com;
+    img-src 'self' data: blob:;
+    object-src 'none';
+    base-uri 'self';
+  " />
   <title>성산지역아동센터 출결</title>
   <link rel="stylesheet" href="attendance.css" />
 </head>

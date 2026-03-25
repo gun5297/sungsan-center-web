@@ -36,29 +36,31 @@ export async function getGalleryItems() {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
-// 이미지 업로드 → Storage URL 반환
+// 이미지 업로드 → { url, storagePath } 반환
 export async function uploadPhoto(file) {
-  const storageRef = ref(storage, `gallery/${Date.now()}_${file.name}`);
+  const storagePath = `gallery/${Date.now()}_${file.name}`;
+  const storageRef = ref(storage, storagePath);
   await uploadBytes(storageRef, file);
-  return await getDownloadURL(storageRef);
+  const url = await getDownloadURL(storageRef);
+  return { url, storagePath };
 }
 
-// 생성 (이미지 URL 포함)
-export async function createGalleryItem({ title, category, date, photoUrl }) {
+// 생성 (이미지 URL + Storage 경로 포함)
+export async function createGalleryItem({ title, category, date, photoUrl, storagePath }) {
   return await addDoc(galleryCol, {
-    title, category, date, photoUrl,
+    title, category, date, photoUrl, storagePath: storagePath || null,
     createdAt: serverTimestamp()
   });
 }
 
-// 삭제 (Storage 이미지도 함께 삭제)
-export async function deleteGalleryItem(id, photoUrl) {
+// 삭제 (storagePath로 Storage 이미지 삭제 — HTTPS URL은 ref()에서 동작하지 않음)
+export async function deleteGalleryItem(id, storagePath) {
   const docRef = doc(db, 'gallery', id);
   await deleteDoc(docRef);
 
-  if (photoUrl) {
+  if (storagePath) {
     try {
-      const storageRef = ref(storage, photoUrl);
+      const storageRef = ref(storage, storagePath);
       await deleteObject(storageRef);
     } catch (e) {
       console.warn('Storage 이미지 삭제 실패:', e);

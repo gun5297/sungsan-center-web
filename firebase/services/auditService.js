@@ -1,7 +1,8 @@
 // ===== 감사 로그 서비스 =====
 // 데이터 변경 시 자동 기록 (불변 — 수정/삭제 불가)
+// window.__currentUser 의존성 제거 → auth.currentUser 직접 사용
 
-import { db } from '../config.js';
+import { db, auth } from '../config.js';
 import {
   collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
@@ -9,25 +10,34 @@ import {
 const logsCol = collection(db, 'auditLogs');
 
 // 로그 기록
+// action: 'create' | 'update' | 'delete' | 'approve' | 'reject'
+// target: 'notice' | 'gallery' | 'child' | 'medication' | 'user' | 'setting'
 export async function logAction(action, target, targetId, summary) {
   try {
-    // state.js 순환 의존 방지 — 직접 import하지 않고 window에서 가져옴
-    const user = window.__currentUser || null;
+    // window.__currentUser 대신 Firebase Auth에서 직접 현재 사용자 가져옴
+    const firebaseUser = auth.currentUser;
+    const uid  = firebaseUser ? firebaseUser.uid : '';
+    // 익명 사용자는 감사 로그에서 "익명"으로 표시
+    const name = (firebaseUser && !firebaseUser.isAnonymous)
+      ? (firebaseUser.displayName || firebaseUser.email || uid)
+      : (firebaseUser?.isAnonymous ? '익명(태블릿)' : '시스템');
+
     await addDoc(logsCol, {
-      action,       // 'create', 'update', 'delete', 'approve', 'reject'
-      target,       // 'notice', 'gallery', 'child', 'medication', 'user', 'setting'
+      action,
+      target,
       targetId: targetId || '',
       summary,
-      userId: user ? user.uid : '',
-      userName: user ? user.name : '시스템',
+      userId: uid,
+      userName: name,
       timestamp: serverTimestamp()
     });
   } catch (e) {
-    console.warn('감사 로그 기록 실패:', e);
+    // 로그 실패는 경고만 — 주 작업을 막지 않음
+    console.warn('[auditService] 감사 로그 기록 실패:', e);
   }
 }
 
-// 최근 로그 조회
+// 최근 로그 조회 (관리자 전용 — Firestore rules에서 강제)
 export async function getRecentLogs(count = 20) {
   const q = query(logsCol, orderBy('timestamp', 'desc'), limit(count));
   const snap = await getDocs(q);

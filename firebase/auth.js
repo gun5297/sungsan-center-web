@@ -13,6 +13,7 @@
 import { auth } from './config.js';
 import {
   signInWithEmailAndPassword,
+  signInAnonymously,
   signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
@@ -22,6 +23,18 @@ export async function login(email, password) {
   try {
     const result = await signInWithEmailAndPassword(auth, email, password);
     return { success: true, user: result.user };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+// 익명 로그인 (출결 태블릿 — PIN 인증 후 호출)
+// 이미 익명 세션이 있으면 기존 세션 유지
+export async function loginAnonymously() {
+  if (auth.currentUser) return { success: true };
+  try {
+    await signInAnonymously(auth);
+    return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
   }

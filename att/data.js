@@ -18,7 +18,8 @@ import {
   deleteStudent as fsDeleteStudent
 } from '../firebase/services/studentService.js';
 
-export const ATT_PASSWORD = '1234';
+// ATT_PASSWORD 제거됨 — Firestore publicConfig/attLock 해시로 대체 (settingsService.js 참조)
+// localStorage 키는 캐시 목적으로만 유지 (인증 우회 수단 아님)
 export const STUDENTS_KEY = 'att_students';
 export const TODAY_KEY = `att_${new Date().toISOString().split('T')[0]}`;
 
@@ -48,7 +49,8 @@ function ensureStudentsSubscription() {
       cachedStudents = students;
     });
   } catch (e) {
-    console.warn('[att/data] 학생 구독 실패, localStorage 폴백:', e);
+    console.error('[att/data] 학생 구독 실패:', e);
+    // localStorage 폴백 제거 — 인증 실패 시 빈 상태 유지
   }
 }
 
@@ -81,42 +83,23 @@ export async function initData() {
 
 // async 버전 — Firestore에서 조회, 실패 시 localStorage 폴백
 export async function getStudents() {
-  try {
-    // 캐시가 있으면 캐시 사용 (실시간 구독으로 최신 상태)
-    if (cachedStudents !== null) return [...cachedStudents];
-    const students = await fsGetAllStudents();
-    cachedStudents = students;
-    return [...students];
-  } catch (e) {
-    console.warn('[att/data] getStudents Firestore 실패, localStorage 폴백:', e);
-    return getStudentsLocal();
-  }
-}
-
-// 동기 버전 — 캐시 또는 localStorage (렌더링 시 폴백용)
-export function getStudentsSync() {
+  // 캐시가 있으면 캐시 사용 (실시간 구독으로 최신 상태)
   if (cachedStudents !== null) return [...cachedStudents];
-  return getStudentsLocal();
+  // 캐시 없으면 Firestore 직접 조회 (localStorage 폴백 없음)
+  const students = await fsGetAllStudents();
+  cachedStudents = students;
+  return [...students];
 }
 
-function getStudentsLocal() {
-  const saved = localStorage.getItem(STUDENTS_KEY);
-  if (!saved) {
-    localStorage.setItem(STUDENTS_KEY, JSON.stringify(DEFAULT_STUDENTS));
-    return [...DEFAULT_STUDENTS];
-  }
-  return JSON.parse(saved);
+// 동기 버전 — 캐시만 사용 (캐시 없으면 빈 배열)
+export function getStudentsSync() {
+  return cachedStudents !== null ? [...cachedStudents] : [];
 }
 
-// Firestore에 학생 전체 저장 (useManage의 개별 CRUD로 대체됨)
-export async function saveStudents(list) {
-  try {
-    localStorage.setItem(STUDENTS_KEY, JSON.stringify(list));
-    // 개별 CRUD는 useManage에서 직접 호출
-  } catch (e) {
-    console.warn('[att/data] saveStudents 실패:', e);
-    localStorage.setItem(STUDENTS_KEY, JSON.stringify(list));
-  }
+// saveStudents는 개별 CRUD(useManage)로 대체됨 — 더 이상 사용하지 않음
+// localStorage에는 학생 데이터를 저장하지 않음
+export async function saveStudents(_list) {
+  console.warn('[att/data] saveStudents는 deprecated. useManage의 개별 CRUD를 사용하세요.');
 }
 
 // ===== 출결 기록 조회/저장 =====
@@ -125,18 +108,16 @@ export async function getTodayRecords() {
   try {
     return await fsGetTodayRecords();
   } catch (e) {
-    console.warn('[att/data] getTodayRecords Firestore 실패, localStorage 폴백:', e);
-    return JSON.parse(localStorage.getItem(TODAY_KEY) || '{}');
+    // 읽기 실패: 빈 객체 반환 (조용한 폴백은 보안상 허용, 단순 표시 문제)
+    console.error('[att/data] getTodayRecords Firestore 실패:', e);
+    return {};
   }
 }
 
 export async function saveTodayRecords(records) {
-  try {
-    await fsSaveTodayRecords(records);
-  } catch (e) {
-    console.warn('[att/data] saveTodayRecords Firestore 실패, localStorage 폴백:', e);
-    localStorage.setItem(TODAY_KEY, JSON.stringify(records));
-  }
+  // 쓰기 실패: localStorage 폴백 없이 예외 전파
+  // → 출결 기록이 localStorage에 저장되면 Firestore 규칙 우회 가능성 있음
+  await fsSaveTodayRecords(records);
 }
 
 // ===== Firestore 서비스 re-export =====

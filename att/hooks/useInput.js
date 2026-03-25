@@ -35,9 +35,17 @@ function showSuccess(student, type, typeLabel, timeStr) {
   document.getElementById('successTime').textContent = timeStr;
 
   const action = type === 'in' ? '등원' : '하원';
-  const smsMsg = `📱 ${student.parent} → "${student.name} 학생이 ${timeStr}에 ${action}하였습니다."`;
-  document.getElementById('successSms').innerHTML =
-    `${smsMsg}<br><span class="sms-timer">⏱ 1분 후 자동 발송 예정 · 1분 내 취소 가능</span>`;
+  // textContent + createElement로 XSS 방지 (학부모 연락처 데이터가 포함되므로)
+  const smsEl = document.getElementById('successSms');
+  smsEl.textContent = '';
+  const smsLine = document.createTextNode(`📱 ${student.parent} → "${student.name} 학생이 ${timeStr}에 ${action}하였습니다."`);
+  const timer = document.createElement('span');
+  timer.className = 'sms-timer';
+  timer.textContent = '⏱ 1분 후 자동 발송 예정 · 1분 내 취소 가능';
+  const br = document.createElement('br');
+  smsEl.appendChild(smsLine);
+  smsEl.appendChild(br);
+  smsEl.appendChild(timer);
 
   showScreen('screenSuccess');
   inputCode = '';

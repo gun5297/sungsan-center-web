@@ -47,7 +47,7 @@ export function renderGallery() {
         <div class="gallery-info">
           <div class="gallery-title">${escapeHtml(item.title)}</div>
           <div class="gallery-date">${escapeHtml(item.date)}</div>
-          ${admin ? `<div class="notice-actions gallery-actions"><button class="delete-btn" onclick="deleteGalleryItem('${escapeHtml(item.id)}', '${escapeHtml(item.photoUrl || '')}')">삭제</button></div>` : ''}
+          ${admin ? `<div class="notice-actions gallery-actions"><button class="delete-btn" onclick="deleteGalleryItem('${escapeHtml(item.id)}', '${escapeHtml(item.storagePath || '')}')">삭제</button></div>` : ''}
         </div>
       </div>
     `;
@@ -73,18 +73,19 @@ export async function addGalleryItem() {
       for (let i = 0; i < totalFiles; i++) {
         showToast(`${i + 1}/${totalFiles} 업로드 중...`, 'info');
         const resized = await resizeImage(files[i]);
-        const photoUrl = await uploadPhoto(resized);
-        await createGalleryItem({ title, category, date: dateStr, photoUrl });
+        const { url: photoUrl, storagePath } = await uploadPhoto(resized);
+        await createGalleryItem({ title, category, date: dateStr, photoUrl, storagePath });
       }
       showToast(`${totalFiles}개 활동이 추가되었습니다.`, 'success');
     } else {
       // 단일 파일 또는 파일 없이 업로드
       let photoUrl = null;
+      let storagePath = null;
       if (totalFiles === 1) {
         const resized = await resizeImage(files[0]);
-        photoUrl = await uploadPhoto(resized);
+        ({ url: photoUrl, storagePath } = await uploadPhoto(resized));
       }
-      await createGalleryItem({ title, category, date: dateStr, photoUrl });
+      await createGalleryItem({ title, category, date: dateStr, photoUrl, storagePath });
       showToast('활동이 추가되었습니다.', 'success');
     }
 
@@ -120,11 +121,16 @@ export function initGallery() {
     renderGallery();
   });
 
-  // 갤러리 영역 우클릭 방지
+  // 갤러리 영역 우클릭·드래그 방지
   const gallerySection = document.getElementById('gallery');
   if (gallerySection) {
     gallerySection.addEventListener('contextmenu', (e) => {
       if (e.target.tagName === 'IMG' || e.target.closest('.gallery-card')) {
+        e.preventDefault();
+      }
+    });
+    gallerySection.addEventListener('dragstart', (e) => {
+      if (e.target.closest('.gallery-card')) {
         e.preventDefault();
       }
     });

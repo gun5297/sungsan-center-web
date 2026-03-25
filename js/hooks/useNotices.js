@@ -1,9 +1,10 @@
 // ===== useNotices: 공지사항 CRUD (Firestore) =====
-import { formatDate, closeModal, skeletonCards, escapeHtml } from '../utils.js';
+import { formatDate, closeModal, skeletonCards, escapeHtml, checkConcurrentEdit } from '../utils.js';
 import { getUserRole, canManage } from '../state.js';
 import {
   subscribeNotices,
   createNotice,
+  getNotice as getNoticeFS,
   updateNotice as updateNoticeFS,
   deleteNotice as deleteNoticeFS,
   uploadNoticeFile
@@ -13,6 +14,8 @@ import { markAsRead, getReadCount } from '../../firebase/services/noticeReadServ
 import { getCurrentUser, isLoggedIn, getIsAdmin } from '../state.js';
 
 let notices = [];
+// 수정 모달 열 때 저장한 서버 타임스탬프 (충돌 감지용)
+const _editingTimestamp = {}; // { [id]: seconds }
 
 function isImageFile(name) {
   return /\.(jpg|jpeg|png|gif|webp)$/i.test(name);
@@ -132,6 +135,8 @@ export async function deleteNotice(id) {
 export function editNotice(id) {
   const notice = notices.find(n => String(n.id) === String(id));
   if (!notice) return;
+  // 현재 타임스탬프 기억 (updatedAt 우선, 없으면 createdAt)
+  _editingTimestamp[id] = (notice.updatedAt || notice.createdAt)?.seconds ?? null;
 
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay active';
@@ -158,8 +163,25 @@ export async function saveEditNotice(id) {
   const title = document.getElementById('editNoticeTitle').value;
   const content = document.getElementById('editNoticeContent').value;
   const category = document.getElementById('editNoticeCategory').value;
+
+  // 동시 수정 충돌 감지
+  try {
+    const current = await getNoticeFS(id);
+    if (current) {
+      const currentTs = (current.updatedAt || current.createdAt) ?? null;
+      const savedTs = _editingTimestamp[id] !== undefined ? { seconds: _editingTimestamp[id] } : null;
+      if (checkConcurrentEdit(savedTs, currentTs)) {
+        const proceed = await showConfirm('다른 관리자가 이 공지를 수정했습니다.\n그래도 저장하시겠습니까? (기존 수정 내용을 덮어씁니다)');
+        if (!proceed) return;
+      }
+    }
+  } catch (e) {
+    console.warn('충돌 감지 실패, 저장 진행:', e);
+  }
+
   await updateNoticeFS(id, { title, content, category });
   logAction('update', 'notice', id, `공지 '${title}' 수정`);
+  delete _editingTimestamp[id];
   document.querySelector('.modal-overlay.active .modal-close').click();
 }
 

@@ -3,6 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!--
+    CSP (Content Security Policy):
+    - default-src 'self'  : 기본적으로 동일 출처만 허용
+    - script-src          : CDN(SheetJS, Firebase) 명시적 허용 + 'strict-dynamic' 없음 (인라인 스크립트 차단)
+    - connect-src         : Firebase API 통신 허용
+    - img-src             : Firebase Storage + data URI(서명 이미지) 허용
+    - frame-ancestors     : 클릭재킹 방지
+    주의: GitHub Pages에서는 HTTP 헤더 설정 불가 → meta 태그 사용
+    meta CSP는 frame-ancestors, report-uri를 지원하지 않지만 XSS 방어는 동일하게 동작.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self'
+      https://cdn.sheetjs.com
+      https://www.gstatic.com
+      https://cdn.jsdelivr.net;
+    style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:;
+    connect-src 'self'
+      https://*.googleapis.com
+      https://*.firebaseio.com
+      https://*.firebaseapp.com
+      https://firestore.googleapis.com
+      https://identitytoolkit.googleapis.com
+      https://securetoken.googleapis.com
+      https://storage.googleapis.com
+      wss://*.firebaseio.com;
+    img-src 'self' data: blob:
+      https://firebasestorage.googleapis.com
+      https://lh3.googleusercontent.com;
+    object-src 'none';
+    base-uri 'self';
+  " />
   <title>성산지역아동센터</title>
   <meta name="theme-color" content="#FF7854" />
   <meta name="apple-mobile-web-app-capable" content="yes" />

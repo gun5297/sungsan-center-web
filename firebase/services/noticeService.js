@@ -10,7 +10,7 @@
 
 import { noticesCol } from '../collections.js';
 import {
-  doc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp
+  doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import {
   ref, uploadBytes, getDownloadURL
@@ -50,10 +50,17 @@ export async function createNotice({ title, content, category, date, file, fileU
   });
 }
 
+// 단건 조회
+export async function getNotice(id) {
+  const ref = doc(db, 'notices', id);
+  const snap = await getDoc(ref);
+  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+}
+
 // 수정
 export async function updateNotice(id, data) {
   const ref = doc(db, 'notices', id);
-  return await updateDoc(ref, data);
+  return await updateDoc(ref, { ...data, updatedAt: serverTimestamp() });
 }
 
 // 삭제

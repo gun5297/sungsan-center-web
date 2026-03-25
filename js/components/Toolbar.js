@@ -39,6 +39,13 @@ export function Toolbar() {
       </div>
 
       <div class="inbox-list" id="inboxList"></div>
+
+      <div class="inbox-export-bar admin-only">
+        <span class="inbox-export-label">CSV 내보내기</span>
+        <button class="inbox-export-btn" onclick="exportNotices()">공지사항</button>
+        <button class="inbox-export-btn" onclick="exportChildren()">아동 목록</button>
+        <button class="inbox-export-btn" onclick="exportMedications()">투약 기록</button>
+      </div>
     </div>
   </div>
 

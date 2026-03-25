@@ -1,5 +1,9 @@
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
+  .section {
+    padding: 56px 20px;
+  }
+
   nav {
     padding: 0 20px;
   }
@@ -24,11 +28,11 @@
   }
 
   #meal .meal-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 
   #gallery .gallery-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   #contact .contact-grid {
@@ -107,6 +111,16 @@
 }
 
 @media (max-width: 480px) {
+  .section {
+    padding: 40px 16px;
+  }
+
+  .modal {
+    padding: 24px 20px;
+    max-height: 90vh;
+    width: 95%;
+  }
+
   .fixed-toolbar {
     top: 70px;
     right: 10px;
@@ -118,6 +132,10 @@
   }
 
   #meal .meal-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  #gallery .gallery-grid {
     grid-template-columns: 1fr;
   }
 

@@ -102,9 +102,9 @@
 }
 
 #schedule .cal-event-tag {
-  font-size: 0.55rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  padding: 1px 3px;
+  padding: 1px 4px;
   border-radius: 3px;
   background: var(--primary-light);
   color: var(--primary);

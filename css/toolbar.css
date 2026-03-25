@@ -10,7 +10,8 @@
 }
 
 .toolbar-btn {
-  padding: 10px 16px;
+  padding: 12px 18px;
+  min-height: 44px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: rgba(255,255,255,0.95);
@@ -79,7 +80,7 @@ body.admin-mode .guest-only {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 8px 24px;
+  padding: 12px 24px;
   background: var(--primary);
   color: #fff;
   font-size: 0.8rem;

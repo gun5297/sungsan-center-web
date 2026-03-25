@@ -1,0 +1,170 @@
+// ===== 관리 화면 (출결 기록, 타임라인, CSV, 초기화) =====
+
+import { getStudents, getTodayRecords, saveTodayRecords, TODAY_KEY } from '../data.js';
+
+let adminRefreshInterval = null;
+
+export function startAdminRefresh() {
+  if (adminRefreshInterval) return;
+  adminRefreshInterval = setInterval(() => {
+    const panel = document.getElementById('panelRecords');
+    if (panel && !panel.classList.contains('hidden')) {
+      renderTimeline();
+    }
+  }, 1000);
+}
+
+export function stopAdminRefresh() {
+  if (adminRefreshInterval) {
+    clearInterval(adminRefreshInterval);
+    adminRefreshInterval = null;
+  }
+}
+
+export function switchAdminTab(tab) {
+  document.getElementById('tabRecords').classList.toggle('active', tab === 'records');
+  document.getElementById('tabManage').classList.toggle('active', tab === 'manage');
+  document.getElementById('panelRecords').classList.toggle('hidden', tab !== 'records');
+  document.getElementById('panelManage').classList.toggle('hidden', tab !== 'manage');
+
+  if (tab === 'records') {
+    renderAdmin();
+  }
+}
+
+export function renderAdmin() {
+  const now = new Date();
+  const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+  document.getElementById('adminDate').textContent =
+    `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${dayNames[now.getDay()]})`;
+
+  const students = getStudents();
+  const records = getTodayRecords();
+
+  let inCount = 0, outCount = 0, absentCount = 0;
+  students.forEach(s => {
+    const r = records[s.id];
+    if (!r) absentCount++;
+    else if (r.outTime) outCount++;
+    else inCount++;
+  });
+
+  document.getElementById('adminSummary').innerHTML = `
+    <div class="summary-card">
+      <div class="summary-num in">${inCount}</div>
+      <div class="summary-label">출석 중</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-num out">${outCount}</div>
+      <div class="summary-label">하원 완료</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-num not">${absentCount}</div>
+      <div class="summary-label">미출석</div>
+    </div>
+  `;
+
+  renderTimeline();
+}
+
+function renderTimeline() {
+  const students = getStudents();
+  const records = getTodayRecords();
+  const now = Date.now();
+
+  const checkedIn = students
+    .filter(s => records[s.id])
+    .sort((a, b) => (records[a.id].inTs || 0) - (records[b.id].inTs || 0));
+
+  if (checkedIn.length === 0) {
+    document.getElementById('adminList').innerHTML =
+      '<div class="timeline-empty">아직 출석한 아동이 없습니다</div>';
+    return;
+  }
+
+  document.getElementById('adminList').innerHTML = checkedIn.map(s => {
+    const r = records[s.id];
+    const elapsed = r.inTs ? now - r.inTs : Infinity;
+    const remaining = Math.max(0, 60 - Math.floor(elapsed / 1000));
+    const canCancel = elapsed < 60000;
+
+    const smsHtml = canCancel
+      ? `<div class="timeline-sms pending">📱 ${remaining}초 후 문자 발송 예정</div>`
+      : `<div class="timeline-sms sent">📱 문자 발송 완료</div>`;
+
+    const cancelBtn = canCancel
+      ? `<button class="cancel-btn" onclick="cancelAttendance('${s.id}')">출석 취소 (${remaining}초)</button>`
+      : `<button class="cancel-btn disabled" disabled>취소 불가</button>`;
+
+    const statusClass = r.outTime ? 'left' : 'present';
+    const statusLabel = r.outTime ? '하원' : '출석 중';
+
+    return `
+      <div class="timeline-item">
+        <div class="timeline-time">${r.inTime}</div>
+        <div class="timeline-body">
+          <div class="timeline-top">
+            <div class="timeline-avatar">${s.id}</div>
+            <div class="timeline-info">
+              <div class="timeline-name">${s.name}</div>
+              <div class="timeline-school">${s.school}</div>
+            </div>
+            <span class="att-row-status ${statusClass}">${statusLabel}</span>
+          </div>
+          ${smsHtml}
+          <div class="timeline-actions">${cancelBtn}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+export function cancelAttendance(studentId) {
+  const records = getTodayRecords();
+  if (!records[studentId]) return;
+  const elapsed = records[studentId].inTs ? Date.now() - records[studentId].inTs : Infinity;
+  if (elapsed >= 60000) return;
+  if (!confirm('출석을 취소하시겠습니까?\n문자 발송도 취소됩니다.')) return;
+  delete records[studentId];
+  saveTodayRecords(records);
+  renderAdmin();
+}
+
+export function exportCSV() {
+  const students = getStudents();
+  const records = getTodayRecords();
+  const today = new Date().toISOString().split('T')[0];
+
+  let csv = '번호,이름,학교,등원시간,하원시간,상태,보호자연락처\n';
+  students.forEach(s => {
+    const r = records[s.id];
+    let status, inTime, outTime;
+    if (!r) {
+      status = '미출석'; inTime = ''; outTime = '';
+    } else if (r.outTime) {
+      status = '하원완료'; inTime = r.inTime; outTime = r.outTime;
+    } else {
+      status = '출석중'; inTime = r.inTime; outTime = '';
+    }
+    csv += `${s.id},${s.name},${s.school},${inTime},${outTime},${status},${s.parent}\n`;
+  });
+
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `출결기록_${today}.csv`;
+  link.click();
+}
+
+export function resetToday() {
+  if (confirm('오늘 출결 기록을 모두 삭제하시겠습니까?')) {
+    localStorage.removeItem(TODAY_KEY);
+    renderAdmin();
+  }
+}
+
+// window 노출
+window.switchAdminTab = switchAdminTab;
+window.cancelAttendance = cancelAttendance;
+window.exportCSV = exportCSV;
+window.resetToday = resetToday;

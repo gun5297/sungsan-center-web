@@ -1,0 +1,171 @@
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+  .numpad {
+    max-width: 300px;
+    gap: 8px;
+  }
+
+  .num-btn {
+    font-size: 1.4rem;
+    border-radius: 12px;
+  }
+
+  #screenMain .greeting {
+    font-size: 1.3rem;
+  }
+
+  #screenMain .input-number {
+    font-size: 2rem;
+  }
+
+  #screenSuccess .success-name {
+    font-size: 1.8rem;
+  }
+
+  #screenAdmin .manage-form-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (min-width: 768px) {
+  .numpad {
+    max-width: 400px;
+    gap: 16px;
+  }
+
+  .num-btn {
+    aspect-ratio: 1.8;
+    font-size: 2rem;
+  }
+}
+
+/* ===== 가로 모드 ===== */
+@media (orientation: landscape) {
+
+  /* 잠금 화면 */
+  #screenLock .lock-content {
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+  }
+
+  #screenLock .lock-left {
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 32px 48px;
+    border-right: 1px solid var(--border);
+    margin-bottom: 0;
+  }
+
+  #screenLock .lock-icon { font-size: 2.4rem; margin-bottom: 0; }
+  #screenLock .lock-title { font-size: 1.6rem; margin-bottom: 0; }
+  #screenLock .lock-subtitle { font-size: 0.9rem; margin-bottom: 0; }
+
+  #screenLock .lock-right {
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    padding: 32px 48px;
+  }
+
+  #screenLock .lock-back-link { margin-top: 4px; }
+  #screenLock .lock-dots { margin-bottom: 0; gap: 14px; }
+  #screenLock .lock-error { margin-bottom: 0; }
+  #screenLock .lock-numpad { margin-bottom: 0; }
+
+  /* 메인 화면 */
+  #screenMain .top-bar { padding: 12px 28px; }
+
+  #screenMain .main-content {
+    flex-direction: row;
+    align-items: stretch;
+    height: calc(100% - 56px);
+    gap: 0;
+    padding: 0;
+  }
+
+  #screenMain .main-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 24px 48px;
+    border-right: 1px solid var(--border);
+  }
+
+  #screenMain .greeting {
+    font-size: 1.4rem;
+    margin-bottom: 0;
+    min-height: auto;
+  }
+
+  #screenMain .input-display { margin-bottom: 0; }
+  #screenMain .input-dots { gap: 14px; margin-bottom: 10px; }
+  #screenMain .input-number { font-size: 2.2rem; min-height: 40px; }
+
+  /* 메인 숫자패드 */
+  #screenMain .main-content > .numpad {
+    flex: 1;
+    max-width: none;
+    width: auto;
+    gap: 10px;
+    margin: auto;
+    padding: 24px 40px;
+    align-self: center;
+    align-content: center;
+    justify-content: center;
+  }
+
+  /* 잠금 숫자패드 */
+  #screenLock .lock-numpad {
+    max-width: 300px;
+    width: 100%;
+    gap: 10px;
+    margin-bottom: 0;
+  }
+
+  .num-btn {
+    aspect-ratio: 1.8;
+    font-size: 1.6rem;
+    border-radius: 14px;
+  }
+
+  .fn-btn { font-size: 0.9rem; }
+  .confirm-btn { font-size: 1rem !important; }
+
+  /* 성공 화면 */
+  #screenSuccess .success-content {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 48px;
+    padding: 24px 64px;
+  }
+
+  #screenSuccess .success-icon {
+    width: 80px;
+    height: 80px;
+    font-size: 2.2rem;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  #screenSuccess .success-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  #screenSuccess .success-name { font-size: 2rem; margin-bottom: 4px; }
+  #screenSuccess .success-type { margin-bottom: 4px; }
+  #screenSuccess .success-time { font-size: 1.5rem; margin-bottom: 14px; }
+  #screenSuccess .success-sms { font-size: 0.88rem; padding: 12px 20px; }
+}

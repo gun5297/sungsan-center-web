@@ -1,0 +1,54 @@
+/* ===== MEAL / 식단표 ===== */
+#meal .meal-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+#meal .meal-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: center;
+  transition: all var(--transition);
+}
+
+#meal .meal-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: transparent;
+}
+
+#meal .meal-card.today {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+#meal .meal-day {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-bottom: 4px;
+}
+
+#meal .meal-date {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+#meal .meal-type {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 6px;
+  margin-top: 12px;
+}
+
+#meal .meal-menu {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  line-height: 1.6;
+}

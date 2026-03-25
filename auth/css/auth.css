@@ -1,0 +1,147 @@
+/* ===== AUTH PAGES (로그인 / 회원가입) ===== */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-sub);
+  padding: 24px;
+}
+
+.auth-container {
+  max-width: 440px;
+  width: 100%;
+}
+
+/* 로고 */
+.auth-logo {
+  display: block;
+  text-align: center;
+  margin-bottom: 32px;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -0.04em;
+  text-decoration: none;
+}
+
+.auth-logo span {
+  color: var(--primary);
+}
+
+/* 폼 카드 */
+.auth-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px;
+}
+
+.auth-card .form-header {
+  border-bottom: none;
+  padding-bottom: 8px;
+  margin-bottom: 24px;
+}
+
+.auth-card .form-doc-title {
+  font-size: 1.3rem;
+}
+
+/* 에러 메시지 */
+.auth-error {
+  padding: 12px 16px;
+  background: var(--danger-light);
+  color: var(--danger);
+  border-radius: var(--radius-xs);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+
+/* 성공 메시지 */
+.auth-success {
+  padding: 12px 16px;
+  background: var(--success-light);
+  color: var(--success);
+  border-radius: var(--radius-xs);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+
+/* 하단 링크 */
+.auth-links {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.auth-links a {
+  color: var(--text-sub);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: color var(--transition);
+  letter-spacing: -0.01em;
+}
+
+.auth-links a:hover {
+  color: var(--primary);
+}
+
+.auth-sep {
+  color: var(--border);
+  margin: 0 12px;
+}
+
+/* 폼 그룹 간격 (auth 페이지 전용) */
+.auth-card .form-group {
+  margin-bottom: 16px;
+}
+
+.auth-card .form-group:last-of-type {
+  margin-bottom: 0;
+}
+
+.auth-card .btn-upload {
+  margin-top: 20px;
+}
+
+/* 승인 대기 안내 */
+.auth-pending {
+  text-align: center;
+  padding: 24px;
+}
+
+.auth-pending-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.auth-pending-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.auth-pending-desc {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* 반응형 */
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 28px 24px;
+  }
+
+  .auth-logo {
+    font-size: 1.4rem;
+  }
+}

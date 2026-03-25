@@ -1,0 +1,263 @@
+/* ===== ADMIN SCREEN ===== */
+#screenAdmin {
+  overflow-y: auto;
+}
+
+#screenAdmin .admin-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+#screenAdmin .admin-back {
+  border: none;
+  background: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--primary);
+  cursor: pointer;
+  font-family: var(--font);
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+#screenAdmin .admin-header h2 {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+#screenAdmin .admin-date {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  margin-top: 4px;
+}
+
+/* ===== ADMIN TABS ===== */
+#screenAdmin .admin-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+}
+
+#screenAdmin .admin-tab {
+  flex: 1;
+  padding: 14px 0;
+  border: none;
+  background: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: var(--font);
+  color: var(--text-sub);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition);
+}
+
+#screenAdmin .admin-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+#screenAdmin .admin-tab:hover {
+  color: var(--text);
+}
+
+/* ===== ADMIN SUMMARY & LIST ===== */
+#screenAdmin .admin-summary {
+  display: flex;
+  gap: 12px;
+  padding: 20px 24px;
+}
+
+#screenAdmin .summary-card {
+  flex: 1;
+  text-align: center;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+#screenAdmin .summary-num {
+  font-size: 1.8rem;
+  font-weight: 900;
+}
+
+#screenAdmin .summary-num.in { color: var(--success); }
+#screenAdmin .summary-num.out { color: var(--primary); }
+#screenAdmin .summary-num.not { color: var(--danger); }
+
+#screenAdmin .summary-label {
+  font-size: 0.8rem;
+  color: var(--text-sub);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+#screenAdmin .admin-list {
+  padding: 0 24px;
+}
+
+/* ===== TIMELINE ===== */
+#screenAdmin .timeline-empty {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--text-sub);
+  font-weight: 600;
+}
+
+#screenAdmin .timeline-item {
+  display: flex;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+#screenAdmin .timeline-time {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+  min-width: 44px;
+  padding-top: 3px;
+}
+
+#screenAdmin .timeline-body {
+  flex: 1;
+}
+
+#screenAdmin .timeline-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+#screenAdmin .timeline-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+
+#screenAdmin .timeline-info {
+  flex: 1;
+}
+
+#screenAdmin .timeline-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+#screenAdmin .timeline-school {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+}
+
+#screenAdmin .att-row-status {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+#screenAdmin .att-row-status.present {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+#screenAdmin .att-row-status.left {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+#screenAdmin .att-row-status.absent {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+#screenAdmin .timeline-sms {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: var(--radius-xs);
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+#screenAdmin .timeline-sms.sent {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+#screenAdmin .timeline-sms.pending {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+
+#screenAdmin .cancel-btn {
+  padding: 5px 12px;
+  border: 1px solid var(--danger-light);
+  border-radius: var(--radius-xs);
+  background: var(--card);
+  color: var(--danger);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+#screenAdmin .cancel-btn:hover:not(:disabled) {
+  background: var(--danger-light);
+}
+
+#screenAdmin .cancel-btn.disabled,
+#screenAdmin .cancel-btn:disabled {
+  color: var(--text-light);
+  border-color: var(--border);
+  background: var(--bg-sub);
+  cursor: not-allowed;
+}
+
+#screenAdmin .admin-actions {
+  display: flex;
+  gap: 12px;
+  padding: 20px 24px;
+}
+
+#screenAdmin .admin-btn {
+  flex: 1;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+#screenAdmin .admin-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+#screenAdmin .admin-btn.danger {
+  color: var(--danger);
+  border-color: var(--danger-light);
+}
+
+#screenAdmin .admin-btn.danger:hover {
+  background: var(--danger-light);
+}

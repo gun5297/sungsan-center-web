@@ -1,0 +1,46 @@
+/* ===== NUMPAD (잠금 + 메인 공유) ===== */
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.num-btn {
+  aspect-ratio: 1.6;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--card);
+  font-size: 1.8rem;
+  font-weight: 800;
+  font-family: var(--font);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.num-btn:active {
+  transform: scale(0.95);
+  background: var(--bg-sub);
+}
+
+.fn-btn {
+  font-size: 1rem;
+  color: var(--text-sub);
+  background: var(--bg-sub);
+}
+
+.confirm-btn {
+  background: var(--primary) !important;
+  color: #fff !important;
+  font-size: 1.1rem !important;
+}
+
+.confirm-btn:active {
+  background: var(--primary-dark) !important;
+}

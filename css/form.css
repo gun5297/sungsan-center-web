@@ -1,0 +1,370 @@
+/* ===== FORM CARD (공통 서류 양식) ===== */
+/* 조퇴/결석, 투약, 등록 섹션에서 공유하는 폼 스타일 */
+.form-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+}
+
+/* 관리자 전용 간이 폼 카드 (갤러리 추가, 픽업 관리 등) */
+.admin-form-card {
+  background: var(--bg-sub);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.admin-form-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+.admin-form-title.mt {
+  margin-top: 40px;
+}
+
+.admin-form-desc {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  margin: 8px 0 20px;
+}
+
+/* 관리자 영역 간격 */
+.admin-section-gap {
+  margin-top: 20px;
+}
+
+.admin-list-gap {
+  margin-top: 16px;
+}
+
+.admin-section-bottom {
+  margin-bottom: 20px;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--text);
+}
+
+.form-org {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.form-doc-title {
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.form-group {
+  flex: 1;
+}
+
+.form-group.full {
+  flex: 1 1 100%;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-range .input-field {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  font-size: 0.85rem;
+  padding: 0 12px;
+  margin-bottom: 0;
+}
+
+.range-sep {
+  color: var(--text-sub);
+  font-weight: 700;
+}
+
+.form-notice {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 2;
+}
+
+.form-date-line {
+  color: var(--text-sub);
+  font-size: 0.85rem;
+  margin: 8px 0;
+}
+
+.form-sign-row {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 12px 0;
+}
+
+.form-to {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  margin-top: 16px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.form-actions .btn-upload,
+.form-actions .btn-secondary-sm {
+  flex: 1;
+  width: auto;
+  margin-top: 0;
+}
+
+/* ===== CONSENT CHECKBOX ===== */
+.form-consent {
+  margin: 16px 0;
+  padding: 16px;
+  background: var(--consent-bg);
+  border: 1px solid var(--consent-border);
+  border-radius: var(--radius-sm);
+}
+
+.consent-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--text-sub);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.consent-check:last-child {
+  margin-bottom: 0;
+}
+
+.consent-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.required-tag {
+  color: var(--danger);
+  font-weight: 800;
+  font-size: 0.75rem;
+}
+
+.optional-tag {
+  color: var(--text-sub);
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+/* ===== 투약 일정표 ===== */
+#medication .med-schedule {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#medication .med-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition);
+}
+
+#medication .med-card:hover {
+  border-color: var(--primary);
+}
+
+#medication .med-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+#medication .med-info {
+  flex: 1;
+  min-width: 0;
+}
+
+#medication .med-child {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+#medication .med-detail {
+  font-size: 0.8rem;
+  color: var(--text-sub);
+  margin-top: 2px;
+}
+
+#medication .med-time-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: var(--warning-light);
+  color: var(--warning);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+#medication .med-period {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  white-space: nowrap;
+}
+
+/* ===== 픽업 일정표 ===== */
+#pickup .pickup-table-wrap {
+  overflow-x: auto;
+}
+
+#pickup .pickup-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+#pickup .pickup-table th {
+  padding: 12px 8px;
+  background: var(--bg-sub);
+  font-weight: 700;
+  color: var(--text-sub);
+  text-align: center;
+  border-bottom: 2px solid var(--border);
+}
+
+#pickup .pickup-table th.today {
+  color: var(--primary);
+}
+
+#pickup .pickup-table td {
+  padding: 12px 8px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+#pickup .pickup-table tr:hover td {
+  background: var(--primary-light);
+}
+
+#pickup .pickup-name {
+  font-weight: 700;
+  color: var(--text);
+}
+
+#pickup .pickup-school {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+}
+
+#pickup .pickup-time {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 0.85rem;
+}
+
+#pickup .pickup-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+#pickup .pickup-status.done {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+#pickup .pickup-status.waiting {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+
+#pickup .pickup-status.scheduled {
+  background: var(--bg-sub);
+  color: var(--text-sub);
+}
+
+/* ===== 등록/상담 탭 ===== */
+#register .register-tabs {
+  display: flex;
+  background: var(--bg-sub);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 24px;
+  max-width: 280px;
+}
+
+#register .day-check-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+#register .day-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+}
+
+#register .day-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}

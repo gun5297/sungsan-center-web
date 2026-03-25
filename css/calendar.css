@@ -1,0 +1,266 @@
+/* ===== CALENDAR / 시간표 ===== */
+
+/* 월/주 네비게이션 (캘린더, 식단, 픽업에서 공유) */
+#schedule .month-nav,
+#meal .meal-week-nav,
+#pickup .meal-week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+#schedule .month-btn,
+#meal .month-btn,
+#pickup .month-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--card);
+  font-size: 1rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-family: var(--font);
+}
+
+#schedule .month-btn:hover,
+#meal .month-btn:hover,
+#pickup .month-btn:hover {
+  background: var(--bg-sub);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+#schedule .month-label,
+#meal .month-label,
+#pickup .month-label {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  min-width: 140px;
+  text-align: center;
+}
+
+#schedule .calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 32px;
+}
+
+#schedule .cal-header {
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  padding: 8px 0;
+}
+
+#schedule .cal-header:first-child {
+  color: var(--danger);
+}
+
+#schedule .cal-header:last-child {
+  color: var(--saturday);
+}
+
+#schedule .cal-day {
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 2px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  position: relative;
+  color: var(--text);
+}
+
+#schedule .cal-day:hover {
+  background: var(--bg-sub);
+}
+
+#schedule .cal-day .cal-num {
+  margin-bottom: 4px;
+}
+
+#schedule .cal-day .cal-events {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+#schedule .cal-event-tag {
+  font-size: 0.55rem;
+  font-weight: 700;
+  padding: 1px 3px;
+  border-radius: 3px;
+  background: var(--primary-light);
+  color: var(--primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+  text-align: center;
+}
+
+#schedule .cal-event-tag.holiday {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+#schedule .cal-event-tag.증산초 {
+  background: var(--school-green-light);
+  color: var(--school-green);
+}
+
+#schedule .cal-event-tag.수색초 {
+  background: var(--school-blue-light);
+  color: var(--school-blue);
+}
+
+#schedule .cal-event-tag.증산중 {
+  background: var(--school-purple-light);
+  color: var(--school-purple);
+}
+
+/* 캘린더 범례 */
+#schedule .cal-legend {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+#schedule .cal-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-sub);
+}
+
+#schedule .cal-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+#schedule .cal-legend-dot.증산초 { background: var(--school-green); }
+#schedule .cal-legend-dot.수색초 { background: var(--school-blue); }
+#schedule .cal-legend-dot.증산중 { background: var(--school-purple); }
+#schedule .cal-legend-dot.holiday { background: var(--danger); }
+
+#schedule .cal-day.today .cal-num {
+  background: var(--primary);
+  color: var(--card);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#schedule .cal-day.selected {
+  background: var(--primary-light);
+}
+
+#schedule .cal-day.other-month {
+  color: var(--text-light);
+}
+
+#schedule .cal-day.other-month .cal-event-tag {
+  display: none;
+}
+
+#schedule .cal-day.sunday, #schedule .cal-day.sunday .cal-num {
+  color: var(--danger);
+}
+
+#schedule .cal-day.saturday, #schedule .cal-day.saturday .cal-num {
+  color: var(--saturday);
+}
+
+#schedule .cal-day.today .cal-num {
+  color: var(--card);
+}
+
+/* 일별 시간표 */
+#schedule .day-schedule {
+  background: var(--bg-sub);
+  border-radius: var(--radius);
+  padding: 28px;
+}
+
+#schedule .day-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+}
+
+#schedule .timetable {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#schedule .time-slot {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition);
+}
+
+#schedule .time-slot:hover {
+  transform: translateX(4px);
+}
+
+#schedule .time-text {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  min-width: 110px;
+  letter-spacing: -0.01em;
+}
+
+#schedule .time-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+}
+
+#schedule .time-dot.snack { background: var(--warning); }
+#schedule .time-dot.meal { background: var(--success); }
+#schedule .time-dot.special { background: var(--school-purple); }
+#schedule .time-dot.rest { background: var(--text-light); }
+
+#schedule .time-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+#schedule .time-slot-event {
+  border-left: 3px solid var(--primary);
+}

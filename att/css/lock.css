@@ -1,0 +1,86 @@
+/* ===== LOCK SCREEN ===== */
+#screenLock .lock-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  gap: 0;
+}
+
+#screenLock .lock-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+#screenLock .lock-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#screenLock .lock-icon {
+  font-size: 2.8rem;
+  margin-bottom: 12px;
+}
+
+#screenLock .lock-title {
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+
+#screenLock .lock-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-sub);
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+#screenLock .lock-dots {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+#screenLock .lock-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  min-height: 20px;
+}
+
+#screenLock .lock-numpad {
+  margin-bottom: 24px;
+}
+
+#screenLock .lock-back-link {
+  color: var(--text-sub);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+#screenLock .lock-back-link:hover {
+  color: var(--primary);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-10px); }
+  40% { transform: translateX(10px); }
+  60% { transform: translateX(-10px); }
+  80% { transform: translateX(10px); }
+}
+
+.shake {
+  animation: shake 0.4s ease;
+}

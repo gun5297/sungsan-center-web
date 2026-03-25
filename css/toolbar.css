@@ -1,0 +1,94 @@
+/* ===== FIXED TOOLBAR ===== */
+.fixed-toolbar {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.toolbar-btn {
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: center;
+  text-decoration: none;
+  box-shadow: var(--shadow);
+  letter-spacing: -0.01em;
+}
+
+.toolbar-att {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.toolbar-att:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(255,120,84,0.3);
+}
+
+.toolbar-admin {
+  color: var(--text-sub);
+}
+
+.toolbar-admin:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.toolbar-admin.logged-in {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.toolbar-admin.logged-in:hover {
+  background: var(--primary-dark);
+}
+
+/* 관리자 전용 요소 */
+.admin-only {
+  display: none !important;
+}
+
+body.admin-mode .admin-only {
+  display: block !important;
+}
+
+/* 비로그인 전용 요소 (로그인 시 숨김) */
+body.admin-mode .guest-only {
+  display: none !important;
+}
+
+/* 관리자 모드 바 */
+.admin-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 24px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+  z-index: 999;
+  letter-spacing: -0.01em;
+}
+
+body.admin-mode .admin-bar {
+  display: block;
+}

@@ -957,154 +957,127 @@ html, body {
   }
 }
 
-/* ===== 가로 모드 (태블릿 landscape) ===== */
-@media (orientation: landscape) and (max-height: 600px) {
-  html, body {
-    overflow: hidden;
-  }
+/* ===== lock-left / lock-right (세로 기본) ===== */
+.lock-left,
+.lock-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  /* 잠금 화면 가로 레이아웃 */
+/* ===== 가로 모드 공통 ===== */
+@media (orientation: landscape) {
+
+  /* 잠금 화면 */
   .lock-content {
     flex-direction: row;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
-    gap: 48px;
-    padding: 16px 48px;
+    gap: 0;
+    padding: 0;
   }
 
-  .lock-content > .lock-back-link {
-    display: none;
+  .lock-left {
+    flex: 1;
+    justify-content: center;
+    gap: 10px;
+    padding: 32px 48px;
+    border-right: 1px solid var(--border);
   }
 
-  .lock-icon { font-size: 2.2rem; margin-bottom: 8px; }
-  .lock-title { font-size: 1.3rem; margin-bottom: 4px; }
-  .lock-subtitle { font-size: 0.85rem; margin-bottom: 16px; }
-  .lock-dots { margin-bottom: 8px; gap: 12px; }
-  .dot { width: 14px; height: 14px; }
+  .lock-icon { font-size: 2.4rem; margin-bottom: 0; }
+  .lock-title { font-size: 1.6rem; margin-bottom: 0; }
+  .lock-subtitle { font-size: 0.9rem; margin-bottom: 0; color: var(--text-sub); }
+  .lock-back-link { margin-top: auto; }
+
+  .lock-right {
+    flex: 1;
+    justify-content: center;
+    gap: 16px;
+    padding: 32px 48px;
+  }
+
+  .lock-dots { margin-bottom: 0; gap: 14px; }
+  .lock-error { margin-bottom: 0; }
   .lock-numpad { margin-bottom: 0; }
 
-  /* 메인 화면 가로 레이아웃 */
-  .top-bar {
-    padding: 10px 24px;
-  }
+  /* 메인 화면 */
+  .top-bar { padding: 12px 28px; }
 
   .main-content {
     flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    height: calc(100% - 52px);
-    gap: 40px;
-    padding: 0 48px 0;
+    align-items: stretch;
+    height: calc(100% - 56px);
+    gap: 0;
+    padding: 0;
   }
 
   .main-left {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    flex: 1;
+    justify-content: center;
+    gap: 20px;
+    padding: 24px 48px;
+    border-right: 1px solid var(--border);
   }
 
   .greeting {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     margin-bottom: 0;
     min-height: auto;
   }
 
-  .input-display {
-    margin-bottom: 0;
-  }
-
-  .input-dots {
-    gap: 12px;
-    margin-bottom: 8px;
-  }
-
-  .dot { width: 14px; height: 14px; }
-
-  .input-number {
-    font-size: 2rem;
-    min-height: 36px;
-  }
+  .input-display { margin-bottom: 0; }
+  .input-dots { gap: 14px; margin-bottom: 10px; }
+  .input-number { font-size: 2.2rem; min-height: 40px; }
 
   .numpad {
-    flex: none;
-    max-width: 320px;
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
+    max-width: none;
+    margin: auto;
+    padding: 24px 40px;
+    align-content: center;
   }
 
   .num-btn {
-    aspect-ratio: 1.6;
-    font-size: 1.5rem;
-    border-radius: 12px;
+    aspect-ratio: 1.8;
+    font-size: 1.6rem;
+    border-radius: 14px;
   }
 
-  .fn-btn { font-size: 0.85rem; }
-  .confirm-btn { font-size: 0.95rem !important; }
+  .fn-btn { font-size: 0.9rem; }
+  .confirm-btn { font-size: 1rem !important; }
 
-  /* 성공 화면 가로 */
+  /* 성공 화면 */
   .success-content {
     flex-direction: row;
     justify-content: center;
-    gap: 40px;
-    padding: 20px 48px;
+    align-items: center;
+    gap: 48px;
+    padding: 24px 64px;
   }
 
   .success-icon {
-    width: 72px;
-    height: 72px;
-    font-size: 2rem;
+    width: 80px;
+    height: 80px;
+    font-size: 2.2rem;
     margin-bottom: 0;
     flex-shrink: 0;
-    align-self: center;
   }
 
   .success-info {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     text-align: left;
   }
 
-  .success-name { font-size: 1.8rem; margin-bottom: 4px; }
+  .success-name { font-size: 2rem; margin-bottom: 4px; }
   .success-type { margin-bottom: 4px; }
-  .success-time { font-size: 1.4rem; margin-bottom: 12px; }
-  .success-sms { font-size: 0.85rem; padding: 12px 20px; }
-}
-
-/* 태블릿 가로 (넓은 화면) */
-@media (orientation: landscape) and (min-height: 600px) {
-  .main-content {
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    height: calc(100% - 80px);
-    gap: 60px;
-    padding: 0 80px 0;
-  }
-
-  .greeting {
-    font-size: 1.5rem;
-    margin-bottom: 16px;
-  }
-
-  .numpad {
-    flex: none;
-    max-width: 380px;
-    gap: 14px;
-  }
-
-  .num-btn {
-    aspect-ratio: 1.7;
-    font-size: 1.8rem;
-  }
-
-  .lock-content {
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 60px;
-  }
-
-  .lock-numpad { margin-bottom: 0; }
+  .success-time { font-size: 1.5rem; margin-bottom: 14px; }
+  .success-sms { font-size: 0.88rem; padding: 12px 20px; }
 }

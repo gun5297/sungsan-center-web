@@ -63,44 +63,61 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 32px 24px;
+  gap: 0;
+}
+
+/* 세로: lock-left = 상단 타이틀 영역 */
+.lock-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+/* 세로: lock-right = 입력 영역 */
+.lock-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .lock-icon {
-  font-size: 3rem;
-  margin-bottom: 16px;
+  font-size: 2.8rem;
+  margin-bottom: 12px;
 }
 
 .lock-title {
   font-size: 1.6rem;
   font-weight: 900;
   letter-spacing: -0.03em;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .lock-subtitle {
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--text-sub);
   font-weight: 600;
-  margin-bottom: 28px;
+  margin-bottom: 0;
 }
 
 .lock-dots {
   display: flex;
   gap: 16px;
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .lock-error {
   color: var(--danger);
   font-size: 0.85rem;
   font-weight: 700;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+  min-height: 20px;
 }
 
 .lock-numpad {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .lock-back-link {
@@ -980,22 +997,26 @@ html, body {
   .lock-left {
     flex: 1;
     justify-content: center;
-    gap: 10px;
+    align-items: center;
+    gap: 12px;
     padding: 32px 48px;
     border-right: 1px solid var(--border);
+    margin-bottom: 0;
   }
 
   .lock-icon { font-size: 2.4rem; margin-bottom: 0; }
   .lock-title { font-size: 1.6rem; margin-bottom: 0; }
-  .lock-subtitle { font-size: 0.9rem; margin-bottom: 0; color: var(--text-sub); }
-  .lock-back-link { margin-top: auto; }
+  .lock-subtitle { font-size: 0.9rem; margin-bottom: 0; }
 
   .lock-right {
     flex: 1;
     justify-content: center;
-    gap: 16px;
+    align-items: center;
+    gap: 14px;
     padding: 32px 48px;
   }
+
+  .lock-back-link { margin-top: 4px; }
 
   .lock-dots { margin-bottom: 0; gap: 14px; }
   .lock-error { margin-bottom: 0; }
@@ -1033,15 +1054,25 @@ html, body {
   .input-dots { gap: 14px; margin-bottom: 10px; }
   .input-number { font-size: 2.2rem; min-height: 40px; }
 
-  .numpad {
+  /* 메인 숫자패드: 오른쪽 영역에서 가운데 정렬 */
+  .main-content > .numpad {
     flex: 1;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
     max-width: none;
+    width: auto;
+    gap: 10px;
     margin: auto;
     padding: 24px 40px;
+    align-self: center;
     align-content: center;
+    justify-content: center;
+  }
+
+  /* 잠금 숫자패드: 이미 lock-right 안에서 가운데 정렬 */
+  .lock-numpad {
+    max-width: 300px;
+    width: 100%;
+    gap: 10px;
+    margin-bottom: 0;
   }
 
   .num-btn {

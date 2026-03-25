@@ -1,0 +1,51 @@
+/* ===== GALLERY ===== */
+#gallery .gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+#gallery .gallery-card {
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--border);
+  transition: all var(--transition);
+  cursor: pointer;
+}
+
+#gallery .gallery-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: transparent;
+}
+
+#gallery .gallery-img {
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#gallery .gallery-img span {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+#gallery .gallery-info {
+  padding: 16px 20px;
+}
+
+#gallery .gallery-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+
+#gallery .gallery-date {
+  font-size: 0.8rem;
+  color: var(--text-sub);
+}

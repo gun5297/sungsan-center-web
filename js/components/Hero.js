@@ -1,6 +1,7 @@
 // ===== Hero 컴포넌트 (히어로 + 통계 카드) =====
 export function Hero() {
   return `
+  <div id="hero">
   <section class="hero">
     <div class="hero-badge">2026년 3월</div>
     <h1>
@@ -35,5 +36,6 @@ export function Hero() {
   </div>
 
   <div class="divider"></div>
+  </div>
   `;
 }

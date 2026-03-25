@@ -1,0 +1,64 @@
+/* ===== CONTACT ===== */
+#contact .contact-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+#contact .contact-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 20px;
+  text-align: center;
+  transition: all var(--transition);
+}
+
+#contact .contact-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: transparent;
+}
+
+#contact .contact-icon {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+#contact .contact-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+
+#contact .contact-info {
+  font-size: 0.85rem;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* ===== FOOTER ===== */
+#footer {
+  text-align: center;
+  padding: 60px 24px;
+  background: var(--bg-sub);
+  margin-top: 40px;
+}
+
+#footer .footer-logo {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+#footer .footer-logo span {
+  color: var(--primary);
+  margin-left: 2px;
+}
+
+#footer .footer-text {
+  font-size: 0.8rem;
+  color: var(--text-sub);
+  margin-top: 4px;
+}

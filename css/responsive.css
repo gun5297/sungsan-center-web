@@ -1,0 +1,137 @@
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  nav {
+    padding: 0 20px;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .fixed-toolbar {
+    top: 72px;
+    right: 12px;
+  }
+
+  .toolbar-btn {
+    font-size: 0.75rem;
+    padding: 8px 14px;
+  }
+
+  #hero .stats {
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: -20px;
+  }
+
+  #meal .meal-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  #gallery .gallery-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #contact .contact-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .date-range {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .date-range .input-field {
+    flex: 1 1 120px;
+    font-size: 0.8rem;
+    padding: 8px 6px;
+  }
+
+  .range-sep {
+    flex-shrink: 0;
+  }
+
+  #medication .med-card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px 12px;
+    padding: 14px 16px;
+  }
+
+  #medication .med-card .med-avatar {
+    display: none;
+  }
+
+  #medication .med-info {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+  }
+
+  #medication .med-child {
+    font-size: 0.9rem;
+  }
+
+  #medication .med-detail {
+    font-size: 0.75rem;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  #medication .med-time-badge {
+    justify-self: start;
+  }
+
+  #medication .med-period {
+    justify-self: end;
+    align-self: center;
+  }
+
+  #medication .med-card .delete-btn {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
+
+  #schedule .cal-day {
+    min-height: 60px;
+  }
+
+  #schedule .cal-event-tag {
+    font-size: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .fixed-toolbar {
+    top: 70px;
+    right: 10px;
+  }
+
+  .toolbar-btn {
+    font-size: 0.7rem;
+    padding: 7px 12px;
+  }
+
+  #meal .meal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #contact .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #hero .hero-buttons {
+    flex-direction: column;
+    width: 100%;
+    padding: 0 20px;
+  }
+
+  #hero .btn-primary,
+  #hero .btn-secondary {
+    text-align: center;
+  }
+}

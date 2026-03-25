@@ -1,0 +1,152 @@
+/* ===== FIXED TOOLBAR ===== */
+.fixed-toolbar {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.toolbar-btn {
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  letter-spacing: -0.01em;
+}
+
+.toolbar-att {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.toolbar-att:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(255,120,84,0.3);
+}
+
+.toolbar-admin {
+  color: var(--text-sub);
+}
+
+.toolbar-admin:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.toolbar-admin.logged-in {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.toolbar-admin.logged-in:hover {
+  background: var(--primary-dark);
+}
+
+/* 관리자 전용 요소 */
+.admin-only {
+  display: none !important;
+}
+
+body.admin-mode .admin-only {
+  display: block !important;
+}
+
+/* 관리자 모드 바 */
+.admin-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 24px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+  z-index: 999;
+  letter-spacing: -0.01em;
+}
+
+body.admin-mode .admin-bar {
+  display: block;
+}
+
+/* ===== TEACHER LOGIN ===== */
+.teacher-lock {
+  margin-bottom: 32px;
+}
+
+.btn-teacher-login {
+  padding: 12px 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--text-sub);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+  letter-spacing: -0.01em;
+}
+
+.btn-teacher-login:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.password-prompt {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  max-width: 360px;
+}
+
+.password-prompt input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.password-prompt input:focus {
+  border-color: var(--primary);
+}
+
+.password-prompt button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.password-prompt button:hover {
+  background: var(--primary-dark);
+}

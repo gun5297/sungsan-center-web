@@ -42,11 +42,10 @@ export function SignupForm() {
             </div>
             <div class="form-group">
               <label class="form-label">직책</label>
-              <select id="signupPosition" class="input-field select-field">
-                <option value="생활복지사">생활복지사</option>
-                <option value="사회복지사">사회복지사</option>
-                <option value="보육교사">보육교사</option>
-                <option value="기타">기타</option>
+              <select id="signupRole" class="input-field select-field">
+                <option value="teacher">선생님</option>
+                <option value="social_worker">사회복무요원</option>
+                <option value="director">센터장</option>
               </select>
             </div>
           </div>

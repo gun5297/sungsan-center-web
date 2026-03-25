@@ -5,6 +5,7 @@ export function Toolbar() {
   <div class="fixed-toolbar">
     <a href="attendance.html" class="toolbar-btn toolbar-att">출결</a>
     <button class="toolbar-btn toolbar-inbox admin-only" onclick="openInbox()">서류함 <span class="inbox-badge" id="inboxBadge">0</span></button>
+    <a href="mypage.html" class="toolbar-btn toolbar-mypage admin-only">마이페이지</a>
     <button class="toolbar-btn toolbar-admin" id="toolbarAdminBtn" onclick="toggleAdminLogin()">로그인</button>
   </div>
 

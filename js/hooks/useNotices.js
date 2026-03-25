@@ -1,5 +1,6 @@
 // ===== useNotices: 공지사항 CRUD (Firestore) =====
 import { formatDate, closeModal } from '../utils.js';
+import { getUserRole, canManage } from '../state.js';
 import {
   subscribeNotices,
   createNotice,
@@ -26,8 +27,8 @@ export function renderNotices() {
       <div class="notice-preview">${n.content}</div>
       ${n.file ? `<div class="notice-file">📎 ${n.file}</div>` : ''}
       <div class="notice-actions">
-        <button class="edit-btn" onclick="event.stopPropagation(); editNotice('${n.id}')">수정</button>
-        <button class="delete-btn" onclick="event.stopPropagation(); deleteNotice('${n.id}')">삭제</button>
+        ${canManage() ? `<button class="edit-btn" onclick="event.stopPropagation(); editNotice('${n.id}')">수정</button>` : ''}
+        ${canManage() ? `<button class="delete-btn" onclick="event.stopPropagation(); deleteNotice('${n.id}')">삭제</button>` : ''}
       </div>
     </div>
   `).join('');

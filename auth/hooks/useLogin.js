@@ -1,10 +1,31 @@
-// ===== useLogin: 로그인 폼 로직 (Firebase Auth) =====
+// ===== useLogin: 로그인 폼 로직 (Firebase Auth + Firestore 역할) =====
 import { login, onAuthChange } from '../../firebase/auth.js';
+import { getUserDoc, createUserDoc, hasNoDirector } from '../../firebase/services/userService.js';
 
 export function initLogin() {
   // 이미 로그인된 상태면 메인으로 리다이렉트
-  onAuthChange((user) => {
+  onAuthChange(async (user) => {
     if (user) {
+      // Firestore 사용자 문서 확인
+      const userDoc = await getUserDoc(user.uid);
+      if (!userDoc) {
+        // Firestore 문서가 없는 경우 (Firebase Console에서 직접 만든 계정)
+        // 센터장이 없으면 센터장으로, 아니면 선생님으로 자동 생성
+        const noDirector = await hasNoDirector();
+        await createUserDoc(user.uid, {
+          email: user.email,
+          name: user.email.split('@')[0],
+          role: noDirector ? 'director' : 'teacher',
+          phone: ''
+        });
+      }
+
+      const doc = userDoc || await getUserDoc(user.uid);
+      if (doc && !doc.approved) {
+        // 승인 대기 중이면 대기 페이지로
+        window.location.href = 'pending.html';
+        return;
+      }
       window.location.href = 'index.html';
     }
   });
@@ -64,9 +85,7 @@ export async function doLogin() {
     document.getElementById('loginPassword').focus();
     return;
   }
-
-  // 로그인 성공 → onAuthChange가 리다이렉트 처리
-  window.location.href = 'index.html';
+  // onAuthChange가 리다이렉트 처리
 }
 
 // window 노출

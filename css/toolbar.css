@@ -59,6 +59,16 @@
   background: var(--primary-dark);
 }
 
+.toolbar-mypage {
+  color: var(--text-sub);
+  text-decoration: none;
+}
+
+.toolbar-mypage:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
 /* 관리자 전용 요소 */
 .admin-only {
   display: none !important;

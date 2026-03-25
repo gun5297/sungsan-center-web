@@ -64,5 +64,12 @@ service cloud.firestore {
       allow create: if true;
       allow read, update, delete: if isAdmin();
     }
+
+    // 사용자 계정: 본인 읽기 / 로그인된 사용자 생성 / 본인·관리자 수정
+    match /users/{uid} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == uid;
+      allow update: if request.auth != null && request.auth.uid == uid;
+    }
   }
 }

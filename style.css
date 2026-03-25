@@ -1964,7 +1964,7 @@ footer {
 }
 
 @media print {
-  body > *:not(.print-area) {
+  #app > *:not(.print-area) {
     display: none !important;
   }
   .print-area {

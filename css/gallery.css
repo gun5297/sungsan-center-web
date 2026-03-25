@@ -50,6 +50,18 @@
   color: var(--text-sub);
 }
 
+/* 갤러리 이미지 보호 (우클릭/드래그/저장 방지) */
+#gallery .gallery-grid img,
+#gallery .gallery-card {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
+}
+#gallery .gallery-card {
+  pointer-events: auto;
+}
+
 /* 갤러리 인증 벽 (비로그인 사용자) */
 #gallery .gallery-auth-wall {
   text-align: center;

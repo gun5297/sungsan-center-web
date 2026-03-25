@@ -1,5 +1,6 @@
 // ===== 공유 상태 관리 (React의 Context/Store 개념) =====
 // 여러 훅에서 공유하는 상태를 구독 패턴으로 관리
+import { isAdminRole } from '../firebase/services/userService.js';
 
 let isAdmin = false;
 let currentUser = null;
@@ -25,6 +26,7 @@ export function getCurrentUser() {
 
 export function setCurrentUser(user) {
   currentUser = user;
+  window.__currentUser = user; // 감사 로그용 전역 접근
 }
 
 export function getUserRole() {
@@ -35,14 +37,9 @@ export function setUserRole(role) {
   userRole = role;
 }
 
-// 관리자 여부 (admin 또는 레거시 director/teacher/social_worker)
-export function isDirector() {
-  return userRole === 'admin' || userRole === 'director' || userRole === 'teacher' || userRole === 'social_worker';
-}
-
 // 관리 권한 (admin 역할 전체 — 레거시 호환 포함)
 export function canManage() {
-  return userRole === 'admin' || userRole === 'director' || userRole === 'teacher' || userRole === 'social_worker';
+  return isAdminRole(userRole);
 }
 
 // 로그인 여부 (역할이 설정되어 있으면 로그인 상태)

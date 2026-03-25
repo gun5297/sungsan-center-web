@@ -1,0 +1,461 @@
+/* ===== 활동 일지 모달 ===== */
+.dailylog-modal {
+  max-width: 580px !important;
+  width: 92%;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 0 !important;
+  border-radius: 20px !important;
+}
+
+/* 헤더 */
+.dailylog-modal .log-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--card);
+  padding: 28px 28px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.dailylog-modal .log-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.dailylog-modal .log-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+.dailylog-modal .log-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-sub);
+  font-weight: 500;
+}
+
+.dailylog-modal .log-close-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: var(--bg-sub);
+  color: var(--text-sub);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.dailylog-modal .log-close-btn:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+/* 본문 */
+.dailylog-modal .log-body {
+  padding: 24px 28px;
+}
+
+/* 메타 정보 행 (날짜 + 날씨 + 출석) */
+.log-meta-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.log-meta-row .log-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.log-field-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  letter-spacing: -0.01em;
+}
+
+.log-field .input-field {
+  margin-bottom: 0;
+  height: 44px;
+  font-size: 0.88rem;
+}
+
+/* 프로그램 섹션 */
+.log-section-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.log-section-title::before {
+  content: '';
+  width: 3px;
+  height: 14px;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+/* 프로그램 카드 */
+.program-row {
+  background: var(--bg-sub);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 10px;
+  position: relative;
+  border: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.program-row:hover {
+  border-color: var(--border);
+}
+
+.program-row .prog-grid {
+  display: grid;
+  grid-template-columns: 90px 1fr 60px;
+  gap: 8px;
+  align-items: center;
+}
+
+.program-row .prog-grid-full {
+  grid-column: 1 / -1;
+  margin-top: 6px;
+}
+
+.program-row .input-field {
+  margin-bottom: 0;
+  height: 40px;
+  font-size: 0.84rem;
+  background: var(--card);
+  border-color: var(--border);
+}
+
+.program-row .input-field:focus {
+  border-color: var(--primary);
+}
+
+.prog-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-light);
+  margin-bottom: 3px;
+}
+
+.prog-delete-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(239, 83, 80, 0.1);
+  color: #ef5350;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.program-row:hover .prog-delete-btn {
+  opacity: 1;
+}
+
+.prog-delete-btn:hover {
+  background: #ef5350;
+  color: #fff;
+}
+
+/* 프로그램 추가 버튼 */
+.log-add-program {
+  width: 100%;
+  padding: 14px;
+  border: 2px dashed var(--border);
+  border-radius: 14px;
+  background: none;
+  color: var(--primary);
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 4px;
+  margin-bottom: 28px;
+}
+
+.log-add-program:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+
+/* 특이사항 */
+.log-notes-field {
+  margin-bottom: 0 !important;
+  min-height: 100px;
+  resize: vertical;
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+/* 푸터 */
+.dailylog-modal .log-footer {
+  position: sticky;
+  bottom: 0;
+  background: var(--card);
+  padding: 20px 28px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+}
+
+.log-footer .log-btn {
+  flex: 1;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: -0.01em;
+}
+
+.log-btn-save {
+  background: var(--primary);
+  color: #fff;
+}
+
+.log-btn-save:hover {
+  background: var(--primary-dark);
+  box-shadow: 0 4px 16px rgba(255, 120, 84, 0.3);
+}
+
+.log-btn-cancel {
+  background: var(--bg-sub);
+  color: var(--text-sub);
+  flex: 0 0 auto !important;
+  width: 100px;
+}
+
+.log-btn-cancel:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+/* ===== 일지 목록 모달 ===== */
+.dailylog-list-modal {
+  max-width: 520px !important;
+}
+
+.dailylog-list-modal .log-body {
+  padding: 8px 28px 28px;
+}
+
+/* 일지 카드 */
+.dailylog-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  margin-bottom: 8px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--bg-sub);
+  border: 1px solid transparent;
+}
+
+.dailylog-item:hover {
+  background: var(--card);
+  border-color: var(--primary);
+  box-shadow: 0 2px 12px rgba(255, 120, 84, 0.1);
+  transform: translateY(-1px);
+}
+
+.dailylog-item-date-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+}
+
+.dailylog-item:hover .dailylog-item-date-box {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.dailylog-date-day {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1;
+}
+
+.dailylog-item:hover .dailylog-date-day {
+  color: #fff;
+}
+
+.dailylog-date-dow {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-top: 2px;
+}
+
+.dailylog-item:hover .dailylog-date-dow {
+  color: rgba(255,255,255,0.8);
+}
+
+.dailylog-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.dailylog-item-meta {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dailylog-item-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.log-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 8px;
+  letter-spacing: -0.01em;
+}
+
+.log-tag-weather {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.log-tag-count {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.log-tag-programs {
+  background: #fff0eb;
+  color: var(--primary);
+}
+
+.dailylog-item-author {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  font-weight: 600;
+}
+
+.dailylog-item-arrow {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.dailylog-item:hover .dailylog-item-arrow {
+  opacity: 1;
+  color: var(--primary);
+}
+
+/* 빈 상태 */
+.dailylog-empty {
+  text-align: center;
+  padding: 48px 20px;
+}
+
+.dailylog-empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.dailylog-empty-text {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-bottom: 4px;
+}
+
+.dailylog-empty-desc {
+  font-size: 0.82rem;
+  color: var(--text-light);
+}
+
+/* 반응형 */
+@media (max-width: 480px) {
+  .dailylog-modal {
+    width: 100%;
+    max-height: 100vh;
+    border-radius: 0 !important;
+  }
+
+  .dailylog-modal .log-header,
+  .dailylog-modal .log-body,
+  .dailylog-modal .log-footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .log-meta-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .log-meta-row .log-field:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .program-row .prog-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .program-row .prog-grid-full {
+    grid-column: 1 / -1;
+  }
+
+  .dailylog-list-modal .log-body {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .dailylog-item {
+    padding: 12px;
+    gap: 12px;
+  }
+}

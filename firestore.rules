@@ -2,74 +2,155 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // 로그인된 사용자 = 관리자(선생님)
-    function isAdmin() {
+    // ===== 헬퍼 함수 =====
+    function isSignedIn() {
       return request.auth != null;
     }
 
-    // 공지사항: 누구나 읽기 / 관리자만 쓰기
-    match /notices/{id} {
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        getUserData().role in ['admin', 'director', 'teacher', 'social_worker'] &&
+        getUserData().approved == true;
+    }
+
+    function isApproved() {
+      return isSignedIn() && getUserData().approved == true;
+    }
+
+    // ===== 사용자 =====
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && (
+        (request.auth.uid == userId &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'phone'])) ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ===== 공지사항 =====
+    match /notices/{noticeId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
-    // 식단표: 누구나 읽기 / 관리자만 쓰기
-    match /meals/{id} {
+    // ===== 갤러리 =====
+    match /gallery/{itemId} {
+      allow read: if isApproved();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ===== 식단 =====
+    match /meals/{mealId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
-    // 학생 목록: 관리자만
-    match /students/{id} {
-      allow read, write: if isAdmin();
-    }
-
-    // 출결 기록: 관리자만
-    match /attendance/{id} {
-      allow read, write: if isAdmin();
-    }
-
-    // 조퇴/결석 신청: 누구나 제출 / 관리자만 삭제
-    match /absences/{id} {
-      allow read, create: if true;
-      allow update, delete: if isAdmin();
-    }
-
-    // 투약 의뢰: 누구나 제출 / 관리자만 삭제
-    match /medications/{id} {
-      allow read, create: if true;
-      allow update, delete: if isAdmin();
-    }
-
-    // 픽업 일정: 누구나 읽기 / 관리자만 쓰기
-    match /pickups/{id} {
+    // ===== 시간표 =====
+    match /schedules/{scheduleId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
-    // 갤러리: 누구나 읽기 / 관리자만 쓰기
-    match /gallery/{id} {
+    // ===== 출결 =====
+    // 태블릿 출결 시스템: 읽기/쓰기 허용하되 문서 크기 제한
+    match /attendance/{dateId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update: if request.resource.data.keys().hasOnly(['records', 'date'])
+                            && request.resource.data.date is string;
+      allow delete: if isAdmin();
     }
 
-    // 서류함: 누구나 제출 / 관리자만 읽기·삭제
-    match /inbox/{id} {
+    // ===== 학생 =====
+    // 태블릿 출결 시스템: 읽기 허용, 쓰기는 관리자만
+    match /students/{studentId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ===== 결석/조퇴 =====
+    match /absences/{absenceId} {
+      allow read: if isSignedIn();
       allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow update, delete: if isAdmin();
     }
 
-    // 신규 등록/상담: 누구나 제출
+    // ===== 투약 =====
+    match /medications/{medId} {
+      allow read: if isSignedIn();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // ===== 픽업 =====
+    match /pickups/{pickupId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ===== 서류함 =====
+    match /inbox/{inboxId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // ===== 신규 등록/상담 =====
     match /registrations/{id} {
       allow create: if true;
       allow read, update, delete: if isAdmin();
     }
 
-    // 사용자 계정: 본인 읽기 / 로그인된 사용자 생성 / 본인·관리자 수정
-    match /users/{uid} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null && request.auth.uid == uid;
-      allow update: if request.auth != null && request.auth.uid == uid;
+    // ===== 설정 (비밀번호 등) =====
+    match /settings/{settingId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ===== 감사 로그 =====
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    // ===== 공지 읽음 확인 =====
+    match /noticeReads/{readId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn();
+      allow delete: if false;
+    }
+
+    // ===== 활동 일지 =====
+    match /dailyLogs/{logId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ===== 아동 통합 명단 =====
+    match /children/{childId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ===== 아동-보호자 연결 =====
+    match /childLinks/{linkId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // ===== 알림 큐 (카카오 알림톡) =====
+    match /notifications/{notiId} {
+      allow read: if isAdmin();
+      allow create: if true; // 출결 시스템에서도 생성
+      allow update: if isAdmin();
+      allow delete: if false;
     }
   }
 }

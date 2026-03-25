@@ -373,6 +373,255 @@
   margin-bottom: 16px;
 }
 
+/* ===== 아동 관리 (관리자) ===== */
+.child-toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.child-search {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0 !important;
+  height: 44px;
+}
+
+.child-add-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-top: 0 !important;
+  width: auto !important;
+  padding: 0 24px;
+  height: 44px;
+  font-size: 0.85rem;
+}
+
+.child-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+  border: 1px solid #f0ebe5;
+}
+
+.child-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  min-width: 480px;
+}
+
+.child-table thead {
+  background: #faf8f5;
+}
+
+.child-table th {
+  padding: 12px 14px;
+  text-align: left;
+  font-weight: 700;
+  color: #8c7e72;
+  font-size: 0.78rem;
+  letter-spacing: -0.01em;
+  border-bottom: 1px solid #f0ebe5;
+  white-space: nowrap;
+}
+
+.child-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f5f0eb;
+  color: #2d2319;
+  vertical-align: middle;
+}
+
+.child-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.child-table tbody tr:hover {
+  background: #faf8f5;
+}
+
+.child-table .inactive-row {
+  opacity: 0.5;
+}
+
+.child-name-cell {
+  font-weight: 700;
+}
+
+.child-status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.child-status-badge.status-active {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.child-status-badge.status-inactive {
+  background: #fce4ec;
+  color: #ef5350;
+}
+
+.child-action-cell {
+  white-space: nowrap;
+  display: flex;
+  gap: 6px;
+}
+
+.child-edit-btn,
+.child-inactive-btn,
+.child-active-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.child-edit-btn {
+  background: #f0f4f8;
+  color: #5a6872;
+}
+
+.child-edit-btn:hover {
+  background: #5a6872;
+  color: #fff;
+}
+
+.child-inactive-btn {
+  background: #fce4ec;
+  color: #ef5350;
+}
+
+.child-inactive-btn:hover {
+  background: #ef5350;
+  color: #fff;
+}
+
+.child-active-btn {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.child-active-btn:hover {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.child-count {
+  margin-top: 12px;
+  text-align: right;
+  font-size: 0.78rem;
+  color: #8c7e72;
+  font-weight: 600;
+}
+
+/* 아동 추가/수정 모달 (넓은 폼) */
+.child-modal-wide {
+  max-width: 560px;
+}
+
+.child-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin-bottom: 8px;
+}
+
+.child-form-grid .form-group {
+  margin-bottom: 0;
+}
+
+/* ===== 내 아이 관리 (일반 사용자) ===== */
+.my-child-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.my-child-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  background: #faf8f5;
+  border-radius: 12px;
+  transition: background 0.2s;
+}
+
+.my-child-item:hover {
+  background: #f5efe8;
+}
+
+.my-child-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+.my-child-relation {
+  font-size: 0.78rem;
+  color: #8c7e72;
+}
+
+/* 아이 연결 모달 - 목록 */
+.link-child-list {
+  max-height: 180px;
+  overflow-y: auto;
+  margin-top: 8px;
+  border-radius: 10px;
+}
+
+.link-child-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid #f0ebe5;
+}
+
+.link-child-option:last-child {
+  border-bottom: none;
+}
+
+.link-child-option:hover {
+  background: #fff0eb;
+}
+
+.link-child-option-name {
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.link-child-option-school {
+  font-size: 0.78rem;
+  color: #8c7e72;
+}
+
+.link-child-selected {
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: #e8f5e9;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: #2e7d32;
+  font-weight: 600;
+  align-items: center;
+  gap: 8px;
+}
+
 /* 반응형 */
 @media (max-width: 480px) {
   .mypage-card {
@@ -416,4 +665,87 @@
   .edit-modal {
     padding: 28px 20px;
   }
+
+  .child-toolbar {
+    flex-direction: column;
+  }
+
+  .child-add-btn {
+    width: 100%;
+  }
+
+  .child-form-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .child-action-cell {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .my-child-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .my-child-item .reject-btn {
+    width: 100%;
+  }
+}
+
+/* ===== 감사 로그 ===== */
+.audit-log-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.audit-log-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0ebe5;
+  font-size: 0.82rem;
+}
+
+.audit-log-item:last-child {
+  border-bottom: none;
+}
+
+.audit-time {
+  color: #8c7e72;
+  font-weight: 600;
+  min-width: 70px;
+  flex-shrink: 0;
+}
+
+.audit-action {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.action-create { background: #e8f5e9; color: #2e7d32; }
+.action-update { background: #e3f2fd; color: #1565c0; }
+.action-delete { background: #fce4ec; color: #c62828; }
+.action-approve { background: #fff0eb; color: #ff7854; }
+.action-reject { background: #f3e5f5; color: #7b1fa2; }
+
+.audit-summary {
+  flex: 1;
+  color: #2d2319;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.audit-user {
+  color: #8c7e72;
+  font-weight: 600;
+  flex-shrink: 0;
 }

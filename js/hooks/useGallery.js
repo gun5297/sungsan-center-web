@@ -1,4 +1,5 @@
 // ===== useGallery: 활동 갤러리 (Firestore + Storage) =====
+import { skeletonCards, escapeHtml, resizeImage } from '../utils.js';
 import { GALLERY_GRADIENTS } from '../data/sampleData.js';
 import { getIsAdmin, isLoggedIn } from '../state.js';
 import {
@@ -7,6 +8,7 @@ import {
   uploadPhoto,
   deleteGalleryItem as deleteGalleryItemFS
 } from '../../firebase/services/galleryService.js';
+import { logAction } from '../../firebase/services/auditService.js';
 
 let galleryItems = [];
 
@@ -35,17 +37,17 @@ export function renderGallery() {
   }
   grid.innerHTML = galleryItems.map((item, i) => {
     const bg = item.photoUrl
-      ? `background-image:url('${item.photoUrl}'); background-size:cover; background-position:center;`
+      ? `background-image:url('${encodeURI(item.photoUrl)}'); background-size:cover; background-position:center;`
       : `background: ${GALLERY_GRADIENTS[i % GALLERY_GRADIENTS.length]};`;
     return `
       <div class="gallery-card">
         <div class="gallery-img" style="${bg}">
-          <span>${item.category}</span>
+          <span>${escapeHtml(item.category)}</span>
         </div>
         <div class="gallery-info">
-          <div class="gallery-title">${item.title}</div>
-          <div class="gallery-date">${item.date}</div>
-          ${admin ? `<div class="notice-actions gallery-actions"><button class="delete-btn" onclick="deleteGalleryItem('${item.id}', '${item.photoUrl || ''}')">삭제</button></div>` : ''}
+          <div class="gallery-title">${escapeHtml(item.title)}</div>
+          <div class="gallery-date">${escapeHtml(item.date)}</div>
+          ${admin ? `<div class="notice-actions gallery-actions"><button class="delete-btn" onclick="deleteGalleryItem('${escapeHtml(item.id)}', '${escapeHtml(item.photoUrl || '')}')">삭제</button></div>` : ''}
         </div>
       </div>
     `;
@@ -58,45 +60,75 @@ export async function addGalleryItem() {
   const dateVal = document.getElementById('galDate').value;
   const fileInput = document.getElementById('galPhoto');
 
-  if (!title || !category) { alert('제목과 카테고리를 입력해주세요.'); return; }
+  if (!title || !category) { showToast('제목과 카테고리를 입력해주세요.', 'warning'); return; }
 
   const dateStr = dateVal ? dateVal.replace(/-/g, '.') : new Date().toISOString().split('T')[0].replace(/-/g, '.');
 
   try {
-    let photoUrl = null;
-    if (fileInput.files && fileInput.files[0]) {
-      photoUrl = await uploadPhoto(fileInput.files[0]);
-    }
+    const files = fileInput.files;
+    const totalFiles = files ? files.length : 0;
 
-    await createGalleryItem({ title, category, date: dateStr, photoUrl });
+    if (totalFiles > 1) {
+      // 다중 파일 업로드
+      for (let i = 0; i < totalFiles; i++) {
+        showToast(`${i + 1}/${totalFiles} 업로드 중...`, 'info');
+        const resized = await resizeImage(files[i]);
+        const photoUrl = await uploadPhoto(resized);
+        await createGalleryItem({ title, category, date: dateStr, photoUrl });
+      }
+      showToast(`${totalFiles}개 활동이 추가되었습니다.`, 'success');
+    } else {
+      // 단일 파일 또는 파일 없이 업로드
+      let photoUrl = null;
+      if (totalFiles === 1) {
+        const resized = await resizeImage(files[0]);
+        photoUrl = await uploadPhoto(resized);
+      }
+      await createGalleryItem({ title, category, date: dateStr, photoUrl });
+      showToast('활동이 추가되었습니다.', 'success');
+    }
 
     document.getElementById('galTitle').value = '';
     document.getElementById('galCategory').value = '';
     document.getElementById('galDate').value = '';
     fileInput.value = '';
-    alert('활동이 추가되었습니다.');
   } catch (e) {
     console.error('갤러리 추가 실패:', e);
-    alert('추가 중 오류가 발생했습니다: ' + e.message);
+    showToast('추가 중 오류가 발생했습니다: ' + e.message, 'error');
   }
 }
 
 export async function deleteGalleryItem(id, photoUrl) {
-  if (!confirm('이 활동을 삭제하시겠습니까?')) return;
+  if (!await showConfirm('이 활동을 삭제하시겠습니까?')) return;
   await deleteGalleryItemFS(id, photoUrl || null);
-  // 실시간 구독이 자동으로 renderGallery() 호출
+  logAction('delete', 'gallery', id, '갤러리 항목 삭제');
 }
+
+let _unsubGallery = null;
 
 export function initGallery() {
   // 로딩 표시
   const grid = document.getElementById('galleryGrid');
-  if (grid) grid.innerHTML = '<div class="loading-state">갤러리 불러오는 중</div>';
+  if (grid) grid.innerHTML = skeletonCards(3);
+
+  // 이전 구독 해제
+  if (_unsubGallery) _unsubGallery();
 
   // Firestore 실시간 구독
-  subscribeGallery((data) => {
+  _unsubGallery = subscribeGallery((data) => {
     galleryItems = data;
     renderGallery();
   });
+
+  // 갤러리 영역 우클릭 방지
+  const gallerySection = document.getElementById('gallery');
+  if (gallerySection) {
+    gallerySection.addEventListener('contextmenu', (e) => {
+      if (e.target.tagName === 'IMG' || e.target.closest('.gallery-card')) {
+        e.preventDefault();
+      }
+    });
+  }
 }
 
 // window에 노출

@@ -11,6 +11,8 @@
 // ├── pickups/           {id, name, school, times: {월,화,수,목,금}}
 // ├── gallery/           {id, title, category, date, photoUrl, createdAt}
 // ├── inbox/             {id, type, name, summary, date, data, consents, createdAt}
+// ├── schedules/         {weekday: {1:[],2:[],3:[],4:[],5:[]}, dates: {"YYYY-MM-DD": [...]}}
+// ├── dailyLogs/        {id: "YYYY-MM-DD", date, author, authorUid, weather, totalChildren, programs[], specialNotes, createdAt}
 // └── schoolEvents/      {id: "YYYY-MM-DD", events[]}  (선택: 정적 데이터로 유지 가능)
 
 import { db } from './config.js';
@@ -25,3 +27,5 @@ export const medicationsCol = collection(db, 'medications');
 export const pickupsCol    = collection(db, 'pickups');
 export const galleryCol    = collection(db, 'gallery');
 export const inboxCol      = collection(db, 'inbox');
+export const schedulesCol  = collection(db, 'schedules');
+export const dailyLogsCol  = collection(db, 'dailyLogs');

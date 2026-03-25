@@ -368,3 +368,40 @@
   accent-color: var(--primary);
   cursor: pointer;
 }
+
+/* 투약 완료 상태 */
+.med-card.med-completed {
+  opacity: 0.6;
+  background: var(--bg-sub);
+}
+
+.med-complete-btn {
+  padding: 6px 14px;
+  border: 1px solid #2e7d32;
+  border-radius: var(--radius-xs);
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.med-complete-btn:hover {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.med-complete-check {
+  color: #2e7d32;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.med-completed-info {
+  font-size: 0.72rem;
+  color: #2e7d32;
+  font-weight: 600;
+  margin-top: 2px;
+}

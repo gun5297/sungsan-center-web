@@ -1,25 +1,50 @@
-// ===== useMeal: 식단표 (localStorage 기반) =====
+// ===== useMeal: 식단표 (Firestore + localStorage 폴백) =====
 import { sampleMeals } from '../data/sampleData.js';
 import { getWeekDates, isSameDay, getDateKey } from '../utils.js';
+import {
+  getMealData as firestoreGetMealData,
+  saveMealData as firestoreSaveMealData,
+  subscribeMealData
+} from '../../firebase/services/mealService.js';
 
 let mealWeekOffset = 0;
+let cachedMealData = null; // 메모리 캐시
 
-// localStorage에서 식단 데이터 로드
-function getMealData() {
+// ===== 데이터 접근 레이어 =====
+
+// localStorage 폴백
+function getLocalMealData() {
   try {
     const saved = localStorage.getItem('mealData');
     return saved ? JSON.parse(saved) : {};
   } catch { return {}; }
 }
 
-function saveMealData(data) {
+function saveLocalMealData(data) {
   localStorage.setItem('mealData', JSON.stringify(data));
+}
+
+// 캐시된 데이터 가져오기 (동기)
+function getMealDataSync() {
+  return cachedMealData || getLocalMealData();
+}
+
+// Firestore에 저장 + localStorage 백업
+async function saveMealDataToStore(data) {
+  cachedMealData = data;
+  saveLocalMealData(data); // 항상 localStorage에도 백업
+
+  try {
+    await firestoreSaveMealData(data);
+  } catch (e) {
+    console.warn('Firestore 식단 저장 실패 (localStorage에 저장됨):', e);
+  }
 }
 
 // 특정 날짜의 식단 가져오기 (저장된 데이터 우선, 없으면 sampleData)
 function getDayMeal(date, dayIndex) {
   const key = getDateKey(date);
-  const saved = getMealData();
+  const saved = getMealDataSync();
   if (saved[key]) return saved[key];
   // sampleData에서 기본값 (주간 index 기반)
   return {
@@ -43,9 +68,11 @@ export function renderMealGrid() {
   document.getElementById('mealWeekLabel').textContent =
     `${startDate.getMonth() + 1}/${startDate.getDate()} ~ ${endDate.getMonth() + 1}/${endDate.getDate()}`;
 
+  const saved = getMealDataSync();
   document.getElementById('mealGrid').innerHTML = dates.map((d, i) => {
     const isToday = isSameDay(d, today);
-    const meal = getDayMeal(d, i);
+    const key = getDateKey(d);
+    const meal = saved[key] || { lunch: sampleMeals.lunch[i] || '', snack: sampleMeals.snack[i] || '' };
     return `
       <div class="meal-card ${isToday ? 'today' : ''}">
         <div class="meal-day">${dayNames[i]}</div>
@@ -101,7 +128,7 @@ function renderMealEditorModal() {
 function renderMealEditorCalendar() {
   const year = editorMonth.getFullYear();
   const month = editorMonth.getMonth();
-  const saved = getMealData();
+  const saved = getMealDataSync();
 
   document.getElementById('mealEditorMonthLabel').textContent = `${year}년 ${month + 1}월`;
 
@@ -145,7 +172,7 @@ export function changeMealEditorMonth(delta) {
 
 export function openMealDayEditor(dateKey) {
   editingDate = dateKey;
-  const saved = getMealData();
+  const saved = getMealDataSync();
   const meal = saved[dateKey] || { lunch: '', snack: '' };
 
   // dateKey를 파싱해서 표시
@@ -199,25 +226,27 @@ function saveMealDaySilent() {
   const lunch = document.getElementById('mealEditLunch').value.trim();
   const snack = document.getElementById('mealEditSnack').value.trim();
   if (lunch || snack) {
-    const data = getMealData();
+    const data = getMealDataSync();
     data[editingDate] = { lunch, snack };
-    saveMealData(data);
+    // silent 저장은 동기적으로 캐시+localStorage만 업데이트 (Firestore는 최종 저장 시)
+    cachedMealData = data;
+    saveLocalMealData(data);
   }
 }
 
-export function saveMealDay() {
+export async function saveMealDay() {
   const lunch = document.getElementById('mealEditLunch').value.trim();
   const snack = document.getElementById('mealEditSnack').value.trim();
 
-  const data = getMealData();
+  const data = getMealDataSync();
   if (lunch || snack) {
     data[editingDate] = { lunch, snack };
   } else {
     delete data[editingDate]; // 비어있으면 삭제
   }
-  saveMealData(data);
+  await saveMealDataToStore(data);
   renderMealGrid(); // 메인 식단표 갱신
-  alert('식단이 저장되었습니다.');
+  showToast('식단이 저장되었습니다.', 'success');
   backToMealCalendar();
 }
 
@@ -234,8 +263,45 @@ export function closeMealEditor() {
   renderMealGrid(); // 메인 식단표 갱신
 }
 
-export function initMeal() {
+// ===== 초기화 =====
+
+export async function initMeal() {
+  // 1) localStorage에서 먼저 로드 (빠른 초기 렌더링)
+  cachedMealData = getLocalMealData();
   renderMealGrid();
+
+  // 2) Firestore에서 로드 시도
+  try {
+    const firestoreData = await firestoreGetMealData();
+    const localData = getLocalMealData();
+    const hasLocal = Object.keys(localData).length > 0;
+    const hasFirestore = firestoreData && Object.keys(firestoreData).length > 0;
+
+    if (hasFirestore) {
+      // Firestore 데이터가 있으면 사용
+      cachedMealData = firestoreData;
+      saveLocalMealData(firestoreData); // localStorage도 동기화
+      renderMealGrid();
+    } else if (hasLocal && !hasFirestore) {
+      // localStorage에만 데이터가 있으면 Firestore로 마이그레이션
+      console.log('식단 데이터 Firestore 마이그레이션 중...');
+      await firestoreSaveMealData(localData);
+      cachedMealData = localData;
+      console.log('식단 데이터 마이그레이션 완료');
+    }
+
+    // 3) 실시간 구독 시작
+    subscribeMealData((data) => {
+      if (data) {
+        cachedMealData = data;
+        saveLocalMealData(data); // localStorage 동기화
+        renderMealGrid();
+      }
+    });
+  } catch (e) {
+    console.warn('Firestore 식단 로드 실패 (localStorage 데이터 사용):', e);
+    // localStorage 데이터로 이미 렌더링되어 있으므로 추가 작업 불필요
+  }
 }
 
 // window에 노출

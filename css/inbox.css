@@ -58,6 +58,50 @@
   border-color: var(--primary);
 }
 
+/* ===== INBOX SEARCH BAR ===== */
+#inboxModal .inbox-search-bar {
+  display: flex;
+  gap: 8px;
+  padding: 0 0 14px;
+  flex-shrink: 0;
+}
+
+#inboxModal .inbox-search-input {
+  flex: 1;
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  font-size: 0.85rem;
+  font-family: var(--font);
+  background: var(--card);
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+#inboxModal .inbox-search-input:focus {
+  border-color: var(--primary);
+}
+
+#inboxModal .inbox-sort-select {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  font-size: 0.8rem;
+  font-family: var(--font);
+  font-weight: 600;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+  flex-shrink: 0;
+  transition: border-color var(--transition);
+}
+
+#inboxModal .inbox-sort-select:focus {
+  border-color: var(--primary);
+}
+
 #inboxModal .inbox-list {
   overflow-y: auto;
   flex: 1;
@@ -102,6 +146,14 @@
 #inboxModal .inbox-name {
   font-size: 0.9rem;
   font-weight: 700;
+}
+
+#inboxModal .inbox-receipt {
+  font-size: 0.7rem;
+  color: var(--primary);
+  font-weight: 700;
+  margin-top: 2px;
+  font-family: 'Courier New', monospace;
 }
 
 #inboxModal .inbox-detail {
@@ -165,6 +217,139 @@
 }
 
 #inboxModal .inbox-empty {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--text-sub);
+  font-weight: 600;
+}
+
+/* ===== MY SUBMISSIONS MODAL ===== */
+#mySubmissionsModal .my-submissions-modal {
+  max-width: 700px;
+  width: 95%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#mySubmissionsModal .inbox-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 0 16px;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+#mySubmissionsModal .inbox-tab {
+  padding: 10px 16px;
+  min-height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--card);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition);
+  color: var(--text-sub);
+  line-height: 1.4;
+}
+
+#mySubmissionsModal .inbox-tab.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+#mySubmissionsModal .inbox-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+#mySubmissionsModal .inbox-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#mySubmissionsModal .inbox-item:hover {
+  background: var(--bg-sub);
+  margin: 0 -24px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+#mySubmissionsModal .inbox-type {
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+#mySubmissionsModal .inbox-type.absence { background: var(--danger-light); color: var(--danger); }
+#mySubmissionsModal .inbox-type.medication { background: var(--warning-light); color: var(--warning); }
+#mySubmissionsModal .inbox-type.register { background: var(--school-blue-light); color: var(--school-blue); }
+#mySubmissionsModal .inbox-type.consult { background: var(--school-purple-light); color: var(--school-purple); }
+
+#mySubmissionsModal .inbox-info {
+  flex: 1;
+  min-width: 0;
+}
+
+#mySubmissionsModal .inbox-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+#mySubmissionsModal .inbox-receipt {
+  font-size: 0.7rem;
+  color: var(--primary);
+  font-weight: 700;
+  margin-top: 2px;
+  font-family: 'Courier New', monospace;
+}
+
+#mySubmissionsModal .inbox-detail {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#mySubmissionsModal .inbox-date {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+#mySubmissionsModal .inbox-consents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+#mySubmissionsModal .inbox-consent-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--success-light);
+  color: var(--success);
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+#mySubmissionsModal .inbox-empty {
   padding: 40px 0;
   text-align: center;
   color: var(--text-sub);

@@ -17,6 +17,11 @@ import { Register } from './components/Register.js';
 import { Contact } from './components/Contact.js';
 import { Footer } from './components/Footer.js';
 
+// --- 토스트 & 확인 모달 & 전자서명 ---
+import './toast.js';
+import './confirm.js';
+import './signature.js';
+
 // --- 훅 임포트 ---
 import { initAdmin, onAdminRender } from './hooks/useAdmin.js';
 import { initNotices, renderNotices } from './hooks/useNotices.js';
@@ -27,8 +32,31 @@ import { initAbsence, renderAbsenceList } from './hooks/useAbsence.js';
 import { initMedication, renderMedSchedule } from './hooks/useMedication.js';
 import { initPickup, renderPickupTable } from './hooks/usePickup.js';
 import './hooks/useRegister.js';
+import './hooks/useDailyLog.js';
+import './hooks/useAttReport.js';
+import './hooks/useMealUpload.js';
+import './hooks/useDataExport.js';
 import { initGallery, renderGallery } from './hooks/useGallery.js';
 import { initInbox } from './hooks/useInbox.js';
+import { initSessionTimeout } from '../firebase/auth.js';
+
+// --- 글로벌 에러 핸들러 ---
+window.addEventListener('error', (e) => {
+  console.error('Global error:', e.error || e.message);
+  if (window.showToast) showToast('예기치 않은 오류가 발생했습니다.', 'error');
+});
+window.addEventListener('unhandledrejection', (e) => {
+  console.error('Unhandled rejection:', e.reason);
+  if (window.showToast) showToast('작업 중 오류가 발생했습니다.', 'error');
+});
+
+// --- 오프라인/온라인 감지 ---
+window.addEventListener('offline', () => {
+  if (window.showToast) showToast('인터넷 연결이 끊어졌습니다. 일부 기능이 제한될 수 있습니다.', 'warning');
+});
+window.addEventListener('online', () => {
+  if (window.showToast) showToast('인터넷에 다시 연결되었습니다.', 'success');
+});
 
 // --- 1단계: 컴포넌트 조합 → DOM 마운트 ---
 document.getElementById('app').innerHTML = [
@@ -91,3 +119,28 @@ initMedication();
 initPickup();
 initGallery();
 initInbox();
+initSessionTimeout();
+
+// --- 5단계: 하단 탭 바 스크롤 추적 ---
+const tabSections = ['hero', 'notice', 'schedule', 'meal', 'gallery'];
+const tabItems = document.querySelectorAll('.tab-item');
+
+function updateActiveTab() {
+  const scrollY = window.scrollY + 200;
+  let activeId = 'hero';
+  for (const id of tabSections) {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= scrollY) activeId = id;
+  }
+  tabItems.forEach(tab => {
+    tab.classList.toggle('active', tab.getAttribute('data-tab') === activeId);
+  });
+}
+
+window.addEventListener('scroll', updateActiveTab, { passive: true });
+tabItems.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabItems.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+  });
+});

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>성산지역아동센터</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">성산<span>지역아동센터</span></div>
+    <ul class="nav-links">
+      <li><a href="#notice">공지사항</a></li>
+      <li><a href="#schedule">시간표</a></li>
+      <li><a href="#absence">신청서</a></li>
+      <li><a href="#medication">투약</a></li>
+      <li><a href="#pickup">픽업</a></li>
+      <li><a href="#register">등록/상담</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="attendance.html" class="nav-cta" style="text-decoration:none;">출결 시스템</a>
+      <button class="nav-admin-btn" id="navAdminBtn" onclick="toggleAdminLogin()">관리자 로그인</button>
+    </div>
+  </nav>
+
+  <!-- 관리자 로그인 모달 -->
+  <div class="modal-overlay" id="adminLoginModal">
+    <div class="modal" style="max-width:380px; text-align:center;">
+      <div class="modal-title">관리자 로그인</div>
+      <p style="color:var(--text-sub); font-size:0.9rem; margin-bottom:20px;">비밀번호를 입력하세요</p>
+      <input type="password" id="adminPwInput" class="input-field" placeholder="비밀번호" style="text-align:center; font-size:1.1rem;" />
+      <button class="btn-upload" onclick="doAdminLogin()" style="margin-top:12px;">로그인</button>
+      <button class="modal-close" onclick="closeAdminModal()">취소</button>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">2026년 3월</div>
+    <h1>
+      아이들의 하루를<br />
+      한눈에<br />
+      <span class="highlight">성산지역아동센터</span>
+    </h1>
+    <p>선생님과 학부모가 함께 소통하는 공간. 공지사항, 시간표, 식단표까지 한곳에서 확인하세요.</p>
+    <div class="hero-buttons">
+      <a href="#notice" class="btn-primary">공지사항 보기</a>
+      <a href="#schedule" class="btn-secondary">시간표 확인</a>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats fade-up">
+    <div class="stat-card">
+      <div class="stat-number">99</div>
+      <div class="stat-label">재원 아동<br>정원 99명</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">99</div>
+      <div class="stat-label">담당 선생님<br>각 반 배정</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">99</div>
+      <div class="stat-label">운영 프로그램<br>특별활동 포함</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">99%</div>
+      <div class="stat-label">학부모 만족도<br>설문 기준</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- NOTICE / 공지사항 & 가정통신문 -->
+  <section class="section fade-up" id="notice">
+    <div class="section-tag">공지사항</div>
+    <h2 class="section-title">가정통신문 &<br>공지사항</h2>
+    <p class="section-desc">센터의 주요 안내사항과 가정통신문을 확인하세요.</p>
+
+    <!-- 업로드 폼 (관리자 전용, 기본 숨김) -->
+    <div class="upload-area admin-only" id="uploadArea">
+      <div class="upload-form" id="teacherForm">
+        <h3>가정통신문 업로드</h3>
+        <input type="text" id="noticeTitle" placeholder="제목을 입력하세요" class="input-field" />
+        <textarea id="noticeContent" placeholder="내용을 입력하세요" class="input-field textarea"></textarea>
+        <div class="file-upload" id="fileUpload">
+          <input type="file" id="fileInput" accept=".pdf,.jpg,.png,.doc,.docx" hidden />
+          <div class="file-drop" onclick="document.getElementById('fileInput').click()">
+            <div class="file-icon">+</div>
+            <p>파일을 선택하거나 여기에 드래그하세요</p>
+            <span>PDF, JPG, PNG, DOC (최대 10MB)</span>
+          </div>
+          <div class="file-name" id="fileName"></div>
+        </div>
+        <select id="noticeCategory" class="input-field select-field">
+          <option value="공지">공지사항</option>
+          <option value="통신문">가정통신문</option>
+          <option value="긴급">긴급 안내</option>
+        </select>
+        <button class="btn-upload" onclick="addNotice()">업로드</button>
+      </div>
+    </div>
+
+    <!-- 공지 리스트 -->
+    <div class="notice-list" id="noticeList">
+      <!-- JS로 렌더링 -->
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- SCHEDULE / 시간표 -->
+  <section class="section fade-up" id="schedule">
+    <div class="section-tag">시간표</div>
+    <h2 class="section-title">월별 & 일별<br>시간표</h2>
+    <p class="section-desc">이번 달 프로그램 일정을 한눈에 확인하세요.</p>
+
+    <!-- 월 네비게이션 -->
+    <div class="month-nav">
+      <button class="month-btn" onclick="changeMonth(-1)">&lt;</button>
+      <span class="month-label" id="monthLabel"></span>
+      <button class="month-btn" onclick="changeMonth(1)">&gt;</button>
+    </div>
+
+    <!-- 범례 -->
+    <div class="cal-legend">
+      <div class="cal-legend-item"><div class="cal-legend-dot 증산초"></div>증산초</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot 수색초"></div>수색초</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot 증산중"></div>증산중</div>
+      <div class="cal-legend-item"><div class="cal-legend-dot holiday"></div>공휴일</div>
+    </div>
+
+    <!-- 캘린더 -->
+    <div class="calendar" id="calendar">
+      <!-- JS로 렌더링 -->
+    </div>
+
+    <!-- 선택된 날짜의 일정 -->
+    <div class="day-schedule" id="daySchedule">
+      <h3 class="day-title" id="dayTitle">날짜를 선택하세요</h3>
+      <div class="timetable" id="timetable">
+        <!-- JS로 렌더링 -->
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- MEAL / 식단표 -->
+  <section class="section fade-up" id="meal">
+    <div class="section-tag">식단표</div>
+    <h2 class="section-title">이번 주<br>식단표</h2>
+    <p class="section-desc">아이들의 건강한 식사를 확인하세요.</p>
+
+    <div class="meal-week-nav">
+      <button class="month-btn" onclick="changeMealWeek(-1)">&lt;</button>
+      <span class="month-label" id="mealWeekLabel"></span>
+      <button class="month-btn" onclick="changeMealWeek(1)">&gt;</button>
+    </div>
+
+    <div class="meal-grid" id="mealGrid">
+      <!-- JS로 렌더링 -->
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ATTENDANCE / 출석 현황 -->
+  <section class="section fade-up" id="attendance">
+    <div class="section-tag">출석 현황</div>
+    <h2 class="section-title">오늘의<br>출석 현황</h2>
+    <p class="section-desc">우리 반 아이들의 출석 상태를 확인하세요.</p>
+
+    <div class="attendance-summary" id="attendanceSummary">
+      <!-- JS로 렌더링 -->
+    </div>
+
+    <div class="attendance-list" id="attendanceList">
+      <!-- JS로 렌더링 -->
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- GALLERY / 갤러리 -->
+  <section class="section fade-up" id="gallery">
+    <div class="section-tag">활동 갤러리</div>
+    <h2 class="section-title">우리 아이들의<br>즐거운 하루</h2>
+    <p class="section-desc">센터에서의 다양한 활동 사진을 확인하세요.</p>
+
+    <div class="gallery-grid" id="galleryGrid">
+      <div class="gallery-card">
+        <div class="gallery-img" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+          <span>미술 활동</span>
+        </div>
+        <div class="gallery-info">
+          <div class="gallery-title">봄맞이 미술 수업</div>
+          <div class="gallery-date">2026.03.20</div>
+        </div>
+      </div>
+      <div class="gallery-card">
+        <div class="gallery-img" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+          <span>체육 활동</span>
+        </div>
+        <div class="gallery-info">
+          <div class="gallery-title">실내 체육 시간</div>
+          <div class="gallery-date">2026.03.18</div>
+        </div>
+      </div>
+      <div class="gallery-card">
+        <div class="gallery-img" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+          <span>현장학습</span>
+        </div>
+        <div class="gallery-info">
+          <div class="gallery-title">봄 현장학습</div>
+          <div class="gallery-date">2026.03.15</div>
+        </div>
+      </div>
+      <div class="gallery-card">
+        <div class="gallery-img" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+          <span>요리 활동</span>
+        </div>
+        <div class="gallery-info">
+          <div class="gallery-title">쿠키 만들기</div>
+          <div class="gallery-date">2026.03.12</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ABSENCE / 조퇴·결석 신청서 -->
+  <section class="section fade-up" id="absence">
+    <div class="section-tag">조퇴·결석 신청서</div>
+    <h2 class="section-title">조퇴 / 결석<br>신청서</h2>
+    <p class="section-desc">증빙서류 제출 양식입니다. 작성 후 출력하여 제출하세요.</p>
+
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-org">성산지역아동센터</div>
+        <div class="form-doc-title">조퇴·결석 신청서</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">신청 유형</label>
+          <select id="absType" class="input-field select-field">
+            <option value="결석">결석</option>
+            <option value="조퇴">조퇴</option>
+            <option value="지각">지각</option>
+            <option value="외출">외출</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">신청일</label>
+          <input type="date" id="absDate" class="input-field" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">아동 성명</label>
+          <input type="text" id="absName" class="input-field" placeholder="아동 이름" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">생년월일</label>
+          <input type="date" id="absBirth" class="input-field" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">소속 학교 / 학년</label>
+          <input type="text" id="absSchool" class="input-field" placeholder="예: 증산초 3학년" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">보호자 성명</label>
+          <input type="text" id="absGuardian" class="input-field" placeholder="보호자 이름" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label class="form-label">사유</label>
+          <textarea id="absReason" class="input-field textarea" placeholder="결석/조퇴 사유를 상세히 기재해 주세요.&#10;(질병의 경우 진단명, 병원명 포함)"></textarea>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">결석/조퇴 기간</label>
+          <div class="date-range">
+            <input type="date" id="absFrom" class="input-field" />
+            <span class="range-sep">~</span>
+            <input type="date" id="absTo" class="input-field" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">보호자 연락처</label>
+          <input type="tel" id="absPhone" class="input-field" placeholder="010-0000-0000" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label class="form-label">첨부서류 (진단서, 진료확인서 등)</label>
+          <input type="file" id="absFile" accept=".pdf,.jpg,.png" class="input-field" />
+        </div>
+      </div>
+
+      <div class="form-notice">
+        <p>위와 같은 사유로 조퇴/결석을 신청합니다.</p>
+        <p class="form-date-line" id="absFormDate"></p>
+        <div class="form-sign-row">
+          <span>신청인(보호자): <span id="absSignName">___________</span> (서명)</span>
+        </div>
+        <p class="form-to">성산지역아동센터장 귀하</p>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-upload" onclick="printAbsence()">출력하기</button>
+        <button class="btn-secondary-sm" onclick="submitAbsence()">온라인 제출</button>
+      </div>
+    </div>
+
+    <!-- 제출 내역 -->
+    <h3 style="margin-top:40px; font-size:1.1rem; font-weight:800; letter-spacing:-0.02em;">제출 내역</h3>
+    <div class="notice-list" id="absenceList" style="margin-top:16px;">
+      <!-- JS로 렌더링 -->
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- MEDICATION / 투약 의뢰서 & 일정 -->
+  <section class="section fade-up" id="medication">
+    <div class="section-tag">투약 관리</div>
+    <h2 class="section-title">투약 의뢰서 &<br>투약 일정</h2>
+    <p class="section-desc">아이에게 약을 투여해야 할 경우 의뢰서를 작성해 주세요.</p>
+
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-org">성산지역아동센터</div>
+        <div class="form-doc-title">투약 의뢰서</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">아동 성명</label>
+          <input type="text" id="medName" class="input-field" placeholder="아동 이름" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">생년월일</label>
+          <input type="date" id="medBirth" class="input-field" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">증상 / 진단명</label>
+          <input type="text" id="medSymptom" class="input-field" placeholder="예: 감기, 중이염" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">처방 병원</label>
+          <input type="text" id="medHospital" class="input-field" placeholder="병원명" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">약 이름</label>
+          <input type="text" id="medDrug" class="input-field" placeholder="약 이름 (처방전 참고)" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">투약 용량</label>
+          <input type="text" id="medDose" class="input-field" placeholder="예: 1포, 5ml" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">투약 시간</label>
+          <select id="medTime" class="input-field select-field">
+            <option value="점심 식후">점심 식후</option>
+            <option value="오전 간식 후">오전 간식 후</option>
+            <option value="오후 간식 후">오후 간식 후</option>
+            <option value="취침 전">취침 전</option>
+            <option value="기타">기타 (비고란에 기재)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">투약 기간</label>
+          <div class="date-range">
+            <input type="date" id="medFrom" class="input-field" />
+            <span class="range-sep">~</span>
+            <input type="date" id="medTo" class="input-field" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label class="form-label">보관 방법</label>
+          <select id="medStorage" class="input-field select-field">
+            <option value="실온 보관">실온 보관</option>
+            <option value="냉장 보관">냉장 보관</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label class="form-label">특이사항 / 알레르기</label>
+          <textarea id="medNote" class="input-field textarea" placeholder="알레르기, 부작용 주의사항 등"></textarea>
+        </div>
+      </div>
+
+      <div class="form-notice">
+        <p>위 아동에 대한 투약을 의뢰하며, 투약 시 발생할 수 있는 부작용에 대해 안내 받았습니다.</p>
+        <p class="form-date-line" id="medFormDate"></p>
+        <div class="form-sign-row">
+          <span>의뢰인(보호자): ___________  (서명)</span>
+        </div>
+        <p class="form-to">성산지역아동센터장 귀하</p>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-upload" onclick="printMedication()">출력하기</button>
+        <button class="btn-secondary-sm" onclick="submitMedication()">온라인 제출</button>
+      </div>
+    </div>
+
+    <!-- 투약 일정표 -->
+    <h3 style="margin-top:40px; font-size:1.1rem; font-weight:800; letter-spacing:-0.02em;">투약 일정표</h3>
+    <p style="font-size:0.85rem; color:var(--text-sub); margin:8px 0 20px;">현재 투약 중인 아동 목록입니다.</p>
+    <div class="med-schedule" id="medSchedule">
+      <!-- JS로 렌더링 -->
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- PICKUP / 픽업 일정표 -->
+  <section class="section fade-up" id="pickup">
+    <div class="section-tag">하교 픽업</div>
+    <h2 class="section-title">저학년<br>픽업 일정표</h2>
+    <p class="section-desc">저학년 아동의 하교 픽업 일정을 확인하세요.</p>
+
+    <div class="meal-week-nav">
+      <button class="month-btn" onclick="changePickupWeek(-1)">&lt;</button>
+      <span class="month-label" id="pickupWeekLabel"></span>
+      <button class="month-btn" onclick="changePickupWeek(1)">&gt;</button>
+    </div>
+
+    <div class="pickup-table-wrap">
+      <table class="pickup-table" id="pickupTable">
+        <!-- JS로 렌더링 -->
+      </table>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- REGISTER / 신규 원생 등록 -->
+  <section class="section fade-up" id="register">
+    <div class="section-tag">원생 등록 / 상담</div>
+    <h2 class="section-title">신규 원생 등록 &<br>상담 신청</h2>
+    <p class="section-desc">새로운 원생 등록 또는 상담을 신청하세요.</p>
+
+    <div class="register-tabs">
+      <button class="toggle-btn active" data-tab="regTab" onclick="switchRegTab('regTab')">신규 등록</button>
+      <button class="toggle-btn" data-tab="consultTab" onclick="switchRegTab('consultTab')">상담 신청</button>
+    </div>
+
+    <!-- 신규 등록 폼 -->
+    <div class="form-card" id="regTab">
+      <div class="form-header">
+        <div class="form-org">성산지역아동센터</div>
+        <div class="form-doc-title">이용 신청서</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">아동 성명</label>
+          <input type="text" id="regChildName" class="input-field" placeholder="아동 이름" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">생년월일</label>
+          <input type="date" id="regChildBirth" class="input-field" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">성별</label>
+          <select id="regGender" class="input-field select-field">
+            <option value="남">남</option>
+            <option value="여">여</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">소속 학교 / 학년</label>
+          <input type="text" id="regSchool" class="input-field" placeholder="예: 증산초 2학년" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">보호자 성명</label>
+          <input type="text" id="regGuardian" class="input-field" placeholder="보호자 이름" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">관계</label>
+          <select id="regRelation" class="input-field select-field">
+            <option value="부">부</option>
+            <option value="모">모</option>
+            <option value="조부">조부</option>
+            <option value="조모">조모</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">보호자 연락처</label>
+          <input type="tel" id="regPhone" class="input-field" placeholder="010-0000-0000" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">비상 연락처</label>
+          <input type="tel" id="regEmergency" class="input-field" placeholder="010-0000-0000" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label class="form-label">주소</label>
+          <input type="text" id="regAddress" class="input-field" placeholder="자택 주소" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label class="form-label">이용 희망 요일</label>
+          <div class="day-check-row" id="regDays">
+            <label class="day-check"><input type="checkbox" value="월" checked> 월</label>
+            <label class="day-check"><input type="checkbox" value="화" checked> 화</label>
+            <label class="day-check"><input type="checkbox" value="수" checked> 수</label>
+            <label class="day-check"><input type="checkbox" value="목" checked> 목</label>
+            <label class="day-check"><input type="checkbox" value="금" checked> 금</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label class="form-label">특이사항 (알레르기, 건강, 기타)</label>
+          <textarea id="regNote" class="input-field textarea" placeholder="알레르기, 지병, 특이사항 등을 기재해 주세요."></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-upload" onclick="submitRegister()">등록 신청</button>
+      </div>
+    </div>
+
+    <!-- 상담 신청 폼 -->
+    <div class="form-card" id="consultTab" style="display:none;">
+      <div class="form-header">
+        <div class="form-org">성산지역아동센터</div>
+        <div class="form-doc-title">상담 신청서</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">신청자 (보호자) 성명</label>
+          <input type="text" id="conGuardian" class="input-field" placeholder="보호자 이름" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">연락처</label>
+          <input type="tel" id="conPhone" class="input-field" placeholder="010-0000-0000" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">아동 성명</label>
+          <input type="text" id="conChild" class="input-field" placeholder="아동 이름" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">희망 상담 일시</label>
+          <input type="datetime-local" id="conDate" class="input-field" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label class="form-label">상담 희망 내용</label>
+          <select id="conTopic" class="input-field select-field">
+            <option value="학습">학습 관련</option>
+            <option value="생활">생활 습관 / 행동</option>
+            <option value="교우">교우 관계</option>
+            <option value="건강">건강 / 안전</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label class="form-label">상담 내용 상세</label>
+          <textarea id="conDetail" class="input-field textarea" placeholder="상담 받고 싶은 내용을 자세히 적어주세요."></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-upload" onclick="submitConsult()">상담 신청</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- CONTACT / 긴급 연락처 -->
+  <section class="section fade-up" id="contact">
+    <div class="section-tag">긴급 연락처</div>
+    <h2 class="section-title">필요할 때<br>바로 연락하세요</h2>
+    <p class="section-desc">센터 운영 시간: 평일 09:00 ~ 19:00</p>
+
+    <div class="contact-grid">
+      <a href="tel:02-XXX-XXXX" class="contact-card">
+        <div class="contact-icon">📞</div>
+        <div class="contact-title">센터 대표</div>
+        <div class="contact-info">02-XXX-XXXX</div>
+      </a>
+      <a href="tel:010-XXXX-XXXX" class="contact-card">
+        <div class="contact-icon">👩‍🏫</div>
+        <div class="contact-title">담임 선생님</div>
+        <div class="contact-info">010-XXXX-XXXX</div>
+      </a>
+      <a href="tel:119" class="contact-card">
+        <div class="contact-icon">🚑</div>
+        <div class="contact-title">긴급 연락</div>
+        <div class="contact-info">119 / 112</div>
+      </a>
+      <a href="https://pf.kakao.com/" class="contact-card" target="_blank">
+        <div class="contact-icon">💬</div>
+        <div class="contact-title">카카오톡 상담</div>
+        <div class="contact-info">@성산지역아동센터</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">성산<span>지역아동센터</span></div>
+    <div class="footer-text">© 2026 성산지역아동센터. All rights reserved.</div>
+    <div class="footer-text">서울시 은평구 증산서길 90 성산지역아동센터</div>
+  </footer>
+
+  <!-- 관리자 모드 바 -->
+  <div class="admin-bar">관리자 모드 — 모든 정보를 수정할 수 있습니다</div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>

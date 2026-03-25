@@ -201,3 +201,59 @@
 .notice-file-download:hover {
   text-decoration: underline;
 }
+
+/* 서식 도구 바 */
+.format-toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.format-toolbar + .textarea {
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+.format-btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: var(--font);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  padding: 0;
+}
+
+.format-btn:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* 렌더링된 서식 내 hr */
+.notice-preview hr,
+.modal-body hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 12px 0;
+}
+
+/* 읽음 확인 배지 */
+.notice-read-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  background: var(--bg-sub);
+  padding: 2px 10px;
+  border-radius: 12px;
+}

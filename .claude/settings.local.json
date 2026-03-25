@@ -1,0 +1,7 @@
+{
+  "enabledMcpjsonServers": [
+    "playwright",
+    "firebase"
+  ],
+  "enableAllProjectMcpServers": true
+}

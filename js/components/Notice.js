@@ -10,6 +10,20 @@ export function Notice() {
       <div class="upload-form" id="teacherForm">
         <h3>가정통신문 업로드</h3>
         <input type="text" id="noticeTitle" placeholder="제목을 입력하세요" class="input-field" />
+        <div class="format-toolbar">
+          <button type="button" class="format-btn" onclick="insertFormatting('bold')" title="굵게">
+            <strong>B</strong>
+          </button>
+          <button type="button" class="format-btn" onclick="insertFormatting('underline')" title="밑줄">
+            <u>U</u>
+          </button>
+          <button type="button" class="format-btn" onclick="insertFormatting('hr')" title="구분선">
+            ―
+          </button>
+          <button type="button" class="format-btn" onclick="insertFormatting('br')" title="줄바꿈">
+            ↵
+          </button>
+        </div>
         <textarea id="noticeContent" placeholder="내용을 입력하세요" class="input-field textarea"></textarea>
         <div class="file-upload" id="fileUpload">
           <input type="file" id="fileInput" accept=".pdf,.jpg,.png,.doc,.docx" hidden />

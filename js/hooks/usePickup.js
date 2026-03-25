@@ -1,5 +1,5 @@
 // ===== usePickup: 저학년 픽업 일정표 (Firestore) =====
-import { getWeekDates, isSameDay } from '../utils.js';
+import { getWeekDates, isSameDay, escapeHtml } from '../utils.js';
 import { getIsAdmin } from '../state.js';
 import { subscribePickups, createPickup, deletePickup as deletePickupFS } from '../../firebase/services/pickupService.js';
 
@@ -31,7 +31,7 @@ export function renderPickupTable() {
   html += '</tr></thead><tbody>';
 
   pickupStudents.forEach((s) => {
-    html += `<tr><td class="pickup-name">${s.name}</td><td class="pickup-school">${s.school}</td>`;
+    html += `<tr><td class="pickup-name">${escapeHtml(s.name)}</td><td class="pickup-school">${escapeHtml(s.school)}</td>`;
     dayNames.forEach((day, i) => {
       const time = (s.times && s.times[day]) || '-';
       const d = dates[i];
@@ -43,9 +43,9 @@ export function renderPickupTable() {
       else if (isToday) status = '<br><span class="pickup-status waiting">대기</span>';
       else status = '<br><span class="pickup-status scheduled">예정</span>';
 
-      html += `<td><span class="pickup-time">${time}</span>${status}</td>`;
+      html += `<td><span class="pickup-time">${escapeHtml(time)}</span>${status}</td>`;
     });
-    if (admin) html += `<td><button class="delete-btn" onclick="deletePickupStudent('${s.id}')">삭제</button></td>`;
+    if (admin) html += `<td><button class="delete-btn" onclick="deletePickupStudent('${escapeHtml(s.id)}')">삭제</button></td>`;
     html += '</tr>';
   });
 
@@ -56,7 +56,7 @@ export function renderPickupTable() {
 export async function addPickupStudent() {
   const name = document.getElementById('pickupName').value.trim();
   const school = document.getElementById('pickupSchool').value.trim();
-  if (!name || !school) { alert('이름과 학교를 입력해주세요.'); return; }
+  if (!name || !school) { showToast('이름과 학교를 입력해주세요.', 'warning'); return; }
 
   await createPickup({
     name, school,
@@ -73,7 +73,7 @@ export async function addPickupStudent() {
 }
 
 export async function deletePickupStudent(id) {
-  if (!confirm('이 아동을 픽업 목록에서 삭제하시겠습니까?')) return;
+  if (!await showConfirm('이 아동을 픽업 목록에서 삭제하시겠습니까?')) return;
   await deletePickupFS(id);
   // 실시간 구독이 자동으로 renderPickupTable() 호출
 }

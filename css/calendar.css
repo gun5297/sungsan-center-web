@@ -277,35 +277,12 @@
   margin-bottom: 0;
 }
 
-#schedule .edit-schedule-btn {
-  padding: 8px 16px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--card);
-  color: var(--text-sub);
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: var(--font);
-  transition: all var(--transition);
-}
-
-#schedule .edit-schedule-btn:hover {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
-}
-
 /* 시간표 수정 모달 행 */
 .schedule-edit-row {
   display: flex;
   gap: 8px;
   align-items: center;
   margin-bottom: 8px;
-}
-
-.schedule-edit-row {
-  align-items: center;
 }
 
 .schedule-edit-row .input-field,

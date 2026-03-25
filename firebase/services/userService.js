@@ -7,6 +7,10 @@ import {
   doc, getDoc, setDoc, updateDoc, getDocs, collection, query, where, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
+// 관리자 역할 판별 (admin + 레거시 역할)
+export const ADMIN_ROLES = new Set(['admin', 'director', 'teacher', 'social_worker']);
+export function isAdminRole(role) { return ADMIN_ROLES.has(role); }
+
 // 사용자 문서 조회
 export async function getUserDoc(uid) {
   const ref = doc(db, 'users', uid);
@@ -16,11 +20,11 @@ export async function getUserDoc(uid) {
 
 // 사용자 문서 생성 (admin은 자동 승인, general은 관리자 승인 필요)
 export async function createUserDoc(uid, { email, name, role, phone }) {
-  const isAdminRole = role === 'admin' || role === 'director' || role === 'teacher' || role === 'social_worker';
   const ref = doc(db, 'users', uid);
   await setDoc(ref, {
     email, name, role, phone,
-    approved: isAdminRole, // 관리자 역할은 자동 승인
+    approved: isAdminRole(role), // 관리자 역할은 자동 승인
+    photoConsent: true, // 사진촬영 동의 (기본값 true)
     createdAt: serverTimestamp()
   });
 }
@@ -51,21 +55,8 @@ export async function rejectUser(uid) {
 }
 
 // 관리자가 한 명도 없으면 true (첫 가입자 = 관리자)
-// admin 및 레거시 director 역할 모두 확인
 export async function hasNoDirector() {
-  const qAdmin = query(collection(db, 'users'), where('role', '==', 'admin'));
-  const snapAdmin = await getDocs(qAdmin);
-  if (!snapAdmin.empty) return false;
-
-  const qDirector = query(collection(db, 'users'), where('role', '==', 'director'));
-  const snapDirector = await getDocs(qDirector);
-  if (!snapDirector.empty) return false;
-
-  const qTeacher = query(collection(db, 'users'), where('role', '==', 'teacher'));
-  const snapTeacher = await getDocs(qTeacher);
-  if (!snapTeacher.empty) return false;
-
-  const qSW = query(collection(db, 'users'), where('role', '==', 'social_worker'));
-  const snapSW = await getDocs(qSW);
-  return snapSW.empty;
+  const q = query(collection(db, 'users'), where('role', 'in', [...ADMIN_ROLES]));
+  const snap = await getDocs(q);
+  return snap.empty;
 }

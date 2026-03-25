@@ -18,6 +18,10 @@
 @import url('css/contact.css');
 @import url('css/inbox.css');
 
+/* 기능별 */
+@import url('css/dailylog.css');
+
 /* 유틸리티 */
+@import url('css/toast.css');
 @import url('css/print.css');
 @import url('css/responsive.css');

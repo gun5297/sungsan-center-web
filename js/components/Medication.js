@@ -85,6 +85,10 @@ export function Medication() {
 
       <div class="form-consent">
         <label class="consent-check">
+          <input type="checkbox" id="medConsentHealth" />
+          <span><strong class="required-tag">[필수]</strong> 본 의뢰서에 기재된 건강 관련 정보(증상, 진단명, 약 정보, 알레르기 등)는 아동의 안전한 투약 관리를 위한 목적으로만 수집·이용되며, 작성일로부터 1년간 보관 후 파기됩니다. 이에 동의합니다.</span>
+        </label>
+        <label class="consent-check">
           <input type="checkbox" id="medConsent1" />
           <span><strong class="required-tag">[필수]</strong> 투약 시 발생할 수 있는 부작용(구토, 알레르기 반응, 졸음 등)에 대해 안내 받았으며, 부작용 발생 시 즉시 보호자에게 연락 후 투약을 중단함에 동의합니다.</span>
         </label>
@@ -102,14 +106,15 @@ export function Medication() {
         <p>위 아동에 대한 투약을 의뢰하며, 상기 안내사항을 모두 확인하였습니다.</p>
         <p class="form-date-line" id="medFormDate"></p>
         <div class="form-sign-row">
-          <span>의뢰인(보호자): ___________  (서명)</span>
+          <span>의뢰인(보호자): ___________</span>
+          <button class="edit-btn" onclick="openSignaturePad(function(d){ document.getElementById('medSignImg').src=d; document.getElementById('medSignImg').style.display='inline'; })">전자서명</button>
+          <img id="medSignImg" style="display:none;height:40px;vertical-align:middle;" />
         </div>
         <p class="form-to">성산지역아동센터장 귀하</p>
       </div>
 
       <div class="form-actions">
-        <button class="btn-upload" onclick="printMedication()">출력하기</button>
-        <button class="btn-secondary-sm" onclick="submitMedication()">온라인 제출</button>
+        <button class="btn-upload" onclick="submitMedication()">온라인 제출</button>
       </div>
     </div>
 

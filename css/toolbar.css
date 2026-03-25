@@ -127,6 +127,15 @@
   background: var(--primary-dark);
 }
 
+.toolbar-mysubmit {
+  color: var(--text-sub);
+}
+
+.toolbar-mysubmit:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
 .toolbar-mypage {
   color: var(--text-sub);
   text-decoration: none;
@@ -172,6 +181,13 @@ body.logged-in .guest-only {
 body.logged-in .logged-only,
 body.admin-mode .logged-only {
   display: block !important;
+}
+
+body.logged-in button.logged-only,
+body.logged-in a.logged-only,
+body.admin-mode button.logged-only,
+body.admin-mode a.logged-only {
+  display: inline-flex !important;
 }
 
 /* 관리자 모드 바 */

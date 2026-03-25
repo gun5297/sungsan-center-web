@@ -103,6 +103,10 @@
   #schedule .cal-event-tag {
     font-size: 0.5rem;
   }
+
+  #attendance .my-child-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 480px) {

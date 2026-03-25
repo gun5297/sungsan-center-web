@@ -1,0 +1,191 @@
+/* ===== Toast 알림 ===== */
+
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  pointer-events: none;
+  max-width: 90vw;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-radius: var(--radius-sm, 10px);
+  background: var(--card, #ffffff);
+  color: var(--text, #2d2319);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: var(--font, 'Pretendard', sans-serif);
+  box-shadow: 0 4px 20px rgba(45, 35, 25, 0.12);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: pre-line;
+  word-break: keep-all;
+  border: 1px solid var(--border, #ede6df);
+  min-width: 200px;
+  max-width: 400px;
+}
+
+.toast-show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-hide {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+.toast-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.toast-message {
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+/* 타입별 스타일 */
+.toast-success .toast-icon {
+  background: var(--success-light, #e8f5e9);
+  color: var(--success, #66bb6a);
+}
+
+.toast-error .toast-icon {
+  background: var(--danger-light, #fce4ec);
+  color: var(--danger, #ef5350);
+}
+
+.toast-warning .toast-icon {
+  background: var(--warning-light, #fff8e1);
+  color: var(--warning, #ffa726);
+}
+
+.toast-info .toast-icon {
+  background: var(--primary-light, #fff0eb);
+  color: var(--primary, #ff7854);
+}
+
+/* ===== 확인 모달 ===== */
+
+.confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.confirm-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.confirm-modal {
+  background: var(--card, #ffffff);
+  border-radius: 16px;
+  padding: 28px 24px 20px;
+  max-width: 340px;
+  width: 85%;
+  box-shadow: 0 8px 30px rgba(45, 35, 25, 0.15);
+  transform: translateY(12px) scale(0.97);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.confirm-active .confirm-modal {
+  transform: translateY(0) scale(1);
+}
+
+.confirm-message {
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: var(--font, 'Pretendard', sans-serif);
+  color: var(--text, #2d2319);
+  line-height: 1.6;
+  text-align: center;
+  word-break: keep-all;
+  letter-spacing: -0.01em;
+  white-space: pre-line;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.confirm-btn {
+  flex: 1;
+  padding: 12px 0;
+  border: none;
+  border-radius: var(--radius-sm, 10px);
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: var(--font, 'Pretendard', sans-serif);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: -0.01em;
+}
+
+.confirm-cancel {
+  background: var(--bg-sub, #faf5f0);
+  color: var(--text-sub, #8c7e72);
+}
+
+.confirm-cancel:hover {
+  background: var(--border, #ede6df);
+}
+
+.confirm-ok {
+  background: var(--primary, #ff7854);
+  color: #fff;
+}
+
+.confirm-ok:hover {
+  background: var(--primary-dark, #e85d3a);
+}
+
+/* ===== 모바일 대응 ===== */
+@media (max-width: 480px) {
+  .toast-container {
+    bottom: 16px;
+    max-width: calc(100vw - 32px);
+  }
+
+  .toast {
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    min-width: 160px;
+    max-width: 100%;
+  }
+
+  .confirm-modal {
+    width: 90%;
+    padding: 24px 20px 16px;
+  }
+}

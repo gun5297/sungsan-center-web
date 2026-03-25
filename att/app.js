@@ -6,6 +6,9 @@ import { MainScreen } from './components/MainScreen.js';
 import { SuccessScreen } from './components/SuccessScreen.js';
 import { AdminScreen } from './components/AdminScreen.js';
 
+// 데이터 초기화 (Firestore 마이그레이션)
+import { initData } from './data.js';
+
 // 훅 (import하면 window 노출 자동 등록)
 import { showScreen } from './hooks/useScreen.js';
 import './hooks/useLock.js';
@@ -27,5 +30,10 @@ document.getElementById('app').innerHTML =
   '<button class="admin-toggle" id="adminToggle" onclick="goAdmin()">관리</button>';
 
 // 초기화
+initData().then(() => {
+  console.log('[att/app] Firestore 데이터 초기화 완료');
+}).catch(e => {
+  console.warn('[att/app] Firestore 초기화 실패 (localStorage 폴백 사용):', e);
+});
 initClock();
 initNavigation();

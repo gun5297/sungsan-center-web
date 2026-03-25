@@ -120,3 +120,97 @@
   line-height: 1.5;
   letter-spacing: -0.01em;
 }
+
+/* ===== 관리자 대시보드 ===== */
+#hero .dashboard {
+  max-width: 900px;
+  margin: 32px auto 0;
+  padding: 0 24px;
+}
+
+#hero .dashboard-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+#hero .dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+#hero .dash-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 16px;
+  text-align: center;
+  transition: all var(--transition);
+}
+
+#hero .dash-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: transparent;
+}
+
+#hero .dash-icon {
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+}
+
+#hero .dash-value {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--primary);
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+
+#hero .dash-label {
+  font-size: 0.8rem;
+  color: var(--text-sub);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+#hero .dashboard-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+#hero .dashboard-actions .btn-primary,
+#hero .dashboard-actions .btn-secondary {
+  padding: 12px 28px;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  #hero .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  #hero .dash-card {
+    padding: 18px 12px;
+  }
+
+  #hero .dash-value {
+    font-size: 1.5rem;
+  }
+
+  #hero .dashboard-actions {
+    flex-direction: column;
+  }
+
+  #hero .dashboard-actions .btn-primary,
+  #hero .dashboard-actions .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+}

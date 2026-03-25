@@ -55,21 +55,7 @@
 
 #meal .edit-schedule-btn {
   padding: 10px 24px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--card);
-  color: var(--text-sub);
   font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: var(--font);
-  transition: all var(--transition);
-}
-
-#meal .edit-schedule-btn:hover {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
 }
 
 /* 식단 수정 모달 */
@@ -192,28 +178,6 @@
   flex: 1;
   padding: 14px;
   margin-top: 0;
-}
-
-.meal-editor-modal .month-btn {
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  background: var(--card);
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: var(--font);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition);
-}
-
-.meal-editor-modal .month-btn:hover {
-  background: var(--bg-sub);
-  border-color: var(--primary);
-  color: var(--primary);
 }
 
 .meal-editor-modal .month-label {

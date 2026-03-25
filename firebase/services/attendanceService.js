@@ -71,3 +71,22 @@ export async function getRecordsByDate(dateKey) {
   const snap = await getDoc(ref);
   return snap.exists() ? snap.data().records : {};
 }
+
+// 월별 출결 조회 (리포트용) — 해당 월의 모든 날짜 문서 조회
+export async function getRecordsByMonth(year, month) {
+  const results = {};
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const pad = (n) => String(n).padStart(2, '0');
+
+  const promises = [];
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = `${year}-${pad(month)}-${pad(d)}`;
+    promises.push(
+      getRecordsByDate(key).then(records => {
+        if (Object.keys(records).length > 0) results[key] = records;
+      })
+    );
+  }
+  await Promise.all(promises);
+  return results;
+}

@@ -23,6 +23,8 @@ export function subscribeNotices(callback) {
   return onSnapshot(q, (snapshot) => {
     const notices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     callback(notices);
+  }, (error) => {
+    console.error('공지 구독 오류:', error);
   });
 }
 

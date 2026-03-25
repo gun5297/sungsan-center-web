@@ -81,6 +81,10 @@ export function Absence() {
 
       <div class="form-consent">
         <label class="consent-check">
+          <input type="checkbox" id="absConsentHealth" />
+          <span><strong class="required-tag">[필수]</strong> 본 신청서에 기재된 건강 관련 정보(진단명, 병원명 등)는 아동의 안전한 돌봄을 위한 목적으로만 수집·이용되며, 퇴소 후 3년간 보관 후 파기됩니다. 이에 동의합니다.</span>
+        </label>
+        <label class="consent-check">
           <input type="checkbox" id="absConsent" />
           <span><strong class="required-tag">[필수]</strong> 본인은 아동의 보호자로서 위 내용이 사실임을 확인하며, 센터 운영규정에 따라 사전 통보 없는 결석이 반복될 경우 이용에 제한이 있을 수 있음을 안내받았습니다.</span>
         </label>
@@ -90,14 +94,15 @@ export function Absence() {
         <p>위와 같은 사유로 조퇴/결석을 신청합니다.</p>
         <p class="form-date-line" id="absFormDate"></p>
         <div class="form-sign-row">
-          <span>신청인(보호자): <span id="absSignName">___________</span> (서명)</span>
+          <span>신청인(보호자): <span id="absSignName">___________</span></span>
+          <button class="edit-btn" onclick="openSignaturePad(function(d){ document.getElementById('absSignImg').src=d; document.getElementById('absSignImg').style.display='inline'; })">전자서명</button>
+          <img id="absSignImg" style="display:none;height:40px;vertical-align:middle;" />
         </div>
         <p class="form-to">성산지역아동센터장 귀하</p>
       </div>
 
       <div class="form-actions">
-        <button class="btn-upload" onclick="printAbsence()">출력하기</button>
-        <button class="btn-secondary-sm" onclick="submitAbsence()">온라인 제출</button>
+        <button class="btn-upload" onclick="submitAbsence()">온라인 제출</button>
       </div>
     </div>
 

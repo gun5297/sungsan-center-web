@@ -28,12 +28,6 @@ export async function updatePasswords(data) {
   await setDoc(passwordsRef, data, { merge: true });
 }
 
-// 관리자 가입 비밀번호 확인
-export async function checkAdminPassword(input) {
-  const passwords = await getPasswords();
-  return input === passwords.adminSignup;
-}
-
 // 출석 패드 비밀번호 확인
 export async function checkAttendancePassword(input) {
   const passwords = await getPasswords();

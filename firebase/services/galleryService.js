@@ -24,6 +24,8 @@ export function subscribeGallery(callback) {
   return onSnapshot(q, (snapshot) => {
     const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     callback(items);
+  }, (error) => {
+    console.error('갤러리 구독 오류:', error);
   });
 }
 

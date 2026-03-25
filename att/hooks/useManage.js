@@ -1,32 +1,38 @@
-// ===== 아동 관리 (CRUD) =====
+// ===== 아동 관리 (CRUD) — Firestore 연동 =====
 
-import { ATT_PASSWORD, getStudents, saveStudents } from '../data.js';
+import { ATT_PASSWORD, getStudents, createStudent, updateStudent, deleteStudentFs, getAllStudents } from '../data.js';
 
 let manageUnlocked = false;
 let editingStudentId = null;
+// Firestore docId를 매핑 (studentId → docId)
+let editingDocId = null;
 
-function renderStudentList() {
-  const students = getStudents();
-  const list = document.getElementById('manageStudentList');
+async function renderStudentList() {
+  try {
+    const students = await getStudents();
+    const list = document.getElementById('manageStudentList');
 
-  if (students.length === 0) {
-    list.innerHTML = '<div class="manage-empty">등록된 아동이 없습니다</div>';
-    return;
+    if (students.length === 0) {
+      list.innerHTML = '<div class="manage-empty">등록된 아동이 없습니다</div>';
+      return;
+    }
+
+    list.innerHTML = students.map(s => `
+      <div class="manage-row">
+        <div class="manage-row-id">${s.id}</div>
+        <div class="manage-row-info">
+          <div class="manage-row-name">${s.name}</div>
+          <div class="manage-row-detail">${s.school} · ${s.parent}</div>
+        </div>
+        <div class="manage-row-actions">
+          <button class="manage-edit-btn" onclick="editStudent('${s.id}')">수정</button>
+          <button class="manage-del-btn" onclick="deleteStudent('${s.id}')">삭제</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    console.error('[useManage] renderStudentList 실패:', e);
   }
-
-  list.innerHTML = students.map(s => `
-    <div class="manage-row">
-      <div class="manage-row-id">${s.id}</div>
-      <div class="manage-row-info">
-        <div class="manage-row-name">${s.name}</div>
-        <div class="manage-row-detail">${s.school} · ${s.parent}</div>
-      </div>
-      <div class="manage-row-actions">
-        <button class="manage-edit-btn" onclick="editStudent('${s.id}')">수정</button>
-        <button class="manage-del-btn" onclick="deleteStudent('${s.id}')">삭제</button>
-      </div>
-    </div>
-  `).join('');
 }
 
 function clearStudentForm() {
@@ -50,7 +56,7 @@ export function unlockManage() {
   }
 }
 
-export function addStudent() {
+export async function addStudent() {
   const id = document.getElementById('stuId').value.trim().padStart(4, '0');
   const name = document.getElementById('stuName').value.trim();
   const school = document.getElementById('stuSchool').value.trim();
@@ -61,62 +67,91 @@ export function addStudent() {
     return;
   }
 
-  const students = getStudents();
+  try {
+    const students = await getStudents();
 
-  if (editingStudentId) {
-    const idx = students.findIndex(s => s.id === editingStudentId);
-    if (idx !== -1) {
+    if (editingStudentId) {
+      // 수정 모드
       if (id !== editingStudentId && students.some(s => s.id === id)) {
         alert('이미 사용 중인 번호입니다.');
         return;
       }
-      students[idx] = { id, name, school, parent };
-    }
-    editingStudentId = null;
-    document.getElementById('stuSubmitBtn').textContent = '추가';
-    document.getElementById('stuCancelBtn').classList.add('hidden');
-  } else {
-    if (students.some(s => s.id === id)) {
-      alert('이미 사용 중인 번호입니다.');
-      return;
-    }
-    students.push({ id, name, school, parent });
-  }
 
-  saveStudents(students);
-  clearStudentForm();
-  renderStudentList();
+      if (editingDocId) {
+        // Firestore 문서 업데이트
+        await updateStudent(editingDocId, { id, name, school, parent });
+      }
+
+      editingStudentId = null;
+      editingDocId = null;
+      document.getElementById('stuSubmitBtn').textContent = '추가';
+      document.getElementById('stuCancelBtn').classList.add('hidden');
+    } else {
+      // 추가 모드
+      if (students.some(s => s.id === id)) {
+        alert('이미 사용 중인 번호입니다.');
+        return;
+      }
+      await createStudent({ id, name, school, parent });
+    }
+
+    clearStudentForm();
+    // Firestore 구독이 자동으로 캐시를 갱신하므로 약간의 지연 후 렌더
+    setTimeout(() => renderStudentList(), 500);
+  } catch (e) {
+    console.error('[useManage] addStudent 실패:', e);
+    alert('저장에 실패했습니다. 다시 시도해주세요.');
+  }
 }
 
-export function editStudent(id) {
-  const students = getStudents();
-  const s = students.find(st => st.id === id);
-  if (!s) return;
+export async function editStudent(id) {
+  try {
+    const students = await getStudents();
+    const s = students.find(st => st.id === id);
+    if (!s) return;
 
-  editingStudentId = id;
-  document.getElementById('stuId').value = s.id;
-  document.getElementById('stuName').value = s.name;
-  document.getElementById('stuSchool').value = s.school;
-  document.getElementById('stuParent').value = s.parent;
-  document.getElementById('stuSubmitBtn').textContent = '저장';
-  document.getElementById('stuCancelBtn').classList.remove('hidden');
+    editingStudentId = id;
+    editingDocId = s.docId || null; // Firestore 문서 ID
+    document.getElementById('stuId').value = s.id;
+    document.getElementById('stuName').value = s.name;
+    document.getElementById('stuSchool').value = s.school;
+    document.getElementById('stuParent').value = s.parent;
+    document.getElementById('stuSubmitBtn').textContent = '저장';
+    document.getElementById('stuCancelBtn').classList.remove('hidden');
 
-  document.querySelector('.manage-form').scrollIntoView({ behavior: 'smooth' });
+    document.querySelector('.manage-form').scrollIntoView({ behavior: 'smooth' });
+  } catch (e) {
+    console.error('[useManage] editStudent 실패:', e);
+  }
 }
 
 export function cancelEditStudent() {
   editingStudentId = null;
+  editingDocId = null;
   document.getElementById('stuSubmitBtn').textContent = '추가';
   document.getElementById('stuCancelBtn').classList.add('hidden');
   clearStudentForm();
 }
 
-export function deleteStudent(id) {
+export async function deleteStudent(id) {
   if (!confirm('이 아동을 삭제하시겠습니까?')) return;
-  let students = getStudents();
-  students = students.filter(s => s.id !== id);
-  saveStudents(students);
-  renderStudentList();
+
+  try {
+    const students = await getStudents();
+    const s = students.find(st => st.id === id);
+    if (!s) return;
+
+    if (s.docId) {
+      // Firestore에서 삭제
+      await deleteStudentFs(s.docId);
+    }
+
+    // Firestore 구독이 자동으로 캐시를 갱신하므로 약간의 지연 후 렌더
+    setTimeout(() => renderStudentList(), 500);
+  } catch (e) {
+    console.error('[useManage] deleteStudent 실패:', e);
+    alert('삭제에 실패했습니다. 다시 시도해주세요.');
+  }
 }
 
 // window 노출

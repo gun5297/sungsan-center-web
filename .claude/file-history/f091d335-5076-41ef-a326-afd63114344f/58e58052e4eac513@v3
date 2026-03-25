@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>성산지역아동센터 출결</title>
+  <link rel="stylesheet" href="attendance.css" />
+</head>
+<body>
+
+  <!-- 잠금 화면: 비밀번호 입력 -->
+  <div class="screen" id="screenLock">
+    <div class="lock-content">
+      <div class="lock-icon">🔒</div>
+      <div class="lock-title">출결 시스템</div>
+      <div class="lock-subtitle">비밀번호를 입력하세요</div>
+      <div class="lock-dots" id="lockDots">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+      <div class="lock-error hidden" id="lockError">비밀번호가 틀렸습니다</div>
+      <div class="numpad lock-numpad">
+        <button class="num-btn" onclick="pressLock('1')">1</button>
+        <button class="num-btn" onclick="pressLock('2')">2</button>
+        <button class="num-btn" onclick="pressLock('3')">3</button>
+        <button class="num-btn" onclick="pressLock('4')">4</button>
+        <button class="num-btn" onclick="pressLock('5')">5</button>
+        <button class="num-btn" onclick="pressLock('6')">6</button>
+        <button class="num-btn" onclick="pressLock('7')">7</button>
+        <button class="num-btn" onclick="pressLock('8')">8</button>
+        <button class="num-btn" onclick="pressLock('9')">9</button>
+        <button class="num-btn fn-btn" onclick="pressLockDelete()">지우기</button>
+        <button class="num-btn" onclick="pressLock('0')">0</button>
+        <button class="num-btn fn-btn confirm-btn" onclick="pressLockConfirm()">확인</button>
+      </div>
+      <a class="lock-back-link" href="index.html">← 메인으로 돌아가기</a>
+    </div>
+  </div>
+
+  <!-- 메인 화면: 번호 입력 -->
+  <div class="screen hidden" id="screenMain">
+    <div class="top-bar">
+      <div class="center-name">성산지역아동센터</div>
+      <div class="clock" id="clock"></div>
+    </div>
+
+    <div class="main-content">
+      <div class="greeting" id="greeting">번호를 입력하세요</div>
+
+      <div class="input-display">
+        <div class="input-dots" id="inputDots">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+        <div class="input-number" id="inputNumber"></div>
+      </div>
+
+      <div class="numpad">
+        <button class="num-btn" onclick="pressNum('1')">1</button>
+        <button class="num-btn" onclick="pressNum('2')">2</button>
+        <button class="num-btn" onclick="pressNum('3')">3</button>
+        <button class="num-btn" onclick="pressNum('4')">4</button>
+        <button class="num-btn" onclick="pressNum('5')">5</button>
+        <button class="num-btn" onclick="pressNum('6')">6</button>
+        <button class="num-btn" onclick="pressNum('7')">7</button>
+        <button class="num-btn" onclick="pressNum('8')">8</button>
+        <button class="num-btn" onclick="pressNum('9')">9</button>
+        <button class="num-btn fn-btn" onclick="pressDelete()">지우기</button>
+        <button class="num-btn" onclick="pressNum('0')">0</button>
+        <button class="num-btn fn-btn confirm-btn" onclick="pressConfirm()">확인</button>
+      </div>
+    </div>
+
+    <!-- 하단 버튼들 -->
+    <a class="back-to-main" href="index.html">← 메인</a>
+  </div>
+
+  <!-- 성공 화면 -->
+  <div class="screen hidden" id="screenSuccess">
+    <div class="success-content">
+      <div class="success-icon" id="successIcon">✓</div>
+      <div class="success-name" id="successName"></div>
+      <div class="success-type" id="successType"></div>
+      <div class="success-time" id="successTime"></div>
+      <div class="success-sms" id="successSms"></div>
+    </div>
+  </div>
+
+  <!-- 관리 화면 -->
+  <div class="screen hidden" id="screenAdmin">
+    <div class="admin-header">
+      <button class="admin-back" onclick="showScreen('screenMain')">← 돌아가기</button>
+      <h2>출결 관리</h2>
+      <div class="admin-date" id="adminDate"></div>
+    </div>
+
+    <!-- 탭 -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" id="tabRecords" onclick="switchAdminTab('records')">출결 기록</button>
+      <button class="admin-tab" id="tabManage" onclick="switchAdminTab('manage')">아동 관리</button>
+    </div>
+
+    <!-- 출결 기록 탭 (비밀번호 불필요) -->
+    <div class="admin-tab-content" id="panelRecords">
+      <div class="admin-summary" id="adminSummary"></div>
+      <div class="admin-list" id="adminList"></div>
+      <div class="admin-actions">
+        <button class="admin-btn" onclick="exportCSV()">엑셀 다운로드</button>
+        <button class="admin-btn danger" onclick="resetToday()">오늘 기록 초기화</button>
+      </div>
+    </div>
+
+    <!-- 아동 관리 탭 (비밀번호 필요) -->
+    <div class="admin-tab-content hidden" id="panelManage">
+      <!-- 비밀번호 게이트 -->
+      <div class="manage-lock" id="manageLock">
+        <div class="manage-lock-msg">아동 관리는 비밀번호가 필요합니다</div>
+        <div class="manage-lock-input">
+          <input type="password" id="managePw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')unlockManage()" />
+          <button class="manage-lock-btn" onclick="unlockManage()">확인</button>
+        </div>
+        <div class="manage-lock-error hidden" id="manageLockError">비밀번호가 틀렸습니다</div>
+      </div>
+
+      <!-- 잠금 해제 후 표시 -->
+      <div class="manage-unlocked hidden" id="manageUnlocked">
+        <!-- 아동 추가 폼 -->
+        <div class="manage-form">
+          <h3>아동 등록</h3>
+          <div class="manage-form-row">
+            <div class="manage-form-group">
+              <label>번호 (4자리)</label>
+              <input type="text" id="stuId" maxlength="4" placeholder="0001" />
+            </div>
+            <div class="manage-form-group">
+              <label>이름</label>
+              <input type="text" id="stuName" placeholder="홍길동" />
+            </div>
+          </div>
+          <div class="manage-form-row">
+            <div class="manage-form-group">
+              <label>학교/학년</label>
+              <input type="text" id="stuSchool" placeholder="증산초 1학년" />
+            </div>
+            <div class="manage-form-group">
+              <label>보호자 연락처</label>
+              <input type="text" id="stuParent" placeholder="010-1234-5678" />
+            </div>
+          </div>
+          <div class="manage-form-actions">
+            <button class="manage-add-btn" id="stuSubmitBtn" onclick="addStudent()">추가</button>
+            <button class="manage-cancel-btn hidden" id="stuCancelBtn" onclick="cancelEditStudent()">취소</button>
+          </div>
+        </div>
+
+        <!-- 아동 목록 -->
+        <div class="manage-student-list" id="manageStudentList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 관리자 버튼 (좌하단) -->
+  <button class="admin-toggle" id="adminToggle" onclick="goAdmin()">관리</button>
+
+  <script src="attendance.js"></script>
+</body>
+</html>

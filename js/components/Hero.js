@@ -35,6 +35,38 @@ export function Hero() {
     </div>
   </div>
 
+  <!-- 관리자 대시보드 (admin-only) -->
+  <div class="dashboard admin-only" id="dashboard">
+    <h2 class="dashboard-title">오늘의 요약</h2>
+    <div class="dashboard-grid">
+      <div class="dash-card" id="dashAttendance">
+        <div class="dash-icon">&#128101;</div>
+        <div class="dash-value" id="dashAttVal">-</div>
+        <div class="dash-label">오늘 출석</div>
+      </div>
+      <div class="dash-card" id="dashInbox">
+        <div class="dash-icon">&#128196;</div>
+        <div class="dash-value" id="dashInboxVal">-</div>
+        <div class="dash-label">미확인 서류</div>
+      </div>
+      <div class="dash-card" id="dashMed">
+        <div class="dash-icon">&#128138;</div>
+        <div class="dash-value" id="dashMedVal">-</div>
+        <div class="dash-label">투약 중</div>
+      </div>
+      <div class="dash-card" id="dashMeal">
+        <div class="dash-icon">&#127858;</div>
+        <div class="dash-value" id="dashMealVal">-</div>
+        <div class="dash-label">오늘 식단</div>
+      </div>
+    </div>
+    <div class="dashboard-actions">
+      <button class="btn-primary" onclick="openDailyLogEditor()">활동 일지 작성</button>
+      <button class="btn-secondary" onclick="openDailyLogList()">일지 목록 보기</button>
+    </div>
+  </div>
+
+  <div style="height:40px;"></div>
   <div class="divider"></div>
   </div>
   `;

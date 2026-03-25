@@ -35,29 +35,15 @@ export function SignupForm() {
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">연락처</label>
-              <input type="tel" id="signupPhone" class="input-field" placeholder="010-0000-0000" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">직책</label>
-              <select id="signupRole" class="input-field select-field" onchange="toggleAdminPwField()">
-                <option value="general">일반 (학부모)</option>
-                <option value="admin">관리자</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group" id="adminPasswordGroup" style="display:none;">
-            <label class="form-label">관리자 인증 비밀번호</label>
-            <input type="password" id="signupAdminPw" class="input-field" placeholder="관리자 인증 비밀번호 입력" />
+          <div class="form-group">
+            <label class="form-label">연락처</label>
+            <input type="tel" id="signupPhone" class="input-field" placeholder="010-0000-0000" />
           </div>
 
           <div class="form-consent">
             <label class="consent-check">
               <input type="checkbox" id="signupConsent" />
-              <span><strong class="required-tag">[필수]</strong> 센터 운영을 위해 개인정보(이름, 이메일, 연락처)를 수집·이용하는 것에 동의합니다.</span>
+              <span><strong class="required-tag">[필수]</strong> 개인정보 수집·이용 동의: 센터 이용자 관리 및 소통을 위해 이름, 이메일, 연락처, 직책 정보를 수집합니다. 수집된 정보는 회원 탈퇴 시까지 보관되며, 탈퇴 후 즉시 파기됩니다. <a href="privacy.html" target="_blank" style="color:var(--primary);text-decoration:underline;">개인정보처리방침 전문 보기</a></span>
             </label>
           </div>
 

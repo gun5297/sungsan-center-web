@@ -1,23 +1,41 @@
 // ===== 관리 화면 (출결 기록, 타임라인, CSV, 초기화) =====
 
-import { getStudents, getTodayRecords, saveTodayRecords, TODAY_KEY } from '../data.js';
+import { getStudents, getTodayRecords, saveTodayRecords, deleteStudentRecord, resetTodayRecords, subscribeTodayRecords } from '../data.js';
 
 let adminRefreshInterval = null;
+let unsubscribeRecords = null;
 
 export function startAdminRefresh() {
   if (adminRefreshInterval) return;
+  // 1초마다 SMS 타이머 카운트다운용 렌더링
   adminRefreshInterval = setInterval(() => {
     const panel = document.getElementById('panelRecords');
     if (panel && !panel.classList.contains('hidden')) {
-      renderTimeline();
+      renderTimelineFromCache();
     }
   }, 1000);
+
+  // Firestore 실시간 구독 — 데이터 변경 시 자동 갱신
+  if (!unsubscribeRecords) {
+    try {
+      unsubscribeRecords = subscribeTodayRecords((records) => {
+        cachedRecords = records;
+        renderAdminFromCache();
+      });
+    } catch (e) {
+      console.warn('[useAdmin] Firestore 구독 실패:', e);
+    }
+  }
 }
 
 export function stopAdminRefresh() {
   if (adminRefreshInterval) {
     clearInterval(adminRefreshInterval);
     adminRefreshInterval = null;
+  }
+  if (unsubscribeRecords) {
+    unsubscribeRecords();
+    unsubscribeRecords = null;
   }
 }
 
@@ -32,15 +50,41 @@ export function switchAdminTab(tab) {
   }
 }
 
-export function renderAdmin() {
+// 캐시된 데이터 (Firestore 구독 + 1초 렌더링에 사용)
+let cachedStudents = null;
+let cachedRecords = null;
+
+export async function renderAdmin() {
   const now = new Date();
   const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
   document.getElementById('adminDate').textContent =
     `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${dayNames[now.getDay()]})`;
 
-  const students = getStudents();
-  const records = getTodayRecords();
+  try {
+    const [students, records] = await Promise.all([getStudents(), getTodayRecords()]);
+    cachedStudents = students;
+    cachedRecords = records;
+    renderSummary(students, records);
+    renderTimeline(students, records);
+  } catch (e) {
+    console.error('[useAdmin] renderAdmin 실패:', e);
+  }
+}
 
+// 캐시 기반 렌더 (Firestore 구독 콜백용)
+function renderAdminFromCache() {
+  if (!cachedStudents || !cachedRecords) return;
+  renderSummary(cachedStudents, cachedRecords);
+  renderTimeline(cachedStudents, cachedRecords);
+}
+
+// 캐시 기반 타임라인만 렌더 (1초 카운트다운용)
+function renderTimelineFromCache() {
+  if (!cachedStudents || !cachedRecords) return;
+  renderTimeline(cachedStudents, cachedRecords);
+}
+
+function renderSummary(students, records) {
   let inCount = 0, outCount = 0, absentCount = 0;
   students.forEach(s => {
     const r = records[s.id];
@@ -63,13 +107,9 @@ export function renderAdmin() {
       <div class="summary-label">미출석</div>
     </div>
   `;
-
-  renderTimeline();
 }
 
-function renderTimeline() {
-  const students = getStudents();
-  const records = getTodayRecords();
+function renderTimeline(students, records) {
   const now = Date.now();
 
   const checkedIn = students
@@ -119,47 +159,61 @@ function renderTimeline() {
   }).join('');
 }
 
-export function cancelAttendance(studentId) {
-  const records = getTodayRecords();
-  if (!records[studentId]) return;
-  const elapsed = records[studentId].inTs ? Date.now() - records[studentId].inTs : Infinity;
-  if (elapsed >= 60000) return;
-  if (!confirm('출석을 취소하시겠습니까?\n문자 발송도 취소됩니다.')) return;
-  delete records[studentId];
-  saveTodayRecords(records);
-  renderAdmin();
+export async function cancelAttendance(studentId) {
+  try {
+    const records = await getTodayRecords();
+    if (!records[studentId]) return;
+    const elapsed = records[studentId].inTs ? Date.now() - records[studentId].inTs : Infinity;
+    if (elapsed >= 60000) return;
+    if (!confirm('출석을 취소하시겠습니까?\n문자 발송도 취소됩니다.')) return;
+    await deleteStudentRecord(studentId);
+    await renderAdmin();
+  } catch (e) {
+    console.error('[useAdmin] cancelAttendance 실패:', e);
+    alert('출석 취소에 실패했습니다.');
+  }
 }
 
-export function exportCSV() {
-  const students = getStudents();
-  const records = getTodayRecords();
-  const today = new Date().toISOString().split('T')[0];
+export async function exportCSV() {
+  try {
+    const [students, records] = await Promise.all([getStudents(), getTodayRecords()]);
+    const today = new Date().toISOString().split('T')[0];
 
-  let csv = '번호,이름,학교,등원시간,하원시간,상태,보호자연락처\n';
-  students.forEach(s => {
-    const r = records[s.id];
-    let status, inTime, outTime;
-    if (!r) {
-      status = '미출석'; inTime = ''; outTime = '';
-    } else if (r.outTime) {
-      status = '하원완료'; inTime = r.inTime; outTime = r.outTime;
-    } else {
-      status = '출석중'; inTime = r.inTime; outTime = '';
-    }
-    csv += `${s.id},${s.name},${s.school},${inTime},${outTime},${status},${s.parent}\n`;
-  });
+    let csv = '번호,이름,학교,등원시간,하원시간,상태,보호자연락처\n';
+    students.forEach(s => {
+      const r = records[s.id];
+      let status, inTime, outTime;
+      if (!r) {
+        status = '미출석'; inTime = ''; outTime = '';
+      } else if (r.outTime) {
+        status = '하원완료'; inTime = r.inTime; outTime = r.outTime;
+      } else {
+        status = '출석중'; inTime = r.inTime; outTime = '';
+      }
+      csv += `${s.id},${s.name},${s.school},${inTime},${outTime},${status},${s.parent}\n`;
+    });
 
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `출결기록_${today}.csv`;
-  link.click();
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `출결기록_${today}.csv`;
+    link.click();
+  } catch (e) {
+    console.error('[useAdmin] exportCSV 실패:', e);
+    alert('CSV 내보내기에 실패했습니다.');
+  }
 }
 
-export function resetToday() {
+export async function resetToday() {
   if (confirm('오늘 출결 기록을 모두 삭제하시겠습니까?')) {
-    localStorage.removeItem(TODAY_KEY);
-    renderAdmin();
+    try {
+      await resetTodayRecords();
+      cachedRecords = {};
+      await renderAdmin();
+    } catch (e) {
+      console.error('[useAdmin] resetToday 실패:', e);
+      alert('초기화에 실패했습니다.');
+    }
   }
 }
 

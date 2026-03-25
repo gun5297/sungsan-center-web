@@ -24,6 +24,9 @@ export function LoginForm() {
 
         <button class="btn-upload" onclick="doLogin()">로그인</button>
 
+        <div class="auth-links" style="margin-bottom:8px;">
+          <a href="reset-password.html">비밀번호를 잊으셨나요?</a>
+        </div>
         <div class="auth-links">
           <a href="signup.html">회원가입</a>
           <span class="auth-sep">|</span>

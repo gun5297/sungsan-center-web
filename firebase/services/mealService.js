@@ -1,34 +1,32 @@
 // ===== 식단표 Firestore 서비스 =====
 // 전환 대상: js/hooks/useMeal.js
 //
-// 현재: sampleMeals 객체 (정적 데모)
-// 전환: Firestore meals 컬렉션 (주별 문서)
+// 현재: localStorage mealData (날짜별 키)
+// 전환: Firestore meals/data 단일 문서
 //
-// 문서 구조: { weekKey: "2026-W13", lunch: [...], snack: [...] }
-// weekKey = ISO 주차 또는 "YYYY-MM-DD" (월요일 기준)
+// 문서 구조: meals/data = { "2026-03-25": { lunch, snack }, ... }
 
-import { mealsCol } from '../collections.js';
 import {
   doc, getDoc, setDoc, onSnapshot
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from '../config.js';
 
-// 특정 주 식단 조회
-export async function getMealByWeek(weekKey) {
-  const ref = doc(db, 'meals', weekKey);
+// 전체 식단 데이터 조회
+export async function getMealData() {
+  const ref = doc(db, 'meals', 'data');
   const snap = await getDoc(ref);
   return snap.exists() ? snap.data() : null;
 }
 
-// 특정 주 식단 저장/수정 (관리자)
-export async function saveMeal(weekKey, { lunch, snack }) {
-  const ref = doc(db, 'meals', weekKey);
-  return await setDoc(ref, { weekKey, lunch, snack }, { merge: true });
+// 전체 식단 데이터 저장 (덮어쓰기)
+export async function saveMealData(data) {
+  const ref = doc(db, 'meals', 'data');
+  return await setDoc(ref, data);
 }
 
-// 실시간 구독 (특정 주)
-export function subscribeMeal(weekKey, callback) {
-  const ref = doc(db, 'meals', weekKey);
+// 실시간 구독
+export function subscribeMealData(callback) {
+  const ref = doc(db, 'meals', 'data');
   return onSnapshot(ref, (snap) => {
     callback(snap.exists() ? snap.data() : null);
   });

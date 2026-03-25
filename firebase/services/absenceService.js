@@ -17,6 +17,8 @@ export function subscribeAbsences(callback) {
   return onSnapshot(q, (snapshot) => {
     const records = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     callback(records);
+  }, (error) => {
+    console.error('결석 구독 오류:', error);
   });
 }
 
@@ -30,7 +32,7 @@ export async function getAbsences() {
 // 제출
 export async function createAbsence({ type, name, birth, school, guardian, reason, from, to, phone, date }) {
   return await addDoc(absencesCol, {
-    type, name, birth, school, guardian, reason, from, to, phone, date,
+    type, name, birth: birth || '', school: school || '', guardian: guardian || '', reason, from, to: to || from, phone: phone || '', date,
     createdAt: serverTimestamp()
   });
 }

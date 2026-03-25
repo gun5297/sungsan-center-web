@@ -48,10 +48,10 @@ function showSuccess(student, type, typeLabel, timeStr) {
   }, 3000);
 }
 
-function recordAttendance(student) {
+async function recordAttendance(student) {
   const now = new Date();
   const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  const records = getTodayRecords();
+  const records = await getTodayRecords();
 
   let type, typeLabel;
 
@@ -71,7 +71,7 @@ function recordAttendance(student) {
     typeLabel = '하원 시간 수정';
   }
 
-  saveTodayRecords(records);
+  await saveTodayRecords(records);
   playBell(type);
   showSuccess(student, type, typeLabel, timeStr);
 }
@@ -87,11 +87,11 @@ export function pressDelete() {
   updateDisplay();
 }
 
-export function pressConfirm() {
+export async function pressConfirm() {
   if (inputCode.length === 0) return;
 
   const code = inputCode.padStart(4, '0');
-  const students = getStudents();
+  const students = await getStudents();
   const student = students.find(s => s.id === code);
 
   if (!student) {
@@ -99,7 +99,7 @@ export function pressConfirm() {
     return;
   }
 
-  recordAttendance(student);
+  await recordAttendance(student);
 }
 
 // window 노출

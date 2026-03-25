@@ -1,11 +1,18 @@
 // ===== useAdmin: Firebase Auth + Firestore 역할 기반 관리자 =====
 import { getIsAdmin, setIsAdmin, setCurrentUser, setUserRole, canManage } from '../state.js';
 import { logout, onAuthChange } from '../../firebase/auth.js';
-import { getUserDoc, createUserDoc, hasNoDirector } from '../../firebase/services/userService.js';
+import { getUserDoc, createUserDoc, hasNoDirector, isAdminRole } from '../../firebase/services/userService.js';
+import { subscribeTodayRecords } from '../../firebase/services/attendanceService.js';
+import { getAllStudents } from '../../firebase/services/studentService.js';
 
-// 관리자 역할 판별 헬퍼 (admin + 레거시 director/teacher/social_worker)
-function isAdminRole(role) {
-  return role === 'admin' || role === 'director' || role === 'teacher' || role === 'social_worker';
+// 인증 상태 초기화 헬퍼
+function resetAuthState() {
+  setIsAdmin(false);
+  setCurrentUser(null);
+  setUserRole(null);
+  document.body.classList.remove('admin-mode', 'logged-in');
+  const btn = document.getElementById('toolbarAdminBtn');
+  if (btn) { btn.textContent = '로그인'; btn.classList.remove('logged-in'); }
 }
 
 // 관리자 상태 변경 시 재렌더링할 콜백 목록
@@ -22,12 +29,7 @@ function reRenderAll() {
 export async function toggleAdminLogin() {
   if (getIsAdmin()) {
     await logout();
-    setIsAdmin(false);
-    setCurrentUser(null);
-    setUserRole(null);
-    document.body.classList.remove('admin-mode', 'logged-in');
-    const btn = document.getElementById('toolbarAdminBtn');
-    if (btn) { btn.textContent = '로그인'; btn.classList.remove('logged-in'); }
+    resetAuthState();
     reRenderAll();
     return;
   }
@@ -58,7 +60,7 @@ export function initAdmin() {
         // 미승인 계정 처리
         if (!userDoc.approved) {
           await logout();
-          alert('관리자의 승인을 기다리고 있습니다.');
+          showToast('관리자의 승인을 기다리고 있습니다.', 'info');
           return;
         }
 
@@ -80,25 +82,69 @@ export function initAdmin() {
         }
       } catch (e) {
         console.error('관리자 상태 확인 실패:', e);
-        // Firestore 오류 시 로그아웃 처리 (다음 로그인에서 재시도)
         await logout();
-        setIsAdmin(false);
-        setCurrentUser(null);
-        setUserRole(null);
-        document.body.classList.remove('admin-mode', 'logged-in');
-        if (btn) { btn.textContent = '로그인'; btn.classList.remove('logged-in'); }
+        resetAuthState();
       }
     } else {
-      setIsAdmin(false);
-      setCurrentUser(null);
-      setUserRole(null);
-      document.body.classList.remove('admin-mode', 'logged-in');
-      if (btn) { btn.textContent = '로그인'; btn.classList.remove('logged-in'); }
+      resetAuthState();
     }
 
     reRenderAll();
   });
 }
+
+// ===== 대시보드 데이터 로드 =====
+function initDashboard() {
+  // 오늘 출석 실시간 구독
+  subscribeTodayRecords((records) => {
+    const el = document.getElementById('dashAttVal');
+    if (el) {
+      const count = Object.values(records).filter(r => r.inTime).length;
+      el.textContent = count;
+    }
+  });
+
+  // 서류함 — inbox 구독은 useInbox에서 하므로, 간단히 DOM 업데이트
+  // inboxBadge가 이미 업데이트되므로 그 값을 복사
+  const observer = new MutationObserver(() => {
+    const badge = document.getElementById('inboxBadge');
+    const dashEl = document.getElementById('dashInboxVal');
+    if (badge && dashEl) dashEl.textContent = badge.textContent || '0';
+  });
+  const badge = document.getElementById('inboxBadge');
+  if (badge) observer.observe(badge, { childList: true, characterData: true, subtree: true });
+
+  // 투약 중 — medSchedule의 자식 수 감시
+  const medObs = new MutationObserver(() => {
+    const medEl = document.getElementById('medSchedule');
+    const dashMed = document.getElementById('dashMedVal');
+    if (medEl && dashMed) {
+      const cards = medEl.querySelectorAll('.med-card:not(.med-completed)');
+      dashMed.textContent = cards.length;
+    }
+  });
+  const medSchedule = document.getElementById('medSchedule');
+  if (medSchedule) medObs.observe(medSchedule, { childList: true, subtree: true });
+
+  // 오늘 식단 — 있는지 여부
+  const mealGrid = document.getElementById('mealGrid');
+  const dashMeal = document.getElementById('dashMealVal');
+  if (mealGrid && dashMeal) {
+    const todayCard = mealGrid.querySelector('.meal-card.today');
+    dashMeal.textContent = todayCard ? '등록됨' : '-';
+    new MutationObserver(() => {
+      const tc = mealGrid.querySelector('.meal-card.today');
+      dashMeal.textContent = tc ? '등록됨' : '-';
+    }).observe(mealGrid, { childList: true, subtree: true });
+  }
+}
+
+// 관리자 로그인 완료 후 대시보드 초기화
+onAdminRender(() => {
+  if (getIsAdmin() && document.getElementById('dashboard')) {
+    initDashboard();
+  }
+});
 
 // window에 노출
 window.toggleAdminLogin = toggleAdminLogin;

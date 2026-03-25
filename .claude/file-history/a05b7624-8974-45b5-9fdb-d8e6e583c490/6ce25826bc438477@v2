@@ -1,0 +1,414 @@
+// ===== Fade-up animation on scroll =====
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+// ===== 공지사항 / 가정통신문 =====
+let notices = [
+  {
+    id: 1,
+    title: '3월 현장학습 안내',
+    content: '안녕하세요, 해오름 아동센터입니다.\n\n3월 28일(금) 봄맞이 현장학습을 진행합니다.\n\n장소: OO공원\n시간: 오전 10시 ~ 오후 2시\n준비물: 도시락, 물, 돗자리\n\n참가 동의서를 3월 25일까지 제출해 주세요.\n\n감사합니다.',
+    category: '통신문',
+    date: '2026.03.22',
+    file: '현장학습_동의서.pdf'
+  },
+  {
+    id: 2,
+    title: '4월 특별활동 프로그램 변경 안내',
+    content: '안녕하세요.\n\n4월부터 특별활동 프로그램이 아래와 같이 변경됩니다.\n\n월요일: 미술 → 코딩교실\n수요일: 음악 (변동 없음)\n금요일: 체육 → 요리교실\n\n문의사항은 담임 선생님께 연락 주세요.',
+    category: '공지',
+    date: '2026.03.20',
+    file: null
+  },
+  {
+    id: 3,
+    title: '수족구병 주의 안내',
+    content: '최근 수족구병이 유행하고 있습니다.\n\n아이에게 발열, 입안 물집, 손발 발진 등의 증상이 있을 경우 등원을 자제하시고 병원 진료를 받아주세요.\n\n센터 내 소독을 강화하고 있으며, 손씻기 지도를 철저히 하겠습니다.',
+    category: '긴급',
+    date: '2026.03.18',
+    file: null
+  }
+];
+
+let currentRole = 'teacher';
+
+function toggleRole(role) {
+  currentRole = role;
+  document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.role === role);
+  });
+  const form = document.getElementById('teacherForm');
+  form.querySelector('h3').textContent = role === 'teacher' ? '가정통신문 업로드' : '문의사항 작성';
+}
+
+// 파일 선택
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    document.getElementById('fileName').textContent = file.name;
+  }
+});
+
+function addNotice() {
+  const title = document.getElementById('noticeTitle').value.trim();
+  const content = document.getElementById('noticeContent').value.trim();
+  const category = document.getElementById('noticeCategory').value;
+  const fileInput = document.getElementById('fileInput');
+  const fileName = fileInput.files[0] ? fileInput.files[0].name : null;
+
+  if (!title || !content) {
+    alert('제목과 내용을 모두 입력해주세요.');
+    return;
+  }
+
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
+
+  notices.unshift({
+    id: Date.now(),
+    title,
+    content,
+    category,
+    date: dateStr,
+    file: fileName
+  });
+
+  document.getElementById('noticeTitle').value = '';
+  document.getElementById('noticeContent').value = '';
+  document.getElementById('fileName').textContent = '';
+  fileInput.value = '';
+
+  renderNotices();
+}
+
+function renderNotices() {
+  const list = document.getElementById('noticeList');
+  list.innerHTML = notices.map(n => `
+    <div class="notice-card" onclick="openNotice(${n.id})">
+      <div class="notice-header">
+        <span class="notice-badge type-${n.category}">${n.category}</span>
+        <span class="notice-date">${n.date}</span>
+      </div>
+      <div class="notice-title">${n.title}</div>
+      <div class="notice-preview">${n.content}</div>
+      ${n.file ? `<div class="notice-file">📎 ${n.file}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function openNotice(id) {
+  const notice = notices.find(n => n.id === id);
+  if (!notice) return;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <div class="modal-title">${notice.title}</div>
+      <div class="modal-meta">
+        <span class="notice-badge type-${notice.category}">${notice.category}</span>
+        <span class="notice-date">${notice.date}</span>
+      </div>
+      <div class="modal-body">${notice.content}</div>
+      ${notice.file ? `<div class="notice-file" style="margin-top:16px">📎 ${notice.file}</div>` : ''}
+      <button class="modal-close" onclick="closeModal(this)">닫기</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('active'));
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal(overlay.querySelector('.modal-close'));
+  });
+}
+
+function closeModal(btn) {
+  const overlay = btn.closest('.modal-overlay');
+  overlay.classList.remove('active');
+  setTimeout(() => overlay.remove(), 300);
+}
+
+renderNotices();
+
+// ===== 캘린더 / 시간표 =====
+let currentDate = new Date();
+let selectedDate = new Date();
+
+// 요일별 시간표 데이터
+const weekdaySchedule = {
+  1: [ // 월요일
+    { time: '09:00 ~ 09:30', name: '등원 및 자유놀이', type: '' },
+    { time: '09:30 ~ 10:00', name: '오전 간식', type: 'snack' },
+    { time: '10:00 ~ 11:00', name: '미술 활동', type: 'special' },
+    { time: '11:00 ~ 12:00', name: '실내 자유놀이', type: '' },
+    { time: '12:00 ~ 13:00', name: '점심 식사', type: 'meal' },
+    { time: '13:00 ~ 14:00', name: '낮잠 / 휴식', type: 'rest' },
+    { time: '14:00 ~ 15:00', name: '독서 활동', type: '' },
+    { time: '15:00 ~ 15:30', name: '오후 간식', type: 'snack' },
+    { time: '15:30 ~ 17:00', name: '숙제 지도', type: '' },
+    { time: '17:00 ~ 19:00', name: '자유놀이 및 하원', type: '' }
+  ],
+  2: [ // 화요일
+    { time: '09:00 ~ 09:30', name: '등원 및 자유놀이', type: '' },
+    { time: '09:30 ~ 10:00', name: '오전 간식', type: 'snack' },
+    { time: '10:00 ~ 11:00', name: '체육 활동', type: 'special' },
+    { time: '11:00 ~ 12:00', name: '실외 놀이', type: '' },
+    { time: '12:00 ~ 13:00', name: '점심 식사', type: 'meal' },
+    { time: '13:00 ~ 14:00', name: '낮잠 / 휴식', type: 'rest' },
+    { time: '14:00 ~ 15:00', name: '수학 활동', type: '' },
+    { time: '15:00 ~ 15:30', name: '오후 간식', type: 'snack' },
+    { time: '15:30 ~ 17:00', name: '숙제 지도', type: '' },
+    { time: '17:00 ~ 19:00', name: '자유놀이 및 하원', type: '' }
+  ],
+  3: [ // 수요일
+    { time: '09:00 ~ 09:30', name: '등원 및 자유놀이', type: '' },
+    { time: '09:30 ~ 10:00', name: '오전 간식', type: 'snack' },
+    { time: '10:00 ~ 11:00', name: '음악 활동', type: 'special' },
+    { time: '11:00 ~ 12:00', name: '실내 자유놀이', type: '' },
+    { time: '12:00 ~ 13:00', name: '점심 식사', type: 'meal' },
+    { time: '13:00 ~ 14:00', name: '낮잠 / 휴식', type: 'rest' },
+    { time: '14:00 ~ 15:00', name: '영어 활동', type: '' },
+    { time: '15:00 ~ 15:30', name: '오후 간식', type: 'snack' },
+    { time: '15:30 ~ 17:00', name: '숙제 지도', type: '' },
+    { time: '17:00 ~ 19:00', name: '자유놀이 및 하원', type: '' }
+  ],
+  4: [ // 목요일
+    { time: '09:00 ~ 09:30', name: '등원 및 자유놀이', type: '' },
+    { time: '09:30 ~ 10:00', name: '오전 간식', type: 'snack' },
+    { time: '10:00 ~ 11:00', name: '과학 탐구', type: 'special' },
+    { time: '11:00 ~ 12:00', name: '실외 놀이', type: '' },
+    { time: '12:00 ~ 13:00', name: '점심 식사', type: 'meal' },
+    { time: '13:00 ~ 14:00', name: '낮잠 / 휴식', type: 'rest' },
+    { time: '14:00 ~ 15:00', name: '독서 활동', type: '' },
+    { time: '15:00 ~ 15:30', name: '오후 간식', type: 'snack' },
+    { time: '15:30 ~ 17:00', name: '숙제 지도', type: '' },
+    { time: '17:00 ~ 19:00', name: '자유놀이 및 하원', type: '' }
+  ],
+  5: [ // 금요일
+    { time: '09:00 ~ 09:30', name: '등원 및 자유놀이', type: '' },
+    { time: '09:30 ~ 10:00', name: '오전 간식', type: 'snack' },
+    { time: '10:00 ~ 11:00', name: '요리 활동', type: 'special' },
+    { time: '11:00 ~ 12:00', name: '실내 자유놀이', type: '' },
+    { time: '12:00 ~ 13:00', name: '점심 식사', type: 'meal' },
+    { time: '13:00 ~ 14:00', name: '낮잠 / 휴식', type: 'rest' },
+    { time: '14:00 ~ 15:00', name: '주간 정리 & 발표', type: '' },
+    { time: '15:00 ~ 15:30', name: '오후 간식', type: 'snack' },
+    { time: '15:30 ~ 17:00', name: '자유놀이', type: '' },
+    { time: '17:00 ~ 19:00', name: '하원', type: '' }
+  ]
+};
+
+function changeMonth(delta) {
+  currentDate.setMonth(currentDate.getMonth() + delta);
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const today = new Date();
+
+  document.getElementById('monthLabel').textContent = `${year}년 ${month + 1}월`;
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrev = new Date(year, month, 0).getDate();
+
+  let html = '';
+  const headers = ['일', '월', '화', '수', '목', '금', '토'];
+  headers.forEach(h => {
+    html += `<div class="cal-header">${h}</div>`;
+  });
+
+  // 이전 달
+  for (let i = firstDay - 1; i >= 0; i--) {
+    html += `<div class="cal-day other-month">${daysInPrev - i}</div>`;
+  }
+
+  // 이번 달
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(year, month, d);
+    const dayOfWeek = date.getDay();
+    const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+    const isSelected = d === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear();
+    const hasEvent = dayOfWeek >= 1 && dayOfWeek <= 5;
+
+    let classes = 'cal-day';
+    if (isToday) classes += ' today';
+    if (isSelected && !isToday) classes += ' selected';
+    if (hasEvent) classes += ' has-event';
+    if (dayOfWeek === 0) classes += ' sunday';
+    if (dayOfWeek === 6) classes += ' saturday';
+
+    html += `<div class="${classes}" onclick="selectDay(${d})">${d}</div>`;
+  }
+
+  // 다음 달
+  const totalCells = firstDay + daysInMonth;
+  const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let i = 1; i <= remaining; i++) {
+    html += `<div class="cal-day other-month">${i}</div>`;
+  }
+
+  document.getElementById('calendar').innerHTML = html;
+}
+
+function selectDay(day) {
+  selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+  renderCalendar();
+  renderDaySchedule();
+}
+
+function renderDaySchedule() {
+  const dayOfWeek = selectedDate.getDay();
+  const dateStr = `${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일`;
+  const dayNames = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+
+  document.getElementById('dayTitle').textContent = `${dateStr} (${dayNames[dayOfWeek]})`;
+
+  const schedule = weekdaySchedule[dayOfWeek];
+  const timetable = document.getElementById('timetable');
+
+  if (!schedule) {
+    timetable.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-sub);font-weight:600;">주말은 휴원입니다</div>';
+    return;
+  }
+
+  timetable.innerHTML = schedule.map(s => `
+    <div class="time-slot">
+      <div class="time-text">${s.time}</div>
+      <div class="time-dot ${s.type}"></div>
+      <div class="time-name">${s.name}</div>
+    </div>
+  `).join('');
+}
+
+renderCalendar();
+renderDaySchedule();
+
+// ===== 식단표 =====
+let mealWeekOffset = 0;
+
+const sampleMeals = {
+  lunch: [
+    '쌀밥\n된장찌개\n제육볶음\n시금치나물\n깍두기',
+    '잡곡밥\n미역국\n생선구이\n콩나물무침\n배추김치',
+    '쌀밥\n소고기무국\n계란말이\n오이무침\n깍두기',
+    '카레라이스\n유부장국\n과일샐러드\n단무지\n배추김치',
+    '비빔밥\n콩나물국\n돈까스\n양배추샐러드\n깍두기'
+  ],
+  snack: [
+    '우유\n고구마',
+    '딸기\n식빵',
+    '바나나\n요거트',
+    '우유\n쿠키',
+    '귤\n떡'
+  ]
+};
+
+function getWeekDates(offset) {
+  const today = new Date();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - today.getDay() + 1 + offset * 7);
+
+  const dates = [];
+  for (let i = 0; i < 5; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    dates.push(d);
+  }
+  return dates;
+}
+
+function changeMealWeek(delta) {
+  mealWeekOffset += delta;
+  renderMealGrid();
+}
+
+function renderMealGrid() {
+  const dates = getWeekDates(mealWeekOffset);
+  const dayNames = ['월', '화', '수', '목', '금'];
+  const today = new Date();
+
+  const startDate = dates[0];
+  const endDate = dates[4];
+  document.getElementById('mealWeekLabel').textContent =
+    `${startDate.getMonth() + 1}/${startDate.getDate()} ~ ${endDate.getMonth() + 1}/${endDate.getDate()}`;
+
+  document.getElementById('mealGrid').innerHTML = dates.map((d, i) => {
+    const isToday = d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+    return `
+      <div class="meal-card ${isToday ? 'today' : ''}">
+        <div class="meal-day">${dayNames[i]}</div>
+        <div class="meal-date">${d.getDate()}</div>
+        <div class="meal-type">점심</div>
+        <div class="meal-menu">${sampleMeals.lunch[i].replace(/\n/g, '<br>')}</div>
+        <div class="meal-type">간식</div>
+        <div class="meal-menu">${sampleMeals.snack[i].replace(/\n/g, '<br>')}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+renderMealGrid();
+
+// ===== 출석 현황 =====
+const students = [
+  { name: '김민준', status: 'present' },
+  { name: '이서윤', status: 'present' },
+  { name: '박도윤', status: 'present' },
+  { name: '최하은', status: 'absent' },
+  { name: '정예준', status: 'present' },
+  { name: '강지우', status: 'late' },
+  { name: '조수아', status: 'present' },
+  { name: '윤서준', status: 'present' },
+  { name: '임하린', status: 'present' },
+  { name: '한지호', status: 'absent' },
+  { name: '오시우', status: 'present' },
+  { name: '신예린', status: 'present' },
+  { name: '권도현', status: 'present' },
+  { name: '황수빈', status: 'present' },
+  { name: '배주원', status: 'late' },
+  { name: '류하윤', status: 'present' },
+];
+
+function renderAttendance() {
+  const present = students.filter(s => s.status === 'present').length;
+  const absent = students.filter(s => s.status === 'absent').length;
+  const late = students.filter(s => s.status === 'late').length;
+
+  document.getElementById('attendanceSummary').innerHTML = `
+    <div class="att-summary-card">
+      <div class="att-summary-number present">${present}</div>
+      <div class="att-summary-label">출석</div>
+    </div>
+    <div class="att-summary-card">
+      <div class="att-summary-number absent">${absent}</div>
+      <div class="att-summary-label">결석</div>
+    </div>
+    <div class="att-summary-card">
+      <div class="att-summary-number late">${late}</div>
+      <div class="att-summary-label">지각</div>
+    </div>
+  `;
+
+  const statusLabel = { present: '출석', absent: '결석', late: '지각' };
+
+  document.getElementById('attendanceList').innerHTML = students.map(s => `
+    <div class="att-item">
+      <div class="att-avatar ${s.status}">${s.name.charAt(0)}</div>
+      <div>
+        <div class="att-name">${s.name}</div>
+        <div class="att-status">${statusLabel[s.status]}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+renderAttendance();

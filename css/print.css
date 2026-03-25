@@ -4,6 +4,51 @@
 }
 
 @media print {
+  /* 불필요한 요소 숨기기 */
+  nav, .fixed-toolbar, .admin-bar, .bottom-tab-bar,
+  .divider, .form-actions, .admin-only,
+  .toolbar-fab, .toolbar-menu,
+  .section-tag, .section-desc,
+  #toast-container, .confirm-overlay,
+  .hero, .stats, .dashboard {
+    display: none !important;
+  }
+
+  /* 전자서명 이미지 출력 보장 */
+  #absSignImg, #medSignImg {
+    display: inline !important;
+    height: 50px !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* 폼 카드 출력 최적화 */
+  .form-card {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  body {
+    padding: 0 !important;
+  }
+
+  /* print-target 클래스가 있을 때: 해당 섹션만 표시 */
+  body.printing #app > section:not(.print-target),
+  body.printing #app > div:not(section) {
+    display: none !important;
+  }
+
+  body.printing .print-target {
+    display: block !important;
+    padding: 40px;
+  }
+
+  body.printing .print-target .section-title {
+    display: none !important;
+  }
+
+  /* .print-area 기반 인쇄 (기존 호환) */
   #app > *:not(.print-area) {
     display: none !important;
   }

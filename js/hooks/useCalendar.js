@@ -1,8 +1,15 @@
-// ===== useCalendar: 캘린더 & 학사일정 & 시간표 =====
+// ===== useCalendar: 캘린더 & 학사일정 & 시간표 (Firestore + localStorage 폴백) =====
 import { schoolEvents as baseEvents } from '../data/schoolEvents.js';
 import { getHolidays, mergeHolidays } from '../data/holidays.js';
 import { getDateKey } from '../utils.js';
 import { getIsAdmin } from '../state.js';
+import {
+  getWeekdaySchedule as firestoreGetWeekday,
+  saveWeekdaySchedule as firestoreSaveWeekday,
+  getDateSchedule as firestoreGetDate,
+  saveDateSchedule as firestoreSaveDate,
+  subscribeSchedules
+} from '../../firebase/services/scheduleService.js';
 
 let currentDate = new Date();
 let selectedDate = new Date();
@@ -14,7 +21,9 @@ let schoolEvents = { ...baseEvents };
 
 const DEFAULT_SCHEDULE = { 1: [], 2: [], 3: [], 4: [], 5: [] };
 
-function loadWeekdaySchedule() {
+// ===== localStorage 폴백 =====
+
+function loadLocalWeekdaySchedule() {
   try {
     const saved = localStorage.getItem('weekdaySchedule');
     if (!saved) return JSON.parse(JSON.stringify(DEFAULT_SCHEDULE));
@@ -26,23 +35,43 @@ function loadWeekdaySchedule() {
   } catch { return JSON.parse(JSON.stringify(DEFAULT_SCHEDULE)); }
 }
 
-function saveWeekdaySchedule() {
-  localStorage.setItem('weekdaySchedule', JSON.stringify(weekdaySchedule));
+function saveLocalWeekdaySchedule(data) {
+  localStorage.setItem('weekdaySchedule', JSON.stringify(data));
 }
 
-function loadDateSchedule() {
+function loadLocalDateSchedule() {
   try {
     const saved = localStorage.getItem('dateSchedule');
     return saved ? JSON.parse(saved) : {};
   } catch { return {}; }
 }
 
-function saveDateSchedule() {
-  localStorage.setItem('dateSchedule', JSON.stringify(dateSchedule));
+function saveLocalDateSchedule(data) {
+  localStorage.setItem('dateSchedule', JSON.stringify(data));
 }
 
-let weekdaySchedule = loadWeekdaySchedule();
-let dateSchedule = loadDateSchedule();
+// ===== Firestore 저장 (+ localStorage 백업) =====
+
+async function saveWeekdayToStore() {
+  saveLocalWeekdaySchedule(weekdaySchedule); // 항상 localStorage에도 백업
+  try {
+    await firestoreSaveWeekday(weekdaySchedule);
+  } catch (e) {
+    console.warn('Firestore 요일별 시간표 저장 실패 (localStorage에 저장됨):', e);
+  }
+}
+
+async function saveDateToStore() {
+  saveLocalDateSchedule(dateSchedule); // 항상 localStorage에도 백업
+  try {
+    await firestoreSaveDate(dateSchedule);
+  } catch (e) {
+    console.warn('Firestore 날짜별 시간표 저장 실패 (localStorage에 저장됨):', e);
+  }
+}
+
+let weekdaySchedule = loadLocalWeekdaySchedule();
+let dateSchedule = loadLocalDateSchedule();
 
 // 특정 날짜의 시간표 가져오기 (날짜별 우선 → 요일별 폴백)
 function getScheduleForDate(date) {
@@ -197,12 +226,11 @@ export function openScheduleEditor() {
   const dayNames = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
 
   if (dayOfWeek === 0 || dayOfWeek === 6) {
-    alert('주말은 휴원입니다. 평일을 선택해 주세요.');
+    showToast('주말은 휴원입니다. 평일을 선택해 주세요.', 'warning');
     return;
   }
 
   const schedule = getScheduleForDate(selectedDate) || [];
-  const todayStr = getDateKey(new Date());
 
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay active';
@@ -311,7 +339,7 @@ function removeScheduleRow(btn) {
   btn.closest('.schedule-edit-row').remove();
 }
 
-function saveScheduleEdit() {
+async function saveScheduleEdit() {
   const rows = document.querySelectorAll('#scheduleEditorRows .schedule-edit-row');
   const newSchedule = [];
   rows.forEach(row => {
@@ -326,29 +354,29 @@ function saveScheduleEdit() {
   if (mode === 'weekday') {
     // 요일별 기본 시간표에 저장
     const checkedDays = [...document.querySelectorAll('.apply-day-check:checked')].map(c => parseInt(c.value));
-    if (checkedDays.length === 0) { alert('적용할 요일을 최소 1개 선택해 주세요.'); return; }
+    if (checkedDays.length === 0) { showToast('적용할 요일을 최소 1개 선택해 주세요.', 'warning'); return; }
 
     checkedDays.forEach(day => {
       weekdaySchedule[day] = JSON.parse(JSON.stringify(newSchedule));
     });
-    saveWeekdaySchedule();
+    await saveWeekdayToStore();
 
     const dayLabels = checkedDays.map(d => ['','월','화','수','목','금'][d]).join(', ');
     closeAndRefresh();
-    alert(`${dayLabels}요일 기본 시간표가 저장되었습니다.`);
+    showToast(`${dayLabels}요일 기본 시간표가 저장되었습니다.`, 'success');
 
   } else {
     // 특정 기간에 날짜별로 저장
     const from = document.getElementById('scheduleFrom').value;
     const to = document.getElementById('scheduleTo').value;
-    if (!from || !to) { alert('기간을 설정해 주세요.'); return; }
+    if (!from || !to) { showToast('기간을 설정해 주세요.', 'warning'); return; }
 
     const checkedDays = [...document.querySelectorAll('.period-day-check:checked')].map(c => parseInt(c.value));
-    if (checkedDays.length === 0) { alert('적용할 요일을 최소 1개 선택해 주세요.'); return; }
+    if (checkedDays.length === 0) { showToast('적용할 요일을 최소 1개 선택해 주세요.', 'warning'); return; }
 
     const startDate = new Date(from);
     const endDate = new Date(to);
-    if (startDate > endDate) { alert('시작일이 종료일보다 늦습니다.'); return; }
+    if (startDate > endDate) { showToast('시작일이 종료일보다 늦습니다.', 'warning'); return; }
 
     let count = 0;
     const current = new Date(startDate);
@@ -361,10 +389,10 @@ function saveScheduleEdit() {
       }
       current.setDate(current.getDate() + 1);
     }
-    saveDateSchedule();
+    await saveDateToStore();
 
     closeAndRefresh();
-    alert(`${from} ~ ${to} 기간의 ${count}일에 시간표가 적용되었습니다.`);
+    showToast(`${from} ~ ${to} 기간의 ${count}일에 시간표가 적용되었습니다.`, 'success');
   }
 }
 
@@ -380,9 +408,67 @@ function closeAndRefresh() {
 // ===== 초기화 =====
 
 export async function initCalendar() {
+  // 1) localStorage에서 먼저 로드 (빠른 초기 렌더링)
+  weekdaySchedule = loadLocalWeekdaySchedule();
+  dateSchedule = loadLocalDateSchedule();
   renderCalendar();
   renderDaySchedule();
 
+  // 2) Firestore에서 시간표 로드 + 마이그레이션
+  try {
+    const [firestoreWeekday, firestoreDate] = await Promise.all([
+      firestoreGetWeekday(),
+      firestoreGetDate()
+    ]);
+
+    const localWeekday = loadLocalWeekdaySchedule();
+    const localDate = loadLocalDateSchedule();
+
+    const hasLocalWeekday = Object.values(localWeekday).some(arr => arr && arr.length > 0);
+    const hasLocalDate = Object.keys(localDate).length > 0;
+    const hasFirestoreWeekday = firestoreWeekday && Object.values(firestoreWeekday).some(arr => arr && arr.length > 0);
+    const hasFirestoreDate = firestoreDate && Object.keys(firestoreDate).length > 0;
+
+    // 요일별 시간표
+    if (hasFirestoreWeekday) {
+      weekdaySchedule = firestoreWeekday;
+      saveLocalWeekdaySchedule(firestoreWeekday);
+    } else if (hasLocalWeekday && !hasFirestoreWeekday) {
+      console.log('요일별 시간표 Firestore 마이그레이션 중...');
+      await firestoreSaveWeekday(localWeekday);
+      console.log('요일별 시간표 마이그레이션 완료');
+    }
+
+    // 날짜별 시간표
+    if (hasFirestoreDate) {
+      dateSchedule = firestoreDate;
+      saveLocalDateSchedule(firestoreDate);
+    } else if (hasLocalDate && !hasFirestoreDate) {
+      console.log('날짜별 시간표 Firestore 마이그레이션 중...');
+      await firestoreSaveDate(localDate);
+      console.log('날짜별 시간표 마이그레이션 완료');
+    }
+
+    renderCalendar();
+    renderDaySchedule();
+
+    // 3) 실시간 구독 시작
+    subscribeSchedules(({ weekday, dates }) => {
+      if (weekday) {
+        weekdaySchedule = weekday;
+        saveLocalWeekdaySchedule(weekday);
+      }
+      if (dates) {
+        dateSchedule = dates;
+        saveLocalDateSchedule(dates);
+      }
+      renderDaySchedule();
+    });
+  } catch (e) {
+    console.warn('Firestore 시간표 로드 실패 (localStorage 데이터 사용):', e);
+  }
+
+  // 4) 공휴일 로드
   const year = new Date().getFullYear();
   try {
     const [thisYear, nextYear] = await Promise.all([

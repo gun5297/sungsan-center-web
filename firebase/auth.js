@@ -42,3 +42,38 @@ export function onAuthChange(callback) {
 export function getCurrentUser() {
   return auth.currentUser;
 }
+
+// ===== 세션 타임아웃 (30분 비활동 시 자동 로그아웃) =====
+const SESSION_TIMEOUT = 30 * 60 * 1000; // 30분
+let sessionTimer = null;
+
+function resetSessionTimer() {
+  if (sessionTimer) clearTimeout(sessionTimer);
+  if (!auth.currentUser) return;
+  sessionTimer = setTimeout(async () => {
+    if (auth.currentUser) {
+      await signOut(auth);
+      // 메인 페이지면 리로드, 아니면 로그인으로 이동
+      if (window.location.pathname.includes('index.html') || window.location.pathname.endsWith('/')) {
+        window.location.reload();
+      } else {
+        window.location.href = 'login.html';
+      }
+    }
+  }, SESSION_TIMEOUT);
+}
+
+export function initSessionTimeout() {
+  const events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
+  events.forEach(event => {
+    document.addEventListener(event, resetSessionTimer, { passive: true });
+  });
+  // 로그인 상태 변경 시 타이머 시작/정지
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      resetSessionTimer();
+    } else {
+      if (sessionTimer) { clearTimeout(sessionTimer); sessionTimer = null; }
+    }
+  });
+}

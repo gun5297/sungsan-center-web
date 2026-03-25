@@ -16,9 +16,9 @@ export function Pickup() {
       <table class="pickup-table" id="pickupTable"></table>
     </div>
 
-    <div class="admin-only" style="margin-top:20px;">
-      <div class="card" style="padding:20px;">
-        <h4 style="font-weight:800; margin-bottom:12px;">픽업 아동 관리</h4>
+    <div class="admin-only admin-section-gap">
+      <div class="admin-form-card">
+        <h4 class="admin-form-title">픽업 아동 관리</h4>
         <div class="form-row">
           <div class="form-group"><label class="form-label">이름</label><input type="text" id="pickupName" class="input-field" placeholder="홍길동" /></div>
           <div class="form-group"><label class="form-label">학교/학년</label><input type="text" id="pickupSchool" class="input-field" placeholder="증산초 1학년" /></div>

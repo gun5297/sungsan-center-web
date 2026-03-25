@@ -17,7 +17,7 @@
 #notice .upload-form {
   background: var(--bg-sub);
   border-radius: var(--radius);
-  padding: 32px;
+  padding: 28px;
 }
 
 #notice .upload-form h3 {

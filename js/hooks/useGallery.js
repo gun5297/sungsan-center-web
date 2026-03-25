@@ -20,7 +20,7 @@ export function renderGallery() {
         <div class="gallery-info">
           <div class="gallery-title">${item.title}</div>
           <div class="gallery-date">${item.date}</div>
-          ${admin ? `<div class="notice-actions" style="display:flex;"><button class="delete-btn" onclick="deleteGalleryItem(${i})">삭제</button></div>` : ''}
+          ${admin ? `<div class="notice-actions gallery-actions"><button class="delete-btn" onclick="deleteGalleryItem(${i})">삭제</button></div>` : ''}
         </div>
       </div>
     `;

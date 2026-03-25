@@ -108,7 +108,7 @@ export function renderDaySchedule() {
   const events = schoolEvents[dateKey];
   if (events) {
     html += events.map(ev => `
-      <div class="time-slot" style="border-left: 3px solid var(--primary);">
+      <div class="time-slot time-slot-event">
         <div class="time-dot special"></div>
         <div class="time-name">${ev}</div>
       </div>
@@ -117,7 +117,7 @@ export function renderDaySchedule() {
 
   const schedule = weekdaySchedule[dayOfWeek];
   if (!schedule) {
-    html += '<div style="text-align:center;padding:32px;color:var(--text-sub);font-weight:600;">주말은 휴원입니다</div>';
+    html += '<div class="empty-state">주말은 휴원입니다</div>';
   } else {
     html += schedule.map(s => `
       <div class="time-slot">

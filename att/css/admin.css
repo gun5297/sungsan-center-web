@@ -50,7 +50,7 @@
   color: var(--text-sub);
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: all 0.2s ease;
+  transition: all var(--transition);
 }
 
 #screenAdmin .admin-tab.active {
@@ -73,9 +73,9 @@
   flex: 1;
   text-align: center;
   padding: 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   background: var(--card);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: var(--shadow);
 }
 
 #screenAdmin .summary-num {
@@ -189,7 +189,7 @@
   font-size: 0.78rem;
   font-weight: 700;
   padding: 5px 10px;
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   margin-bottom: 8px;
   font-variant-numeric: tabular-nums;
 }
@@ -200,21 +200,21 @@
 }
 
 #screenAdmin .timeline-sms.pending {
-  background: #fff8e1;
-  color: #b45309;
+  background: var(--warning-light);
+  color: var(--warning);
 }
 
 #screenAdmin .cancel-btn {
   padding: 5px 12px;
   border: 1px solid var(--danger-light);
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   background: var(--card);
   color: var(--danger);
   font-size: 0.75rem;
   font-weight: 700;
   font-family: var(--font);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition);
 }
 
 #screenAdmin .cancel-btn:hover:not(:disabled) {
@@ -225,7 +225,7 @@
 #screenAdmin .cancel-btn:disabled {
   color: var(--text-light);
   border-color: var(--border);
-  background: #f5f5f5;
+  background: var(--bg-sub);
   cursor: not-allowed;
 }
 
@@ -239,13 +239,13 @@
   flex: 1;
   padding: 14px;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   background: var(--card);
   font-size: 0.9rem;
   font-weight: 700;
   font-family: var(--font);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition);
 }
 
 #screenAdmin .admin-btn:hover {

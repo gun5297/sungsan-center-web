@@ -47,8 +47,9 @@
 
   .date-range .input-field {
     flex: 1 1 120px;
+    height: 44px;
     font-size: 0.8rem;
-    padding: 8px 6px;
+    padding: 0 10px;
   }
 
   .range-sep {
@@ -59,7 +60,7 @@
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 8px 12px;
-    padding: 14px 16px;
+    padding: 16px;
   }
 
   #medication .med-card .med-avatar {

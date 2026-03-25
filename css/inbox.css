@@ -60,6 +60,7 @@
   white-space: nowrap;
   transition: all var(--transition);
   color: var(--text-sub);
+  line-height: 1.4;
 }
 
 #inboxModal .inbox-tab.active {
@@ -93,16 +94,16 @@
 #inboxModal .inbox-type {
   padding: 4px 10px;
   border-radius: 10px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-#inboxModal .inbox-type.absence { background: #fee2e2; color: #ef4444; }
-#inboxModal .inbox-type.medication { background: #fef3c7; color: #d97706; }
-#inboxModal .inbox-type.register { background: #dbeafe; color: #2563eb; }
-#inboxModal .inbox-type.consult { background: #ede9fe; color: #7c3aed; }
+#inboxModal .inbox-type.absence { background: var(--danger-light); color: var(--danger); }
+#inboxModal .inbox-type.medication { background: var(--warning-light); color: var(--warning); }
+#inboxModal .inbox-type.register { background: var(--school-blue-light); color: var(--school-blue); }
+#inboxModal .inbox-type.consult { background: var(--school-purple-light); color: var(--school-purple); }
 
 #inboxModal .inbox-info {
   flex: 1;
@@ -133,14 +134,14 @@
 #inboxModal .inbox-print-btn {
   padding: 6px 14px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   background: var(--card);
   font-size: 0.75rem;
   font-weight: 700;
   font-family: var(--font);
   cursor: pointer;
   flex-shrink: 0;
-  transition: all 0.2s;
+  transition: all var(--transition);
 }
 
 #inboxModal .inbox-print-btn:hover {

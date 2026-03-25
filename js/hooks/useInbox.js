@@ -169,7 +169,7 @@ export function printInboxItem(idx) {
         <tr><th>아동 성명</th><td>${item.data.child}</td></tr>
         <tr><th>희망 상담 일시</th><td>${item.data.dateTime || '-'}</td></tr>
         <tr><th>상담 주제</th><td>${item.data.topic || '-'}</td></tr>
-        <tr><th>상담 내용</th><td style="white-space:pre-wrap;">${item.data.detail}</td></tr>
+        <tr><th>상담 내용</th><td class="pre-wrap">${item.data.detail}</td></tr>
       </table>
       <div class="print-notice">
         <p>※ 상담 내용은 아동 지도 및 센터 운영 개선 목적으로만 활용되며, 상담 기록이 보관될 수 있습니다.</p>

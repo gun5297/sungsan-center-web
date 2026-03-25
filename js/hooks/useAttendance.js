@@ -16,7 +16,7 @@ export function renderAttendance() {
   if (attStudents.length === 0) {
     document.getElementById('attendanceSummary').innerHTML = '';
     document.getElementById('attendanceList').innerHTML =
-      '<div style="text-align:center;color:var(--text-sub);padding:40px 0;font-weight:600;">출결 시스템에 등록된 아동이 없습니다</div>';
+      '<div class="empty-state">출결 시스템에 등록된 아동이 없습니다</div>';
     return;
   }
 
@@ -64,11 +64,11 @@ export function renderAttendance() {
     return `
       <div class="att-item">
         <div class="att-avatar ${statusClass}">${s.name.charAt(0)}</div>
-        <div style="flex:1;">
+        <div class="att-info">
           <div class="att-name">${s.name}</div>
           <div class="att-status">${statusLabel}${timeInfo ? ` · ${timeInfo}` : ''}</div>
         </div>
-        <div style="font-size:0.75rem;color:var(--text-sub);font-weight:600;">${s.school}</div>
+        <div class="att-school">${s.school}</div>
       </div>
     `;
   }).join('');

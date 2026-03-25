@@ -60,10 +60,15 @@
   padding: 16px 28px;
   background: var(--success-light);
   color: var(--success);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   font-size: 0.95rem;
   font-weight: 700;
   animation: fadeUp 0.5s ease 0.3s both;
+}
+
+#screenSuccess .sms-timer {
+  font-size: 0.85em;
+  opacity: 0.8;
 }
 
 @keyframes fadeUp {

@@ -27,6 +27,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 600;
+  font-family: var(--font);
 }
 
 #schedule .month-btn:hover,
@@ -67,7 +68,7 @@
 }
 
 #schedule .cal-header:last-child {
-  color: #5c9eff;
+  color: var(--saturday);
 }
 
 #schedule .cal-day {
@@ -115,23 +116,23 @@
 }
 
 #schedule .cal-event-tag.holiday {
-  background: #fce4ec;
-  color: #d32f2f;
+  background: var(--danger-light);
+  color: var(--danger);
 }
 
 #schedule .cal-event-tag.증산초 {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--school-green-light);
+  color: var(--school-green);
 }
 
 #schedule .cal-event-tag.수색초 {
-  background: #e3f2fd;
-  color: #1565c0;
+  background: var(--school-blue-light);
+  color: var(--school-blue);
 }
 
 #schedule .cal-event-tag.증산중 {
-  background: #f3e8ff;
-  color: #7c3aed;
+  background: var(--school-purple-light);
+  color: var(--school-purple);
 }
 
 /* 캘린더 범례 */
@@ -159,14 +160,14 @@
   flex-shrink: 0;
 }
 
-#schedule .cal-legend-dot.증산초 { background: #2e7d32; }
-#schedule .cal-legend-dot.수색초 { background: #1565c0; }
-#schedule .cal-legend-dot.증산중 { background: #7c3aed; }
-#schedule .cal-legend-dot.holiday { background: #d32f2f; }
+#schedule .cal-legend-dot.증산초 { background: var(--school-green); }
+#schedule .cal-legend-dot.수색초 { background: var(--school-blue); }
+#schedule .cal-legend-dot.증산중 { background: var(--school-purple); }
+#schedule .cal-legend-dot.holiday { background: var(--danger); }
 
 #schedule .cal-day.today .cal-num {
   background: var(--primary);
-  color: #fff;
+  color: var(--card);
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -192,11 +193,11 @@
 }
 
 #schedule .cal-day.saturday, #schedule .cal-day.saturday .cal-num {
-  color: #5c9eff;
+  color: var(--saturday);
 }
 
 #schedule .cal-day.today .cal-num {
-  color: #fff;
+  color: var(--card);
 }
 
 /* 일별 시간표 */
@@ -251,11 +252,15 @@
 
 #schedule .time-dot.snack { background: var(--warning); }
 #schedule .time-dot.meal { background: var(--success); }
-#schedule .time-dot.special { background: #ab7ae0; }
+#schedule .time-dot.special { background: var(--school-purple); }
 #schedule .time-dot.rest { background: var(--text-light); }
 
 #schedule .time-name {
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: -0.01em;
+}
+
+#schedule .time-slot-event {
+  border-left: 3px solid var(--primary);
 }

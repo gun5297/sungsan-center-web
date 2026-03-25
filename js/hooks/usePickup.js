@@ -25,7 +25,7 @@ export function renderPickupTable() {
   let html = '<thead><tr><th>아동</th><th>학교</th>';
   dates.forEach((d, i) => {
     const isToday = isSameDay(d, today);
-    html += `<th style="${isToday ? 'color:var(--primary)' : ''}">${dayNames[i]} (${d.getDate()}일)</th>`;
+    html += `<th${isToday ? ' class="today"' : ''}>${dayNames[i]} (${d.getDate()}일)</th>`;
   });
   if (admin) html += '<th></th>';
   html += '</tr></thead><tbody>';

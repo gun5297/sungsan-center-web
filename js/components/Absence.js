@@ -102,8 +102,8 @@ export function Absence() {
     </div>
 
     <div class="admin-only">
-      <h3 style="margin-top:40px; font-size:1.1rem; font-weight:800; letter-spacing:-0.02em;">제출 내역</h3>
-      <div class="notice-list" id="absenceList" style="margin-top:16px;"></div>
+      <h3 class="admin-form-title mt">제출 내역</h3>
+      <div class="notice-list admin-list-gap" id="absenceList"></div>
     </div>
   </section>
 

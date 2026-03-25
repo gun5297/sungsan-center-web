@@ -6,9 +6,9 @@ export function Gallery() {
     <h2 class="section-title">우리 아이들의<br>즐거운 하루</h2>
     <p class="section-desc">센터에서의 다양한 활동 사진을 확인하세요.</p>
 
-    <div class="admin-only" style="margin-bottom:20px;">
-      <div class="card" style="padding:20px;">
-        <h4 style="font-weight:800; margin-bottom:12px;">활동 추가</h4>
+    <div class="admin-only admin-section-bottom">
+      <div class="admin-form-card">
+        <h4 class="admin-form-title">활동 추가</h4>
         <div class="form-row">
           <div class="form-group"><label class="form-label">활동 제목</label><input type="text" id="galTitle" class="input-field" placeholder="봄맞이 미술 수업" /></div>
           <div class="form-group"><label class="form-label">카테고리</label><input type="text" id="galCategory" class="input-field" placeholder="미술 활동" /></div>

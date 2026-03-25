@@ -31,11 +31,11 @@ export function Toolbar() {
 
   <!-- 관리자 로그인 모달 -->
   <div class="modal-overlay" id="adminLoginModal">
-    <div class="modal" style="max-width:380px; text-align:center;">
+    <div class="modal admin-login-modal">
       <div class="modal-title">관리자 로그인</div>
-      <p style="color:var(--text-sub); font-size:0.9rem; margin-bottom:20px;">비밀번호를 입력하세요</p>
-      <input type="password" id="adminPwInput" class="input-field" placeholder="비밀번호" style="text-align:center; font-size:1.1rem;" />
-      <button class="btn-upload" onclick="doAdminLogin()" style="margin-top:12px;">로그인</button>
+      <p class="admin-login-desc">비밀번호를 입력하세요</p>
+      <input type="password" id="adminPwInput" class="input-field admin-login-input" placeholder="비밀번호" />
+      <button class="btn-upload" onclick="doAdminLogin()">로그인</button>
       <button class="modal-close" onclick="closeAdminModal()">취소</button>
     </div>
   </div>

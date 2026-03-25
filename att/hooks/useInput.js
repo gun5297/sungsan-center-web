@@ -17,7 +17,7 @@ function updateDisplay() {
 function showError() {
   const greeting = document.getElementById('greeting');
   greeting.textContent = '등록되지 않은 번호입니다';
-  greeting.style.color = '#ef4444';
+  greeting.style.color = 'var(--danger)';
   inputCode = '';
   updateDisplay();
 
@@ -37,7 +37,7 @@ function showSuccess(student, type, typeLabel, timeStr) {
   const action = type === 'in' ? '등원' : '하원';
   const smsMsg = `📱 ${student.parent} → "${student.name} 학생이 ${timeStr}에 ${action}하였습니다."`;
   document.getElementById('successSms').innerHTML =
-    `${smsMsg}<br><span style="font-size:0.85em;opacity:0.8;">⏱ 1분 후 자동 발송 예정 · 1분 내 취소 가능</span>`;
+    `${smsMsg}<br><span class="sms-timer">⏱ 1분 후 자동 발송 예정 · 1분 내 취소 가능</span>`;
 
   showScreen('screenSuccess');
   inputCode = '';

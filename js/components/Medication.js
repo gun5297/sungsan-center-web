@@ -114,8 +114,8 @@ export function Medication() {
     </div>
 
     <div class="admin-only">
-      <h3 style="margin-top:40px; font-size:1.1rem; font-weight:800; letter-spacing:-0.02em;">투약 일정표</h3>
-      <p style="font-size:0.85rem; color:var(--text-sub); margin:8px 0 20px;">현재 투약 중인 아동 목록입니다.</p>
+      <h3 class="admin-form-title mt">투약 일정표</h3>
+      <p class="admin-form-desc">현재 투약 중인 아동 목록입니다.</p>
       <div class="med-schedule" id="medSchedule"></div>
     </div>
   </section>

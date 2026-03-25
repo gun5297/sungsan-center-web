@@ -4,7 +4,44 @@
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 36px;
+  padding: 32px;
+}
+
+/* 관리자 전용 간이 폼 카드 (갤러리 추가, 픽업 관리 등) */
+.admin-form-card {
+  background: var(--bg-sub);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.admin-form-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+.admin-form-title.mt {
+  margin-top: 40px;
+}
+
+.admin-form-desc {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  margin: 8px 0 20px;
+}
+
+/* 관리자 영역 간격 */
+.admin-section-gap {
+  margin-top: 20px;
+}
+
+.admin-list-gap {
+  margin-top: 16px;
+}
+
+.admin-section-bottom {
+  margin-bottom: 20px;
 }
 
 .form-header {
@@ -46,7 +83,7 @@
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-sub);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   letter-spacing: -0.01em;
 }
 
@@ -59,8 +96,10 @@
 .date-range .input-field {
   flex: 1;
   min-width: 0;
+  height: 48px;
   font-size: 0.85rem;
-  padding: 10px 8px;
+  padding: 0 12px;
+  margin-bottom: 0;
 }
 
 .range-sep {
@@ -102,16 +141,19 @@
   margin-top: 20px;
 }
 
-.form-actions .btn-upload {
+.form-actions .btn-upload,
+.form-actions .btn-secondary-sm {
   flex: 1;
+  width: auto;
+  margin-top: 0;
 }
 
 /* ===== CONSENT CHECKBOX ===== */
 .form-consent {
   margin: 16px 0;
   padding: 16px;
-  background: #fef9f4;
-  border: 1px solid #f0e6dc;
+  background: var(--consent-bg);
+  border: 1px solid var(--consent-border);
   border-radius: var(--radius-sm);
 }
 
@@ -122,7 +164,7 @@
   cursor: pointer;
   font-size: 0.8rem;
   color: var(--text-sub);
-  line-height: 1.5;
+  line-height: 1.6;
   margin-bottom: 10px;
 }
 
@@ -131,9 +173,12 @@
 }
 
 .consent-check input[type="checkbox"] {
-  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
   flex-shrink: 0;
   accent-color: var(--primary);
+  cursor: pointer;
 }
 
 .required-tag {
@@ -159,7 +204,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 16px 20px;
+  padding: 20px;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -235,6 +280,10 @@
   color: var(--text-sub);
   text-align: center;
   border-bottom: 2px solid var(--border);
+}
+
+#pickup .pickup-table th.today {
+  color: var(--primary);
 }
 
 #pickup .pickup-table td {

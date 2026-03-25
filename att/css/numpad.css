@@ -10,7 +10,7 @@
 .num-btn {
   aspect-ratio: 1.6;
   border: none;
-  border-radius: 16px;
+  border-radius: var(--radius);
   background: var(--card);
   font-size: 1.8rem;
   font-weight: 800;
@@ -18,7 +18,7 @@
   color: var(--text);
   cursor: pointer;
   transition: all 0.15s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: var(--shadow);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -26,13 +26,13 @@
 
 .num-btn:active {
   transform: scale(0.95);
-  background: #f0f0f0;
+  background: var(--bg-sub);
 }
 
 .fn-btn {
   font-size: 1rem;
   color: var(--text-sub);
-  background: #f5f5f5;
+  background: var(--bg-sub);
 }
 
 .confirm-btn {

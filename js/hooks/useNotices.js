@@ -75,7 +75,7 @@ export function editNotice(id) {
         <option value="통신문" ${notice.category === '통신문' ? 'selected' : ''}>가정통신문</option>
         <option value="긴급" ${notice.category === '긴급' ? 'selected' : ''}>긴급 안내</option>
       </select>
-      <button class="btn-upload" onclick="saveEditNotice(${id})" style="margin-top:12px;">저장</button>
+      <button class="btn-upload" onclick="saveEditNotice(${id})">저장</button>
       <button class="modal-close" onclick="closeModal(this)">취소</button>
     </div>
   `;
@@ -106,7 +106,7 @@ export function openNotice(id) {
         <span class="notice-date">${notice.date}</span>
       </div>
       <div class="modal-body">${notice.content}</div>
-      ${notice.file ? `<div class="notice-file" style="margin-top:16px">📎 ${notice.file}</div>` : ''}
+      ${notice.file ? `<div class="notice-file">📎 ${notice.file}</div>` : ''}
       <button class="modal-close" onclick="closeModal(this)">닫기</button>
     </div>
   `;

@@ -807,6 +807,114 @@ html, body {
   background: var(--danger-light);
 }
 
+/* ===== TIMELINE ===== */
+.timeline-empty {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--text-sub);
+  font-weight: 600;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.timeline-time {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+  min-width: 44px;
+  padding-top: 3px;
+}
+
+.timeline-body {
+  flex: 1;
+}
+
+.timeline-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.timeline-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+
+.timeline-info {
+  flex: 1;
+}
+
+.timeline-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.timeline-school {
+  font-size: 0.75rem;
+  color: var(--text-sub);
+}
+
+.timeline-sms {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.timeline-sms.sent {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.timeline-sms.pending {
+  background: #fff8e1;
+  color: #b45309;
+}
+
+.cancel-btn {
+  padding: 5px 12px;
+  border: 1px solid var(--danger-light);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--danger);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background: var(--danger-light);
+}
+
+.cancel-btn.disabled,
+.cancel-btn:disabled {
+  color: var(--text-light);
+  border-color: var(--border);
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {
   .numpad {
@@ -847,4 +955,156 @@ html, body {
     aspect-ratio: 1.8;
     font-size: 2rem;
   }
+}
+
+/* ===== 가로 모드 (태블릿 landscape) ===== */
+@media (orientation: landscape) and (max-height: 600px) {
+  html, body {
+    overflow: hidden;
+  }
+
+  /* 잠금 화면 가로 레이아웃 */
+  .lock-content {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 48px;
+    padding: 16px 48px;
+  }
+
+  .lock-content > .lock-back-link {
+    display: none;
+  }
+
+  .lock-icon { font-size: 2.2rem; margin-bottom: 8px; }
+  .lock-title { font-size: 1.3rem; margin-bottom: 4px; }
+  .lock-subtitle { font-size: 0.85rem; margin-bottom: 16px; }
+  .lock-dots { margin-bottom: 8px; gap: 12px; }
+  .dot { width: 14px; height: 14px; }
+  .lock-numpad { margin-bottom: 0; }
+
+  /* 메인 화면 가로 레이아웃 */
+  .top-bar {
+    padding: 10px 24px;
+  }
+
+  .main-content {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: calc(100% - 52px);
+    gap: 40px;
+    padding: 0 48px 0;
+  }
+
+  .main-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .greeting {
+    font-size: 1.3rem;
+    margin-bottom: 0;
+    min-height: auto;
+  }
+
+  .input-display {
+    margin-bottom: 0;
+  }
+
+  .input-dots {
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .dot { width: 14px; height: 14px; }
+
+  .input-number {
+    font-size: 2rem;
+    min-height: 36px;
+  }
+
+  .numpad {
+    flex: none;
+    max-width: 320px;
+    gap: 10px;
+  }
+
+  .num-btn {
+    aspect-ratio: 1.6;
+    font-size: 1.5rem;
+    border-radius: 12px;
+  }
+
+  .fn-btn { font-size: 0.85rem; }
+  .confirm-btn { font-size: 0.95rem !important; }
+
+  /* 성공 화면 가로 */
+  .success-content {
+    flex-direction: row;
+    justify-content: center;
+    gap: 40px;
+    padding: 20px 48px;
+  }
+
+  .success-icon {
+    width: 72px;
+    height: 72px;
+    font-size: 2rem;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .success-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+  }
+
+  .success-name { font-size: 1.8rem; margin-bottom: 4px; }
+  .success-type { margin-bottom: 4px; }
+  .success-time { font-size: 1.4rem; margin-bottom: 12px; }
+  .success-sms { font-size: 0.85rem; padding: 12px 20px; }
+}
+
+/* 태블릿 가로 (넓은 화면) */
+@media (orientation: landscape) and (min-height: 600px) {
+  .main-content {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: calc(100% - 80px);
+    gap: 60px;
+    padding: 0 80px 0;
+  }
+
+  .greeting {
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+  }
+
+  .numpad {
+    flex: none;
+    max-width: 380px;
+    gap: 14px;
+  }
+
+  .num-btn {
+    aspect-ratio: 1.7;
+    font-size: 1.8rem;
+  }
+
+  .lock-content {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 60px;
+  }
+
+  .lock-numpad { margin-bottom: 0; }
 }

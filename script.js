@@ -516,70 +516,85 @@ function renderMealGrid() {
 
 renderMealGrid();
 
-// ===== 출석 현황 =====
-const students = [
-  { name: '홍길동', status: 'present' },
-  { name: '홍길동', status: 'present' },
-  { name: '홍길동', status: 'present' },
-  { name: '홍길동', status: 'absent' },
-  { name: '홍길동', status: 'present' },
-  { name: '홍길동', status: 'late' },
-  { name: '홍길동', status: 'present' },
-  { name: '홍길동', status: 'present' },
-  { name: '홍길동', status: 'present' },
-  { name: '홍길동', status: 'absent' },
-  { name: '홍길동', status: 'present' },
-  { name: '홍길동', status: 'present' },
-  { name: '홍길동', status: 'present' },
-  { name: '홍길동', status: 'present' },
-  { name: '홍길동', status: 'late' },
-  { name: '홍길동', status: 'present' },
-];
+// ===== 출석 현황 (출결 시스템 연동) =====
+function getAttStudents() {
+  return JSON.parse(localStorage.getItem('att_students') || '[]');
+}
+
+function getAttRecords() {
+  const key = `att_${new Date().toISOString().split('T')[0]}`;
+  return JSON.parse(localStorage.getItem(key) || '{}');
+}
 
 function renderAttendance() {
-  const present = students.filter(s => s.status === 'present').length;
-  const absent = students.filter(s => s.status === 'absent').length;
-  const late = students.filter(s => s.status === 'late').length;
+  const attStudents = getAttStudents();
+  const records = getAttRecords();
+
+  if (attStudents.length === 0) {
+    document.getElementById('attendanceSummary').innerHTML = '';
+    document.getElementById('attendanceList').innerHTML =
+      '<div style="text-align:center;color:var(--text-sub);padding:40px 0;font-weight:600;">출결 시스템에 등록된 아동이 없습니다</div>';
+    return;
+  }
+
+  let presentCount = 0, leftCount = 0, absentCount = 0;
+  attStudents.forEach(s => {
+    const r = records[s.id];
+    if (!r) absentCount++;
+    else if (r.outTime) leftCount++;
+    else presentCount++;
+  });
 
   document.getElementById('attendanceSummary').innerHTML = `
     <div class="att-summary-card">
-      <div class="att-summary-number present">${present}</div>
-      <div class="att-summary-label">출석</div>
+      <div class="att-summary-number present">${presentCount}</div>
+      <div class="att-summary-label">출석 중</div>
     </div>
     <div class="att-summary-card">
-      <div class="att-summary-number absent">${absent}</div>
-      <div class="att-summary-label">결석</div>
+      <div class="att-summary-number late">${leftCount}</div>
+      <div class="att-summary-label">하원</div>
     </div>
     <div class="att-summary-card">
-      <div class="att-summary-number late">${late}</div>
-      <div class="att-summary-label">지각</div>
+      <div class="att-summary-number absent">${absentCount}</div>
+      <div class="att-summary-label">미출석</div>
     </div>
   `;
 
-  const statusLabel = { present: '출석', absent: '결석', late: '지각' };
+  document.getElementById('attendanceList').innerHTML = attStudents.map(s => {
+    const r = records[s.id];
+    let statusClass, statusLabel, timeInfo;
 
-  document.getElementById('attendanceList').innerHTML = students.map((s, i) => `
-    <div class="att-item">
-      <div class="att-avatar ${s.status}">${s.name.charAt(0)}</div>
-      <div>
-        <div class="att-name">${s.name}</div>
-        <div class="att-status">${statusLabel[s.status]}</div>
+    if (!r) {
+      statusClass = 'absent';
+      statusLabel = '미출석';
+      timeInfo = '';
+    } else if (r.outTime) {
+      statusClass = 'late';
+      statusLabel = '하원';
+      timeInfo = `등원 ${r.inTime} · 하원 ${r.outTime}`;
+    } else {
+      statusClass = 'present';
+      statusLabel = '출석 중';
+      timeInfo = `등원 ${r.inTime}`;
+    }
+
+    return `
+      <div class="att-item">
+        <div class="att-avatar ${statusClass}">${s.name.charAt(0)}</div>
+        <div style="flex:1;">
+          <div class="att-name">${s.name}</div>
+          <div class="att-status">${statusLabel}${timeInfo ? ` · ${timeInfo}` : ''}</div>
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-sub);font-weight:600;">${s.school}</div>
       </div>
-      ${isAdmin ? `<select class="input-field" style="width:auto;padding:6px 10px;margin:0;font-size:0.75rem;" onchange="changeAttStatus(${i}, this.value)">
-        <option value="present" ${s.status==='present'?'selected':''}>출석</option>
-        <option value="absent" ${s.status==='absent'?'selected':''}>결석</option>
-        <option value="late" ${s.status==='late'?'selected':''}>지각</option>
-      </select>` : ''}
-    </div>
-  `).join('');
-}
-
-function changeAttStatus(index, status) {
-  students[index].status = status;
-  renderAttendance();
+    `;
+  }).join('');
 }
 
 renderAttendance();
+
+// 30초마다 자동 갱신
+setInterval(renderAttendance, 30000);
 
 // ===== 조퇴·결석 신청서 =====
 let absenceRecords = [

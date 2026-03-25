@@ -155,15 +155,17 @@ function recordAttendance(student) {
   let type, typeLabel;
 
   if (!records[student.id]) {
-    records[student.id] = { inTime: timeStr, outTime: null };
+    records[student.id] = { inTime: timeStr, inTs: Date.now(), outTime: null, outTs: null };
     type = 'in';
     typeLabel = '등원 완료';
   } else if (!records[student.id].outTime) {
     records[student.id].outTime = timeStr;
+    records[student.id].outTs = Date.now();
     type = 'out';
     typeLabel = '하원 완료';
   } else {
     records[student.id].outTime = timeStr;
+    records[student.id].outTs = Date.now();
     type = 'out';
     typeLabel = '하원 시간 수정';
   }
@@ -180,10 +182,10 @@ function showSuccess(student, type, typeLabel, timeStr) {
   document.getElementById('successType').textContent = typeLabel;
   document.getElementById('successTime').textContent = timeStr;
 
-  const smsMsg = type === 'in'
-    ? `📱 ${student.parent} → "${student.name} 학생이 ${timeStr}에 등원하였습니다."`
-    : `📱 ${student.parent} → "${student.name} 학생이 ${timeStr}에 하원하였습니다."`;
-  document.getElementById('successSms').textContent = smsMsg;
+  const action = type === 'in' ? '등원' : '하원';
+  const smsMsg = `📱 ${student.parent} → "${student.name} 학생이 ${timeStr}에 ${action}하였습니다."`;
+  document.getElementById('successSms').innerHTML =
+    `${smsMsg}<br><span style="font-size:0.85em;opacity:0.8;">⏱ 1분 후 자동 발송 예정 · 1분 내 취소 가능</span>`;
 
   showScreen('screenSuccess');
   inputCode = '';
@@ -192,6 +194,25 @@ function showSuccess(student, type, typeLabel, timeStr) {
   setTimeout(() => {
     showScreen('screenMain');
   }, 3000);
+}
+
+let adminRefreshInterval = null;
+
+function startAdminRefresh() {
+  if (adminRefreshInterval) return;
+  adminRefreshInterval = setInterval(() => {
+    const panel = document.getElementById('panelRecords');
+    if (panel && !panel.classList.contains('hidden')) {
+      renderTimeline();
+    }
+  }, 1000);
+}
+
+function stopAdminRefresh() {
+  if (adminRefreshInterval) {
+    clearInterval(adminRefreshInterval);
+    adminRefreshInterval = null;
+  }
 }
 
 function showScreen(screenId) {
@@ -204,6 +225,9 @@ function showScreen(screenId) {
 
   if (screenId === 'screenAdmin') {
     renderAdmin();
+    startAdminRefresh();
+  } else {
+    stopAdminRefresh();
   }
 }
 
@@ -257,42 +281,71 @@ function renderAdmin() {
     </div>
   `;
 
-  document.getElementById('adminList').innerHTML = students.map(s => {
-    const r = records[s.id];
-    let status, statusClass, inTime, outTime;
+  renderTimeline();
+}
 
-    if (!r) {
-      status = '미출석';
-      statusClass = 'absent';
-      inTime = '-';
-      outTime = '-';
-    } else if (r.outTime) {
-      status = '하원';
-      statusClass = 'left';
-      inTime = r.inTime;
-      outTime = r.outTime;
-    } else {
-      status = '출석 중';
-      statusClass = 'present';
-      inTime = r.inTime;
-      outTime = '-';
-    }
+function renderTimeline() {
+  const students = getStudents();
+  const records = getTodayRecords();
+  const now = Date.now();
+
+  // 출석한 학생만 inTs 기준 시간순 정렬
+  const checkedIn = students
+    .filter(s => records[s.id])
+    .sort((a, b) => (records[a.id].inTs || 0) - (records[b.id].inTs || 0));
+
+  if (checkedIn.length === 0) {
+    document.getElementById('adminList').innerHTML =
+      '<div class="timeline-empty">아직 출석한 아동이 없습니다</div>';
+    return;
+  }
+
+  document.getElementById('adminList').innerHTML = checkedIn.map(s => {
+    const r = records[s.id];
+    const elapsed = r.inTs ? now - r.inTs : Infinity;
+    const remaining = Math.max(0, 60 - Math.floor(elapsed / 1000));
+    const canCancel = elapsed < 60000;
+
+    const smsHtml = canCancel
+      ? `<div class="timeline-sms pending">📱 ${remaining}초 후 문자 발송 예정</div>`
+      : `<div class="timeline-sms sent">📱 문자 발송 완료</div>`;
+
+    const cancelBtn = canCancel
+      ? `<button class="cancel-btn" onclick="cancelAttendance('${s.id}')">출석 취소 (${remaining}초)</button>`
+      : `<button class="cancel-btn disabled" disabled>취소 불가</button>`;
+
+    const statusClass = r.outTime ? 'left' : 'present';
+    const statusLabel = r.outTime ? '하원' : '출석 중';
 
     return `
-      <div class="att-row">
-        <div class="att-row-avatar">${s.id}</div>
-        <div class="att-row-info">
-          <div class="att-row-name">${s.name}</div>
-          <div class="att-row-school">${s.school}</div>
+      <div class="timeline-item">
+        <div class="timeline-time">${r.inTime}</div>
+        <div class="timeline-body">
+          <div class="timeline-top">
+            <div class="timeline-avatar">${s.id}</div>
+            <div class="timeline-info">
+              <div class="timeline-name">${s.name}</div>
+              <div class="timeline-school">${s.school}</div>
+            </div>
+            <span class="att-row-status ${statusClass}">${statusLabel}</span>
+          </div>
+          ${smsHtml}
+          <div class="timeline-actions">${cancelBtn}</div>
         </div>
-        <div class="att-row-times">
-          <div class="att-row-time in">등원 ${inTime}</div>
-          <div class="att-row-time out">하원 ${outTime}</div>
-        </div>
-        <span class="att-row-status ${statusClass}">${status}</span>
       </div>
     `;
   }).join('');
+}
+
+function cancelAttendance(studentId) {
+  const records = getTodayRecords();
+  if (!records[studentId]) return;
+  const elapsed = records[studentId].inTs ? Date.now() - records[studentId].inTs : Infinity;
+  if (elapsed >= 60000) return;
+  if (!confirm('출석을 취소하시겠습니까?\n문자 발송도 취소됩니다.')) return;
+  delete records[studentId];
+  saveTodayRecords(records);
+  renderAdmin();
 }
 
 // ===== 아동 관리 (비밀번호 게이트) =====

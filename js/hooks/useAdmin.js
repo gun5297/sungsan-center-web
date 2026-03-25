@@ -1,6 +1,6 @@
-// ===== useAdmin: 세션 기반 관리자 인증 & 모드 토글 =====
+// ===== useAdmin: Firebase Auth 기반 관리자 인증 & 모드 토글 =====
 import { getIsAdmin, setIsAdmin, setCurrentUser } from '../state.js';
-import { getSession, clearSession, seedUsersIfNeeded } from '../../auth/authData.js';
+import { logout, onAuthChange } from '../../firebase/auth.js';
 
 // 관리자 상태 변경 시 재렌더링할 콜백 목록
 let renderCallbacks = [];
@@ -13,10 +13,10 @@ function reRenderAll() {
   renderCallbacks.forEach(fn => fn());
 }
 
-export function toggleAdminLogin() {
+export async function toggleAdminLogin() {
   if (getIsAdmin()) {
     // 로그아웃
-    clearSession();
+    await logout();
     setIsAdmin(false);
     setCurrentUser(null);
     document.body.classList.remove('admin-mode');
@@ -33,20 +33,28 @@ export function toggleAdminLogin() {
 }
 
 export function initAdmin() {
-  seedUsersIfNeeded();
-
-  // localStorage에서 세션 복원
-  const session = getSession();
-  if (session && (session.role === 'teacher' || session.role === 'director')) {
-    setIsAdmin(true);
-    setCurrentUser(session);
-    document.body.classList.add('admin-mode');
+  // Firebase Auth 상태 변경 구독
+  onAuthChange((user) => {
     const btn = document.getElementById('toolbarAdminBtn');
-    if (btn) {
-      btn.textContent = `${session.name} 로그아웃`;
-      btn.classList.add('logged-in');
+    if (user) {
+      setIsAdmin(true);
+      setCurrentUser({ email: user.email, uid: user.uid });
+      document.body.classList.add('admin-mode');
+      if (btn) {
+        btn.textContent = `${user.email} 로그아웃`;
+        btn.classList.add('logged-in');
+      }
+    } else {
+      setIsAdmin(false);
+      setCurrentUser(null);
+      document.body.classList.remove('admin-mode');
+      if (btn) {
+        btn.textContent = '로그인';
+        btn.classList.remove('logged-in');
+      }
     }
-  }
+    reRenderAll();
+  });
 }
 
 // window에 노출

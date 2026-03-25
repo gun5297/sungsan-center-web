@@ -1,0 +1,68 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 로그인된 사용자 = 관리자(선생님)
+    function isAdmin() {
+      return request.auth != null;
+    }
+
+    // 공지사항: 누구나 읽기 / 관리자만 쓰기
+    match /notices/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 식단표: 누구나 읽기 / 관리자만 쓰기
+    match /meals/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 학생 목록: 관리자만
+    match /students/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    // 출결 기록: 관리자만
+    match /attendance/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    // 조퇴/결석 신청: 누구나 제출 / 관리자만 삭제
+    match /absences/{id} {
+      allow read, create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // 투약 의뢰: 누구나 제출 / 관리자만 삭제
+    match /medications/{id} {
+      allow read, create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // 픽업 일정: 누구나 읽기 / 관리자만 쓰기
+    match /pickups/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 갤러리: 누구나 읽기 / 관리자만 쓰기
+    match /gallery/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 서류함: 누구나 제출 / 관리자만 읽기·삭제
+    match /inbox/{id} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // 신규 등록/상담: 누구나 제출
+    match /registrations/{id} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}

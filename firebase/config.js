@@ -5,6 +5,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebas
 import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-storage.js";
+import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app-check.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAPoHWA-Ty5Z_ij34p9SOp_fjI_y9x9E1g",
@@ -16,6 +17,19 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+// ===== App Check (reCAPTCHA v3) =====
+// 봇/스크립트 도구의 Firestore 직접 접근 차단
+// RECAPTCHA_SITE_KEY: Google reCAPTCHA 관리 콘솔에서 발급
+// https://www.google.com/recaptcha/admin/create (유형: reCAPTCHA v3)
+const RECAPTCHA_SITE_KEY = 'REPLACE_WITH_YOUR_RECAPTCHA_V3_SITE_KEY';
+
+if (RECAPTCHA_SITE_KEY !== 'REPLACE_WITH_YOUR_RECAPTCHA_V3_SITE_KEY') {
+  initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),
+    isTokenAutoRefreshEnabled: true,
+  });
+}
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);

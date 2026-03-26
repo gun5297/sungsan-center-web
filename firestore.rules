@@ -139,10 +139,10 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // ===== 학생 명단 — id/name/school만 저장 (전화번호 없음) =====
-    // 익명(출결 태블릿) read 허용: 번호 조회용
+    // ===== 학생 명단 — 승인된 실명 사용자만 =====
+    // 태블릿은 students를 조회하지 않음 (ID만으로 출결 기록)
     match /students/{studentId} {
-      allow read: if isApproved() || isAnonymous();
+      allow read: if isApproved();
       allow create, update, delete: if isAdmin();
     }
 

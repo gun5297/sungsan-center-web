@@ -1,0 +1,84 @@
+/* ===== 개인정보처리방침 페이지 ===== */
+
+.privacy-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+}
+
+.privacy-page h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.privacy-page .updated {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  margin-bottom: 32px;
+}
+
+.privacy-page h2 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin-top: 32px;
+  margin-bottom: 12px;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.privacy-page p,
+.privacy-page li {
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: var(--text-sub);
+  word-break: keep-all;
+}
+
+.privacy-page ul {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.privacy-page table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 0.85rem;
+}
+
+.privacy-page th,
+.privacy-page td {
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.privacy-page th {
+  background: var(--bg-sub);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.privacy-page .back-link {
+  display: inline-block;
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.privacy-page .back-link:hover {
+  text-decoration: underline;
+}
+
+.privacy-page .back-link--top {
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+.privacy-page .back-link--bottom {
+  margin-top: 32px;
+}

@@ -20,6 +20,8 @@
 
 /* 기능별 */
 @import url('css/dailylog.css');
+@import url('css/att-report.css');
+@import url('css/meal-upload.css');
 
 /* 유틸리티 */
 @import url('css/toast.css');

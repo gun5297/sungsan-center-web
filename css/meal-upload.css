@@ -1,0 +1,114 @@
+/* ===== 식단 업로드 모달 ===== */
+
+.meal-upload-modal {
+  max-width: 560px;
+}
+
+.meal-upload-desc {
+  margin: 16px 0;
+}
+
+.meal-upload-desc p {
+  font-size: 13px;
+  color: var(--text-sub);
+  margin-bottom: 12px;
+}
+
+.meal-upload-dropzone {
+  cursor: pointer;
+  padding: 32px;
+  text-align: center;
+  border: 2px dashed #ddd;
+  border-radius: 12px;
+  transition: border-color var(--transition);
+}
+
+.meal-upload-dropzone:hover {
+  border-color: var(--primary);
+}
+
+.meal-upload-dropzone-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.meal-upload-dropzone-text {
+  font-size: 14px;
+  color: #666;
+}
+
+.meal-upload-dropzone-hint {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 4px;
+}
+
+.meal-upload-filename {
+  display: none;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #f0f7ff;
+  border-radius: var(--radius-xs);
+  font-size: 13px;
+  color: #2196F3;
+}
+
+/* 미리보기 */
+.meal-upload-preview {
+  display: none;
+  margin-top: 12px;
+}
+
+.meal-upload-preview-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.meal-upload-table-wrap {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+}
+
+.meal-upload-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.meal-upload-table thead tr {
+  background: var(--bg-sub);
+  position: sticky;
+  top: 0;
+}
+
+.meal-upload-table th {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.meal-upload-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #f0f0f0;
+  white-space: pre-line;
+  font-size: 12px;
+}
+
+.meal-upload-table td:first-child {
+  white-space: nowrap;
+}
+
+/* 하단 버튼 */
+.meal-upload-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.meal-upload-actions .btn-upload,
+.meal-upload-actions .btn-secondary-sm {
+  flex: 1;
+}

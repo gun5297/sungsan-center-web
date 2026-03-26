@@ -26,7 +26,7 @@ let _unsubMyChildren = null;
 
 export function initMyPage() {
   const root = document.getElementById('mypageRoot');
-  root.innerHTML = '<div class="loading-state" style="padding:80px 0;">불러오는 중</div>';
+  root.innerHTML = '<div class="loading-state mypage-loading-state">불러오는 중</div>';
 
   onAuthChange(async (user) => {
     if (!user) {
@@ -44,7 +44,7 @@ export function initMyPage() {
       renderMyPage(root, user, userDoc);
     } catch (e) {
       console.error('마이페이지 로드 실패:', e);
-      root.innerHTML = '<div class="empty-state" style="padding:80px 0;">페이지를 불러올 수 없습니다.<br><a href="index.html">메인으로</a></div>';
+      root.innerHTML = '<div class="empty-state mypage-loading-state">페이지를 불러올 수 없습니다.<br><a href="index.html">메인으로</a></div>';
     }
   });
 }
@@ -61,18 +61,18 @@ async function renderMyPage(root, user, userDoc) {
       passwordSection = `
         <div class="mypage-card mt">
           <div class="mypage-section-title">비밀번호 관리</div>
-          <div class="mypage-info-list" style="margin-bottom:0;">
-            <div class="mypage-info-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+          <div class="mypage-info-list">
+            <div class="mypage-info-row mypage-info-row--vertical">
               <span class="mypage-info-label">관리자 가입 인증 비밀번호</span>
-              <div style="display:flex;gap:8px;width:100%;align-items:center;">
-                <input type="text" id="pwAdminSignup" class="input-field" value="${escapeHtml(passwords.adminSignup || '')}" style="margin-bottom:0;flex:1;" />
+              <div class="mypage-pw-row">
+                <input type="text" id="pwAdminSignup" class="input-field" value="${escapeHtml(passwords.adminSignup || '')}" />
                 <button class="edit-btn" onclick="savePassword('adminSignup')">저장</button>
               </div>
             </div>
-            <div class="mypage-info-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+            <div class="mypage-info-row mypage-info-row--vertical">
               <span class="mypage-info-label">출석 패드 진입 비밀번호</span>
-              <div style="display:flex;gap:8px;width:100%;align-items:center;">
-                <input type="text" id="pwAttendance" class="input-field" value="${escapeHtml(passwords.attendance || '')}" style="margin-bottom:0;flex:1;" />
+              <div class="mypage-pw-row">
+                <input type="text" id="pwAttendance" class="input-field" value="${escapeHtml(passwords.attendance || '')}" />
                 <button class="edit-btn" onclick="savePassword('attendance')">저장</button>
               </div>
             </div>
@@ -113,7 +113,7 @@ async function renderMyPage(root, user, userDoc) {
         pendingSection = `
           <div class="mypage-card mt">
             <div class="mypage-section-title">승인 대기 계정</div>
-            <div class="empty-state" style="padding:24px 0;">대기 중인 계정이 없습니다</div>
+            <div class="empty-state mypage-empty-sm">대기 중인 계정이 없습니다</div>
           </div>
         `;
       }
@@ -132,20 +132,20 @@ async function renderMyPage(root, user, userDoc) {
         <div class="mypage-info-list">
           <div class="mypage-info-row">
             <span class="mypage-info-label">개인정보 수집 동의</span>
-            <span class="mypage-info-value" style="color:var(--primary);font-weight:600;">O (필수)</span>
+            <span class="mypage-info-value mypage-consent-value">O (필수)</span>
           </div>
           <div class="mypage-info-row">
             <span class="mypage-info-label">사진촬영 동의</span>
-            <span class="mypage-info-value" id="photoConsentStatus" style="font-weight:600;color:${photoConsent ? 'var(--primary)' : '#999'};">${photoConsent ? 'O' : 'X (철회됨)'}</span>
+            <span class="mypage-info-value ${photoConsent ? 'mypage-consent-value' : 'mypage-consent-revoked'}" id="photoConsentStatus">${photoConsent ? 'O' : 'X (철회됨)'}</span>
           </div>
         </div>
-        <div style="margin-top:12px;">
+        <div class="mypage-consent-actions">
           ${photoConsent
-            ? `<button class="btn-secondary-sm" onclick="withdrawPhotoConsent('${escapeHtml(user.uid)}')" style="color:#e74c3c;border-color:#e74c3c;">사진촬영 동의 철회</button>`
-            : `<button class="btn-secondary-sm" onclick="grantPhotoConsent('${escapeHtml(user.uid)}')" style="color:var(--primary);border-color:var(--primary);">사진촬영 동의 재동의</button>`
+            ? `<button class="btn-secondary-sm mypage-consent-withdraw" onclick="withdrawPhotoConsent('${escapeHtml(user.uid)}')">사진촬영 동의 철회</button>`
+            : `<button class="btn-secondary-sm mypage-consent-grant" onclick="grantPhotoConsent('${escapeHtml(user.uid)}')">사진촬영 동의 재동의</button>`
           }
         </div>
-        <p style="margin-top:8px;font-size:0.78rem;color:#8c7e72;">※ 사진촬영 동의를 철회하면 갤러리에서 해당 아동의 사진이 접근 불가 처리됩니다.</p>
+        <p class="mypage-consent-note">※ 사진촬영 동의를 철회하면 갤러리에서 해당 아동의 사진이 접근 불가 처리됩니다.</p>
       </div>
     `;
   }
@@ -158,12 +158,12 @@ async function renderMyPage(root, user, userDoc) {
           <input type="text" class="input-field child-search" id="childSearch" placeholder="이름으로 검색" oninput="filterChildren(this.value)" />
           <button class="btn-upload child-add-btn" onclick="openChildModal()">아동 추가</button>
         </div>
-        <div id="childListWrap"><div class="empty-state" style="padding:24px 0;">불러오는 중...</div></div>
+        <div id="childListWrap"><div class="empty-state mypage-empty-sm">불러오는 중...</div></div>
       </div>`
     : `<div class="mypage-card mt" id="myChildCard">
         <div class="mypage-section-title">내 아이 관리</div>
-        <div id="myChildListWrap"><div class="empty-state" style="padding:24px 0;">불러오는 중...</div></div>
-        <button class="btn-upload" style="margin-top:16px;width:100%;" onclick="openLinkChildModal()">아이 연결하기</button>
+        <div id="myChildListWrap"><div class="empty-state mypage-empty-sm">불러오는 중...</div></div>
+        <button class="btn-upload mypage-link-child-btn" onclick="openLinkChildModal()">아이 연결하기</button>
       </div>`;
 
   root.innerHTML = `
@@ -216,7 +216,7 @@ async function renderMyPage(root, user, userDoc) {
     ${isAdmin ? `
     <div class="mypage-card mt">
       <div class="mypage-section-title">데이터 내보내기</div>
-      <div class="mypage-actions" style="flex-wrap:wrap;">
+      <div class="mypage-actions mypage-actions--wrap">
         <button class="btn-secondary-sm" onclick="exportChildren()">아동 목록 CSV</button>
         <button class="btn-secondary-sm" onclick="exportNotices()">공지사항 CSV</button>
         <button class="btn-secondary-sm" onclick="exportMedications()">투약 기록 CSV</button>
@@ -227,7 +227,7 @@ async function renderMyPage(root, user, userDoc) {
     ${isAdmin ? `
     <div class="mypage-card mt">
       <div class="mypage-section-title">활동 로그</div>
-      <div id="auditLogList" class="audit-log-list"><div class="empty-state" style="padding:20px 0;">로그 불러오는 중...</div></div>
+      <div id="auditLogList" class="audit-log-list"><div class="empty-state mypage-empty-md">로그 불러오는 중...</div></div>
     </div>
     ` : ''}
 
@@ -241,7 +241,7 @@ async function renderMyPage(root, user, userDoc) {
         </div>
         <div class="form-group">
           <label class="form-label">이메일</label>
-          <input type="email" class="input-field" value="${escapeHtml(userDoc.email)}" disabled style="background:#f5f0eb;color:#8c7e72;" />
+          <input type="email" class="input-field input-disabled" value="${escapeHtml(userDoc.email)}" disabled />
         </div>
         <div class="form-group">
           <label class="form-label">연락처</label>
@@ -249,7 +249,7 @@ async function renderMyPage(root, user, userDoc) {
         </div>
         <div class="form-group">
           <label class="form-label">직책</label>
-          <input type="text" class="input-field" value="${escapeHtml(roleLabel)}" disabled style="background:#f5f0eb;color:#8c7e72;" />
+          <input type="text" class="input-field input-disabled" value="${escapeHtml(roleLabel)}" disabled />
         </div>
         <div class="edit-modal-actions">
           <button class="btn-upload" onclick="saveEdit('${escapeHtml(user.uid)}')">저장</button>
@@ -326,7 +326,7 @@ async function renderMyPage(root, user, userDoc) {
           <div class="link-child-list" id="linkChildList"></div>
           <input type="hidden" id="linkChildId" value="" />
           <input type="hidden" id="linkChildName" value="" />
-          <div id="linkChildSelected" class="link-child-selected" style="display:none;"></div>
+          <div id="linkChildSelected" class="link-child-selected hidden"></div>
         </div>
         <div class="form-group">
           <label class="form-label">관계 *</label>
@@ -390,7 +390,7 @@ function renderChildList() {
     : _allChildren;
 
   if (filtered.length === 0) {
-    wrap.innerHTML = `<div class="empty-state" style="padding:24px 0;">${_childSearchTerm ? '검색 결과가 없습니다' : '등록된 아동이 없습니다'}</div>`;
+    wrap.innerHTML = `<div class="empty-state mypage-empty-sm">${_childSearchTerm ? '검색 결과가 없습니다' : '등록된 아동이 없습니다'}</div>`;
     return;
   }
 
@@ -434,7 +434,7 @@ function renderMyChildList() {
   if (!wrap) return;
 
   if (_myLinks.length === 0) {
-    wrap.innerHTML = '<div class="empty-state" style="padding:24px 0;">연결된 아이가 없습니다</div>';
+    wrap.innerHTML = '<div class="empty-state mypage-empty-sm">연결된 아이가 없습니다</div>';
     return;
   }
 
@@ -668,7 +668,7 @@ window.openLinkChildModal = () => {
   document.getElementById('linkChildName').value = '';
   document.getElementById('linkChildSearch').value = '';
   document.getElementById('linkRelation').value = '';
-  document.getElementById('linkChildSelected').style.display = 'none';
+  document.getElementById('linkChildSelected').classList.add('hidden');
   document.getElementById('linkChildModal').classList.add('active');
   renderLinkChildList('');
 };
@@ -690,7 +690,7 @@ function renderLinkChildList(term) {
   if (term) available = available.filter(c => c.name && c.name.includes(term));
 
   if (available.length === 0) {
-    listEl.innerHTML = '<div class="empty-state" style="padding:12px 0;font-size:0.82rem;">검색 결과가 없습니다</div>';
+    listEl.innerHTML = '<div class="empty-state mypage-empty-search">검색 결과가 없습니다</div>';
     return;
   }
 
@@ -705,7 +705,7 @@ function renderLinkChildList(term) {
 window.selectLinkChild = (childId, childName) => {
   document.getElementById('linkChildId').value = childId;
   document.getElementById('linkChildName').value = childName;
-  document.getElementById('linkChildSelected').style.display = 'flex';
+  document.getElementById('linkChildSelected').classList.remove('hidden');
   document.getElementById('linkChildSelected').innerHTML = `<span>선택: <strong>${escapeHtml(childName)}</strong></span>`;
   document.getElementById('linkChildList').innerHTML = '';
   document.getElementById('linkChildSearch').value = '';
@@ -746,7 +746,7 @@ async function loadAuditLogs() {
   try {
     const logs = await getRecentLogs(20);
     if (logs.length === 0) {
-      el.innerHTML = '<div class="empty-state" style="padding:20px 0;">아직 기록된 활동이 없습니다</div>';
+      el.innerHTML = '<div class="empty-state mypage-empty-md">아직 기록된 활동이 없습니다</div>';
       return;
     }
     el.innerHTML = logs.map(log => {
@@ -763,6 +763,6 @@ async function loadAuditLogs() {
       `;
     }).join('');
   } catch (e) {
-    el.innerHTML = '<div class="empty-state" style="padding:20px 0;">로그를 불러올 수 없습니다</div>';
+    el.innerHTML = '<div class="empty-state mypage-empty-md">로그를 불러올 수 없습니다</div>';
   }
 }

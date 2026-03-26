@@ -24,36 +24,36 @@ export function openMealUploadModal() {
   overlay.id = 'mealUploadOverlay';
   overlay.className = 'modal-overlay active';
   overlay.innerHTML = `
-    <div class="modal" style="max-width:560px;">
+    <div class="modal meal-upload-modal">
       <div class="modal-title">엑셀 식단 업로드</div>
       <button class="modal-close-x" onclick="closeMealUpload()"></button>
 
-      <div style="margin:16px 0;">
-        <p style="font-size:13px;color:#888;margin-bottom:12px;">
+      <div class="meal-upload-desc">
+        <p>
           급식업체에서 받은 엑셀 파일을 업로드하면 자동으로 식단이 등록됩니다.<br>
           <strong>형식:</strong> 1열-날짜 / 2열-점심 / 3열-간식
         </p>
 
         <div class="meal-upload-area" id="mealUploadArea">
-          <input type="file" id="mealFileInput" accept=".xlsx,.xls,.csv" style="display:none;" onchange="handleMealFile(this)" />
-          <div onclick="document.getElementById('mealFileInput').click()" style="cursor:pointer;padding:32px;text-align:center;border:2px dashed #ddd;border-radius:12px;transition:border-color 0.2s;">
-            <div style="font-size:32px;margin-bottom:8px;">&#128196;</div>
-            <div style="font-size:14px;color:#666;">클릭하여 파일 선택</div>
-            <div style="font-size:12px;color:#aaa;margin-top:4px;">.xlsx, .xls, .csv</div>
+          <input type="file" id="mealFileInput" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleMealFile(this)" />
+          <div class="meal-upload-dropzone" onclick="document.getElementById('mealFileInput').click()">
+            <div class="meal-upload-dropzone-icon">&#128196;</div>
+            <div class="meal-upload-dropzone-text">클릭하여 파일 선택</div>
+            <div class="meal-upload-dropzone-hint">.xlsx, .xls, .csv</div>
           </div>
         </div>
 
-        <div id="mealUploadFileName" style="display:none;margin-top:8px;padding:8px 12px;background:#f0f7ff;border-radius:8px;font-size:13px;color:#2196F3;"></div>
+        <div id="mealUploadFileName" class="meal-upload-filename"></div>
       </div>
 
-      <div id="mealUploadPreview" style="display:none;margin-top:12px;">
-        <div style="font-weight:600;font-size:14px;margin-bottom:8px;">미리보기</div>
-        <div id="mealUploadTable" style="max-height:300px;overflow-y:auto;border:1px solid #eee;border-radius:8px;"></div>
+      <div id="mealUploadPreview" class="meal-upload-preview">
+        <div class="meal-upload-preview-title">미리보기</div>
+        <div id="mealUploadTable" class="meal-upload-table-wrap"></div>
       </div>
 
-      <div style="display:flex;gap:12px;margin-top:20px;">
-        <button class="btn-upload" id="mealApplyBtn" style="flex:1;display:none;" onclick="applyMealUpload()">식단 적용</button>
-        <button class="btn-secondary-sm" style="flex:1;" onclick="closeMealUpload()">취소</button>
+      <div class="meal-upload-actions">
+        <button class="btn-upload hidden" id="mealApplyBtn" onclick="applyMealUpload()">식단 적용</button>
+        <button class="btn-secondary-sm" onclick="closeMealUpload()">취소</button>
       </div>
     </div>
   `;
@@ -232,12 +232,12 @@ function renderMealPreview(data) {
   previewDiv.style.display = 'block';
 
   tableDiv.innerHTML = `
-    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <table class="meal-upload-table">
       <thead>
-        <tr style="background:#f5f5f5;position:sticky;top:0;">
-          <th style="padding:8px;text-align:left;border-bottom:1px solid #ddd;width:25%;">날짜</th>
-          <th style="padding:8px;text-align:left;border-bottom:1px solid #ddd;width:40%;">점심</th>
-          <th style="padding:8px;text-align:left;border-bottom:1px solid #ddd;width:35%;">간식</th>
+        <tr>
+          <th>날짜</th>
+          <th>점심</th>
+          <th>간식</th>
         </tr>
       </thead>
       <tbody>
@@ -246,9 +246,9 @@ function renderMealPreview(data) {
           const displayDate = `${parseInt(parts[1])}/${parseInt(parts[2])}`;
           return `
             <tr>
-              <td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;white-space:nowrap;">${displayDate} (${getDayName(d.dateKey)})</td>
-              <td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;white-space:pre-line;font-size:12px;">${d.lunch || '-'}</td>
-              <td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;white-space:pre-line;font-size:12px;">${d.snack || '-'}</td>
+              <td>${displayDate} (${getDayName(d.dateKey)})</td>
+              <td>${d.lunch || '-'}</td>
+              <td>${d.snack || '-'}</td>
             </tr>
           `;
         }).join('')}
@@ -257,7 +257,7 @@ function renderMealPreview(data) {
   `;
 
   // 적용 버튼 표시
-  document.getElementById('mealApplyBtn').style.display = 'block';
+  document.getElementById('mealApplyBtn').classList.remove('hidden');
 }
 
 function getDayName(dateKey) {

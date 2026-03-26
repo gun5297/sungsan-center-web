@@ -129,7 +129,7 @@ initInbox();
 initSessionTimeout();
 
 // --- 5단계: 하단 탭 바 스크롤 추적 ---
-const tabSections = ['hero', 'notice', 'schedule', 'meal', 'gallery'];
+const tabSections = ['hero', 'notice', 'meal', 'schedule', 'gallery'];
 const tabItems = document.querySelectorAll('.tab-item');
 
 function updateActiveTab() {

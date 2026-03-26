@@ -1,6 +1,6 @@
 // ===== useMedication: 투약 관리 (Firestore) =====
 import { formatDate, resetFields, escapeHtml, validateMaxLength, canSubmit } from '../utils.js';
-import { getIsAdmin, getCurrentUser } from '../state.js';
+import { getIsAdmin, getCurrentUser, isLoggedIn } from '../state.js';
 import { subscribeMedications, createMedication, deleteMedication as deleteMedicationFS, completeMedication as completeMedicationFS } from '../../firebase/services/medicationService.js';
 import { addInboxItem } from '../../firebase/services/inboxService.js';
 import { uploadSignature } from '../../firebase/services/signatureService.js';
@@ -125,12 +125,22 @@ export function printMedication() {
 let _unsubMedications = null;
 
 export function initMedication() {
+  if (!isLoggedIn()) {
+    if (_unsubMedications) { _unsubMedications(); _unsubMedications = null; }
+    medRecords = [];
+    renderMedSchedule();
+    return;
+  }
+
+  // 이미 구독 중이면 re-render만 (관리자 상태 변경 시 skeleton 없이)
+  if (_unsubMedications) {
+    renderMedSchedule();
+    return;
+  }
+
   // 로딩 표시
   const el = document.getElementById('medSchedule');
   if (el) el.innerHTML = '<div class="loading-state">투약 일정 불러오는 중</div>';
-
-  // 이전 구독 해제
-  if (_unsubMedications) _unsubMedications();
 
   // Firestore 실시간 구독
   _unsubMedications = subscribeMedications((data) => {

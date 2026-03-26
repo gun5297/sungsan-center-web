@@ -132,10 +132,21 @@ export async function deleteGalleryItem(id, storagePath) {
 let _unsubGallery = null;
 
 export function initGallery() {
+  if (!isLoggedIn()) {
+    if (_unsubGallery) { _unsubGallery(); _unsubGallery = null; }
+    galleryItems = [];
+    renderGallery();
+    return;
+  }
+
+  // 이미 구독 중이면 re-render만 (관리자 상태 변경 시 skeleton 없이)
+  if (_unsubGallery) {
+    renderGallery();
+    return;
+  }
+
   const grid = document.getElementById('galleryGrid');
   if (grid) grid.innerHTML = skeletonCards(3);
-
-  if (_unsubGallery) _unsubGallery();
 
   _unsubGallery = subscribeGallery((data) => {
     galleryItems = data;

@@ -5,7 +5,7 @@ import {
   deleteInboxItem as deleteInboxItemFS,
   getMySubmissions as getMySubmissionsFS
 } from '../../firebase/services/inboxService.js';
-import { getCurrentUser, getUserRole } from '../state.js';
+import { getCurrentUser, getUserRole, getIsAdmin } from '../state.js';
 import { getMyChildren } from '../../firebase/services/childLinkService.js';
 import { escapeHtml } from '../utils.js';
 import { on } from '../events.js';
@@ -332,8 +332,15 @@ function renderMySubmissions() {
 let _unsubInbox = null;
 
 export function initInbox() {
-  // 이전 구독 해제
-  if (_unsubInbox) _unsubInbox();
+  if (!getIsAdmin()) {
+    if (_unsubInbox) { _unsubInbox(); _unsubInbox = null; }
+    inboxItems = [];
+    updateInboxBadge();
+    return;
+  }
+
+  // 이미 구독 중이면 스킵
+  if (_unsubInbox) return;
 
   // Firestore 실시간 구독
   _unsubInbox = subscribeInbox((data) => {

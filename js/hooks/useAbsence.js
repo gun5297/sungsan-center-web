@@ -1,7 +1,8 @@
 // ===== useAbsence: 조퇴/결석 신청서 (Firestore) =====
 import { on } from '../events.js';
 import { formatDate, todayString, resetFields, skeletonCards, escapeHtml, validateMaxLength, canSubmit } from '../utils.js';
-import { subscribeAbsences, createAbsence } from '../../firebase/services/absenceService.js';
+import { getIsAdmin, isLoggedIn } from '../state.js';
+import { subscribeAbsences, createAbsence, deleteAbsence as deleteAbsenceFS } from '../../firebase/services/absenceService.js';
 import { addInboxItem } from '../../firebase/services/inboxService.js';
 import { uploadSignature } from '../../firebase/services/signatureService.js';
 import { openSignaturePad } from '../signature.js';
@@ -11,6 +12,7 @@ let absenceRecords = [];
 export function renderAbsenceList() {
   const list = document.getElementById('absenceList');
   if (!list) return;
+  const admin = getIsAdmin();
   if (absenceRecords.length === 0) {
     list.innerHTML = '<div class="empty-state">제출된 신청서가 없습니다</div>';
     return;
@@ -20,11 +22,22 @@ export function renderAbsenceList() {
       <div class="notice-header">
         <span class="notice-badge type-${r.type === '결석' ? '긴급' : '공지'}">${escapeHtml(r.type)}</span>
         <span class="notice-date">${escapeHtml(r.date)}</span>
+        ${admin ? `<button class="delete-btn" data-action="deleteAbsence" data-id="${escapeHtml(r.id)}">삭제</button>` : ''}
       </div>
       <div class="notice-title">${escapeHtml(r.name)} (${escapeHtml(r.school)})</div>
       <div class="notice-preview">사유: ${escapeHtml(r.reason)} | 기간: ${escapeHtml(r.from)} ~ ${escapeHtml(r.to)}</div>
     </div>
   `).join('');
+}
+
+export async function deleteAbsence(id) {
+  if (!await showConfirm('이 신청서를 삭제하시겠습니까?')) return;
+  try {
+    await deleteAbsenceFS(id);
+  } catch (e) {
+    console.error('결석 신청서 삭제 오류:', e);
+    showToast('삭제 중 오류가 발생했습니다. 다시 시도해 주세요.', 'error');
+  }
 }
 
 export async function submitAbsence() {
@@ -130,12 +143,22 @@ let _unsubAbsences = null;
 export function initAbsence() {
   initDates();
 
+  if (!isLoggedIn()) {
+    if (_unsubAbsences) { _unsubAbsences(); _unsubAbsences = null; }
+    absenceRecords = [];
+    renderAbsenceList();
+    return;
+  }
+
+  // 이미 구독 중이면 re-render만 (관리자 상태 변경 시 skeleton 없이)
+  if (_unsubAbsences) {
+    renderAbsenceList();
+    return;
+  }
+
   // 로딩 표시
   const list = document.getElementById('absenceList');
   if (list) list.innerHTML = skeletonCards(2);
-
-  // 이전 구독 해제
-  if (_unsubAbsences) _unsubAbsences();
 
   // Firestore 실시간 구독
   _unsubAbsences = subscribeAbsences((data) => {
@@ -146,6 +169,7 @@ export function initAbsence() {
 
 // 이벤트 위임 등록
 on('submitAbsence', () => submitAbsence());
+on('deleteAbsence', (e, el) => deleteAbsence(el.dataset.id));
 on('openAbsSignature', () => {
   openSignaturePad(function(d) {
     document.getElementById('absSignImg').src = d;

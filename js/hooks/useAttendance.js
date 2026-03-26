@@ -4,7 +4,7 @@ import { on } from '../events.js';
 import { skeletonRows, escapeHtml } from '../utils.js';
 import { subscribeTodayRecords } from '../../firebase/services/attendanceService.js';
 import { subscribeStudents } from '../../firebase/services/studentService.js';
-import { getCurrentUser, getUserRole } from '../state.js';
+import { getCurrentUser, getUserRole, isLoggedIn } from '../state.js';
 import { getMyChildren } from '../../firebase/services/childLinkService.js';
 
 let cachedStudents = [];
@@ -153,6 +153,22 @@ export function renderAttendance() {
 }
 
 export function initAttendance() {
+  // 로그인 전에는 구독하지 않음 (Firestore rules: students — isApproved)
+  if (!isLoggedIn()) {
+    if (unsubStudents) { unsubStudents(); unsubStudents = null; }
+    if (unsubRecords) { unsubRecords(); unsubRecords = null; }
+    cachedStudents = [];
+    cachedRecords = {};
+    renderFromCache();
+    return;
+  }
+
+  // 이미 구독 중이면 re-render만
+  if (unsubStudents) {
+    renderFromCache();
+    return;
+  }
+
   // 스켈레톤 로딩 표시
   const attList = document.getElementById('attendanceList');
   if (attList) attList.innerHTML = skeletonRows(4);
@@ -165,7 +181,6 @@ export function initAttendance() {
     });
   } catch (e) {
     console.warn('[useAttendance] 학생 구독 실패:', e);
-    // 폴백: localStorage
     cachedStudents = JSON.parse(localStorage.getItem('att_students') || '[]');
     renderFromCache();
   }
@@ -178,7 +193,6 @@ export function initAttendance() {
     });
   } catch (e) {
     console.warn('[useAttendance] 출결 구독 실패:', e);
-    // 폴백: localStorage
     const key = `att_${new Date().toISOString().split('T')[0]}`;
     cachedRecords = JSON.parse(localStorage.getItem(key) || '{}');
     renderFromCache();

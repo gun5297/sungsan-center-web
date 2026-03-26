@@ -31,16 +31,16 @@ import { initAdmin, onAdminRender } from './hooks/useAdmin.js';
 import { initNotices, renderNotices } from './hooks/useNotices.js';
 import { initCalendar } from './hooks/useCalendar.js';
 import { initMeal, renderMealGrid } from './hooks/useMeal.js';
-import { initAttendance, renderAttendance } from './hooks/useAttendance.js';
-import { initAbsence, renderAbsenceList } from './hooks/useAbsence.js';
-import { initMedication, renderMedSchedule } from './hooks/useMedication.js';
+import { initAttendance } from './hooks/useAttendance.js';
+import { initAbsence } from './hooks/useAbsence.js';
+import { initMedication } from './hooks/useMedication.js';
 import { initPickup, renderPickupTable } from './hooks/usePickup.js';
 import './hooks/useRegister.js';
 import './hooks/useDailyLog.js';
 import './hooks/useAttReport.js';
 import './hooks/useMealUpload.js';
 import './hooks/useDataExport.js';
-import { initGallery, renderGallery } from './hooks/useGallery.js';
+import { initGallery } from './hooks/useGallery.js';
 import { initInbox } from './hooks/useInbox.js';
 import { initSessionTimeout } from '../firebase/auth.js';
 
@@ -80,14 +80,17 @@ document.getElementById('app').innerHTML = [
   Footer(),
 ].join('');
 
-// --- 2단계: 관리자 상태 변경 시 재렌더링 콜백 등록 ---
+// --- 2단계: 인증 상태 변경 시 콜백 등록 ---
+// 재렌더링 (항상)
 onAdminRender(renderNotices);
 onAdminRender(renderMealGrid);
-onAdminRender(renderAttendance);
-onAdminRender(renderMedSchedule);
-onAdminRender(renderAbsenceList);
-onAdminRender(renderGallery);
 onAdminRender(renderPickupTable);
+// 인증 필요 구독 — 로그인/로그아웃 시 재구독/해제
+onAdminRender(initAttendance);
+onAdminRender(initGallery);
+onAdminRender(initAbsence);
+onAdminRender(initMedication);
+onAdminRender(initInbox);
 
 // --- 3단계: Fade-up 스크롤 애니메이션 ---
 const observer = new IntersectionObserver((entries) => {

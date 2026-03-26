@@ -60,6 +60,7 @@ body {
   overflow-x: hidden;
   word-break: keep-all;
   overflow-wrap: break-word;
+  touch-action: manipulation;
 }
 
 a {

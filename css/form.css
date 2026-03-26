@@ -129,6 +129,17 @@
   margin: 12px 0;
 }
 
+#absSignImg, #medSignImg {
+  display: block;
+  max-width: 200px;
+  max-height: 80px;
+  width: auto;
+  height: auto;
+  margin-top: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
 .form-to {
   font-size: 0.85rem;
   color: var(--text-sub);

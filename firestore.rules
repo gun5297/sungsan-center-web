@@ -173,9 +173,9 @@ service cloud.firestore {
     }
 
     // ===== 출결 태블릿 공개 설정 =====
-    // PIN 해시 포함 — 로그인한 사용자만 읽기 (익명 Auth 포함)
+    // PIN 해시만 저장 (평문 없음) — 잠금 해제 전 읽기 필요하므로 공개 허용
     match /publicConfig/{configId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow write: if isAdmin();
     }
 

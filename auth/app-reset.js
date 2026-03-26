@@ -2,7 +2,7 @@
 import { ResetPasswordForm } from './components/ResetPasswordForm.js';
 import { auth } from '../firebase/config.js';
 import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-import { on, initEvents } from './events.js';
+import { on, initEvents } from '../js/events.js';
 
 // 0단계: 이벤트 위임 초기화
 initEvents();

@@ -7,7 +7,7 @@
 import { checkAttendancePassword } from '../../firebase/services/settingsService.js';
 import { loginAnonymously } from '../../firebase/auth.js';
 import { showScreen } from './useScreen.js';
-import { on } from '../events.js';
+import { on } from '../../js/events.js';
 
 let lockCode = '';
 

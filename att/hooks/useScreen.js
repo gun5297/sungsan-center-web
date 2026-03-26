@@ -2,7 +2,7 @@
 
 import { ATT_PASSWORD } from '../data.js';
 import { renderAdmin, startAdminRefresh, stopAdminRefresh, switchAdminTab } from './useAdmin.js';
-import { on } from '../events.js';
+import { on } from '../../js/events.js';
 
 export function showScreen(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));

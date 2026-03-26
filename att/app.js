@@ -1,7 +1,7 @@
 // ===== 출결 시스템 진입점 =====
 
 // 이벤트 위임 시스템
-import { initEvents } from './events.js';
+import { initEvents } from '../js/events.js';
 
 // 컴포넌트
 import { LockScreen } from './components/LockScreen.js';

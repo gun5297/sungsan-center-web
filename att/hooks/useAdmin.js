@@ -1,7 +1,7 @@
 // ===== 관리 화면 (출결 기록, 타임라인, CSV, 초기화) =====
 
 import { getStudents, getTodayRecords, saveTodayRecords, deleteStudentRecord, resetTodayRecords, subscribeTodayRecords } from '../data.js';
-import { on } from '../events.js';
+import { on } from '../../js/events.js';
 
 let adminRefreshInterval = null;
 let unsubscribeRecords = null;

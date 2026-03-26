@@ -1,7 +1,7 @@
 // ===== 아동 관리 (CRUD) — Firestore 연동 =====
 
 import { ATT_PASSWORD, getStudents, createStudent, updateStudent, deleteStudentFs, getAllStudents } from '../data.js';
-import { on } from '../events.js';
+import { on } from '../../js/events.js';
 
 let manageUnlocked = false;
 let editingStudentId = null;

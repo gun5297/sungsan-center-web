@@ -3,7 +3,7 @@ import { auth } from '../../firebase/config.js';
 import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 import { createUserDoc } from '../../firebase/services/userService.js';
 import { onAuthChange } from '../../firebase/auth.js';
-import { on } from '../events.js';
+import { on } from '../../js/events.js';
 
 export function initSignup() {
   // 이미 로그인된 상태면 로그아웃 (회원가입 페이지는 비로그인 상태에서만 사용)

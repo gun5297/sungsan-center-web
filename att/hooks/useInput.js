@@ -3,7 +3,7 @@
 import { getStudents, getTodayRecords, saveTodayRecords } from '../data.js';
 import { playBell } from './useBell.js';
 import { showScreen } from './useScreen.js';
-import { on } from '../events.js';
+import { on } from '../../js/events.js';
 
 let inputCode = '';
 

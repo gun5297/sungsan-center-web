@@ -1,7 +1,7 @@
 // ===== useLogin: 로그인 폼 로직 (Firebase Auth + Firestore 역할) =====
 import { login, logout, onAuthChange } from '../../firebase/auth.js';
 import { getUserDoc, createUserDoc, hasNoDirector } from '../../firebase/services/userService.js';
-import { on } from '../events.js';
+import { on } from '../../js/events.js';
 
 // doLogin()에서 직접 리다이렉트할 때는 onAuthChange 무시
 let loginInProgress = false;

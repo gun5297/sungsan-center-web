@@ -24,7 +24,9 @@ const app = initializeApp(firebaseConfig);
 // https://www.google.com/recaptcha/admin/create (유형: reCAPTCHA v3)
 const RECAPTCHA_SITE_KEY = '6LdfipgsAAAAAK7_6Czc055MFcKn9-KX-GkpBydv';
 
-if (RECAPTCHA_SITE_KEY) {
+// 로컬 개발 환경에서는 App Check 건너뜀 (reCAPTCHA 도메인 미등록)
+const isProd = !['localhost', '127.0.0.1'].includes(location.hostname);
+if (RECAPTCHA_SITE_KEY && isProd) {
   try {
     initializeAppCheck(app, {
       provider: new ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),

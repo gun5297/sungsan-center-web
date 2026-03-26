@@ -67,7 +67,14 @@ export async function checkAttendancePassword(input) {
     let storedHash = _cachedHash;
     if (!storedHash || Date.now() - _cacheTime > HASH_CACHE_TTL) {
       const snap = await getDoc(attLockRef);
-      storedHash = snap.exists() ? snap.data().hash : await hashPin(DEFAULTS.attendance);
+      if (snap.exists() && snap.data().hash) {
+        storedHash = snap.data().hash;
+      } else {
+        // 문서 없거나 hash 필드 없음 → 기본 PIN으로 초기화
+        storedHash = await hashPin(DEFAULTS.attendance);
+        // 비동기로 Firestore에 기본 해시 저장 (실패해도 무시)
+        setDoc(attLockRef, { hash: storedHash }, { merge: true }).catch(() => {});
+      }
       _cachedHash = storedHash;
       _cacheTime = Date.now();
     }

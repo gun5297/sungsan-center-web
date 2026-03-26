@@ -7,9 +7,9 @@ export function Pickup() {
     <p class="section-desc">저학년 아동의 하교 픽업 일정을 확인하세요.</p>
 
     <div class="meal-week-nav">
-      <button class="month-btn" onclick="changePickupWeek(-1)">&lt;</button>
+      <button class="month-btn" data-action="changePickupWeek" data-dir="-1">&lt;</button>
       <span class="month-label" id="pickupWeekLabel"></span>
-      <button class="month-btn" onclick="changePickupWeek(1)">&gt;</button>
+      <button class="month-btn" data-action="changePickupWeek" data-dir="1">&gt;</button>
     </div>
 
     <div class="pickup-table-wrap">
@@ -30,7 +30,7 @@ export function Pickup() {
           <div class="form-group"><label class="form-label">목</label><input type="text" id="pickupThu" class="input-field" placeholder="13:00" /></div>
           <div class="form-group"><label class="form-label">금</label><input type="text" id="pickupFri" class="input-field" placeholder="12:30" /></div>
         </div>
-        <button class="btn-upload" onclick="addPickupStudent()">추가</button>
+        <button class="btn-upload" data-action="addPickupStudent">추가</button>
       </div>
     </div>
   </section>

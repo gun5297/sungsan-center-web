@@ -95,5 +95,3 @@ export function openSignaturePad(onComplete) {
   });
 }
 
-// 전역 노출
-window.openSignaturePad = openSignaturePad;

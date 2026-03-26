@@ -23,7 +23,7 @@ export function ResetPasswordForm() {
             <input type="email" id="resetEmail" class="input-field" placeholder="가입하신 이메일 주소" />
           </div>
 
-          <button class="btn-upload" onclick="resetPassword()">재설정 링크 보내기</button>
+          <button class="btn-upload" data-action="resetPassword">재설정 링크 보내기</button>
         </div>
 
         <div class="auth-links">

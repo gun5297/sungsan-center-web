@@ -1,5 +1,6 @@
 // ===== useAdmin: Firebase Auth + Firestore 역할 기반 관리자 =====
 import { getIsAdmin, setIsAdmin, setCurrentUser, setUserRole, canManage } from '../state.js';
+import { on } from '../events.js';
 import { logout, onAuthChange } from '../../firebase/auth.js';
 import { getUserDoc, createUserDoc, hasNoDirector, isAdminRole } from '../../firebase/services/userService.js';
 import { subscribeTodayRecords } from '../../firebase/services/attendanceService.js';
@@ -146,5 +147,5 @@ onAdminRender(() => {
   }
 });
 
-// window에 노출
-window.toggleAdminLogin = toggleAdminLogin;
+// 이벤트 위임 등록
+on('toggleAdminLogin', () => toggleAdminLogin());

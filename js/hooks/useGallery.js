@@ -9,6 +9,7 @@ import {
   deleteGalleryItem as deleteGalleryItemFS
 } from '../../firebase/services/galleryService.js';
 import { logAction } from '../../firebase/services/auditService.js';
+import { on } from '../events.js';
 
 let galleryItems = [];
 
@@ -47,7 +48,7 @@ export function renderGallery() {
         <div class="gallery-info">
           <div class="gallery-title">${escapeHtml(item.title)}</div>
           <div class="gallery-date">${escapeHtml(item.date)}</div>
-          ${admin ? `<div class="notice-actions gallery-actions"><button class="delete-btn" onclick="deleteGalleryItem('${escapeHtml(item.id)}', '${escapeHtml(item.storagePath || '')}')">삭제</button></div>` : ''}
+          ${admin ? `<div class="notice-actions gallery-actions"><button class="delete-btn" data-action="deleteGalleryItem" data-id="${escapeHtml(item.id)}" data-path="${escapeHtml(item.storagePath || '')}">삭제</button></div>` : ''}
         </div>
       </div>
     `;
@@ -99,9 +100,9 @@ export async function addGalleryItem() {
   }
 }
 
-export async function deleteGalleryItem(id, photoUrl) {
+export async function deleteGalleryItem(id, storagePath) {
   if (!await showConfirm('이 활동을 삭제하시겠습니까?')) return;
-  await deleteGalleryItemFS(id, photoUrl || null);
+  await deleteGalleryItemFS(id, storagePath || null);
   logAction('delete', 'gallery', id, '갤러리 항목 삭제');
 }
 
@@ -137,6 +138,6 @@ export function initGallery() {
   }
 }
 
-// window에 노출
-window.addGalleryItem = addGalleryItem;
-window.deleteGalleryItem = deleteGalleryItem;
+// 이벤트 위임 등록
+on('addGalleryItem', () => addGalleryItem());
+on('deleteGalleryItem', (e, el) => deleteGalleryItem(el.dataset.id, el.dataset.path));

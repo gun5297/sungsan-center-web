@@ -1,5 +1,6 @@
 // ===== useAttReport: 월별 출석 통계 리포트 (HTML → window.print 기반 PDF) =====
 import { getIsAdmin } from '../state.js';
+import { on } from '../events.js';
 import { getRecordsByMonth } from '../../firebase/services/attendanceService.js';
 import { getAllStudents } from '../../firebase/services/studentService.js';
 
@@ -24,7 +25,7 @@ export function openAttendanceReport() {
   overlay.innerHTML = `
     <div class="modal att-report-modal">
       <div class="modal-title">월별 출석 리포트</div>
-      <button class="modal-close-x" onclick="closeAttReport()"></button>
+      <button class="modal-close-x" data-action="closeAttReport"></button>
 
       <div class="att-report-selectors">
         <div class="form-group">
@@ -48,8 +49,8 @@ export function openAttendanceReport() {
       <div id="reportPreview" class="att-report-preview"></div>
 
       <div class="att-report-actions">
-        <button class="btn-upload" onclick="generateAttReport()">리포트 생성</button>
-        <button class="btn-secondary-sm hidden" id="reportPrintBtn" onclick="printAttReport()">PDF 저장 / 인쇄</button>
+        <button class="btn-upload" data-action="generateAttReport">리포트 생성</button>
+        <button class="btn-secondary-sm hidden" id="reportPrintBtn" data-action="printAttReport">PDF 저장 / 인쇄</button>
       </div>
     </div>
   `;
@@ -244,8 +245,8 @@ function printAttReport() {
     </tbody>
   </table>
   <div class="footer">출력일: ${new Date().toLocaleDateString('ko-KR')} | 성산지역아동센터</div>
-  <div class="no-print" style="text-align:center;margin-top:20px;">
-    <button onclick="window.print()" style="padding:10px 32px;background:#FF7854;color:#fff;border:none;border-radius:8px;font-size:15px;cursor:pointer;font-family:inherit;">인쇄 / PDF 저장</button>
+  <div class="no-print att-report-print-wrap">
+    <button class="att-report-print-btn" onclick="window.print()">인쇄 / PDF 저장</button>
   </div>
 </body>
 </html>`;
@@ -269,7 +270,7 @@ function formatMinutes(totalMinutes) {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
-window.openAttendanceReport = openAttendanceReport;
-window.generateAttReport = generateAttReport;
-window.printAttReport = printAttReport;
-window.closeAttReport = closeAttReport;
+// ===== 이벤트 위임 등록 =====
+on('closeAttReport', () => closeAttReport());
+on('generateAttReport', () => generateAttReport());
+on('printAttReport', () => printAttReport());

@@ -7,6 +7,7 @@
 import { checkAttendancePassword } from '../../firebase/services/settingsService.js';
 import { loginAnonymously } from '../../firebase/auth.js';
 import { showScreen } from './useScreen.js';
+import { on } from '../events.js';
 
 let lockCode = '';
 
@@ -56,14 +57,14 @@ function showLockError(msg) {
 }
 
 // ===== 입력 핸들러 =====
-export function pressLock(n) {
+function pressLock(n) {
   if (isLockedOut()) return; // 잠금 중엔 입력 차단
   if (lockCode.length >= 4) return;
   lockCode += n;
   updateLockDots();
 }
 
-export function pressLockDelete() {
+function pressLockDelete() {
   if (isLockedOut()) return;
   lockCode = lockCode.slice(0, -1);
   updateLockDots();
@@ -71,7 +72,7 @@ export function pressLockDelete() {
   if (errorEl) errorEl.classList.add('hidden');
 }
 
-export async function pressLockConfirm() {
+async function pressLockConfirm() {
   if (lockCode.length === 0) return;
 
   // 잠금 상태 체크
@@ -124,7 +125,7 @@ export async function pressLockConfirm() {
   }
 }
 
-// window 노출
-window.pressLock = pressLock;
-window.pressLockDelete = pressLockDelete;
-window.pressLockConfirm = pressLockConfirm;
+// 이벤트 위임 등록
+on('pressLock', (e, el) => pressLock(el.dataset.key));
+on('pressLockDelete', () => pressLockDelete());
+on('pressLockConfirm', () => pressLockConfirm());

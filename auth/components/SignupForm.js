@@ -47,7 +47,7 @@ export function SignupForm() {
             </label>
           </div>
 
-          <button class="btn-upload" onclick="doSignup()">회원가입</button>
+          <button class="btn-upload" data-action="doSignup">회원가입</button>
         </div>
 
         <div class="auth-links">

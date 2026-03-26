@@ -17,6 +17,10 @@ import { Register } from './components/Register.js';
 import { Contact } from './components/Contact.js';
 import { Footer } from './components/Footer.js';
 
+// --- 이벤트 위임 초기화 ---
+import { initEvents, on } from './events.js';
+initEvents();
+
 // --- 토스트 & 확인 모달 & 전자서명 ---
 import './toast.js';
 import './confirm.js';
@@ -97,9 +101,9 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
 // --- FAB 메뉴 토글 (모바일) ---
-window.toggleToolbarMenu = function() {
+on('toggleToolbarMenu', () => {
   document.getElementById('fixedToolbar').classList.toggle('open');
-};
+});
 
 // 모바일에서 메뉴 버튼 클릭 시 메뉴 닫기
 document.querySelectorAll('.toolbar-menu .toolbar-btn').forEach(btn => {

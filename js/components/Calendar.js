@@ -7,9 +7,9 @@ export function Calendar() {
     <p class="section-desc">이번 달 프로그램 일정을 한눈에 확인하세요.</p>
 
     <div class="month-nav">
-      <button class="month-btn" onclick="changeMonth(-1)">&lt;</button>
+      <button class="month-btn" data-action="changeMonth" data-dir="-1">&lt;</button>
       <span class="month-label" id="monthLabel"></span>
-      <button class="month-btn" onclick="changeMonth(1)">&gt;</button>
+      <button class="month-btn" data-action="changeMonth" data-dir="1">&gt;</button>
     </div>
 
     <div class="cal-legend">
@@ -24,7 +24,7 @@ export function Calendar() {
     <div class="day-schedule" id="daySchedule">
       <div class="day-schedule-header">
         <h3 class="day-title" id="dayTitle">날짜를 선택하세요</h3>
-        <button class="edit-schedule-btn admin-only" onclick="openScheduleEditor()">수정</button>
+        <button class="edit-schedule-btn admin-only" data-action="openScheduleEditor">수정</button>
       </div>
       <div class="timetable" id="timetable"></div>
     </div>

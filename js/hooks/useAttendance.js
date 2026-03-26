@@ -1,5 +1,6 @@
 // ===== useAttendance: 출석 현황 (메인 페이지 표시용) — Firestore 실시간 구독 =====
 
+import { on } from '../events.js';
 import { skeletonRows, escapeHtml } from '../utils.js';
 import { subscribeTodayRecords } from '../../firebase/services/attendanceService.js';
 import { subscribeStudents } from '../../firebase/services/studentService.js';
@@ -185,4 +186,5 @@ export function initAttendance() {
 }
 
 // window에 노출
-window.renderAttendance = renderAttendance;
+// 이벤트 위임 등록
+on('renderAttendance', () => renderAttendance());

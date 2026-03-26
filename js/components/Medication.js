@@ -107,14 +107,14 @@ export function Medication() {
         <p class="form-date-line" id="medFormDate"></p>
         <div class="form-sign-row">
           <span>의뢰인(보호자): ___________</span>
-          <button class="edit-btn" onclick="openSignaturePad(function(d){ document.getElementById('medSignImg').src=d; document.getElementById('medSignImg').style.display='inline'; })">전자서명</button>
-          <img id="medSignImg" style="display:none;height:40px;vertical-align:middle;" />
+          <button class="edit-btn" data-action="openMedSignature">전자서명</button>
+          <img id="medSignImg" class="hidden" />
         </div>
         <p class="form-to">성산지역아동센터장 귀하</p>
       </div>
 
       <div class="form-actions">
-        <button class="btn-upload" onclick="submitMedication()">온라인 제출</button>
+        <button class="btn-upload" data-action="submitMedication">온라인 제출</button>
       </div>
     </div>
 

@@ -2,6 +2,8 @@
 // SheetJS(xlsx) CDN을 통해 전역 XLSX 객체 사용
 import { getIsAdmin } from '../state.js';
 import { getDateKey } from '../utils.js';
+import { on } from '../events.js';
+import { changeMealWeek } from './useMeal.js';
 import {
   getMealData as firestoreGetMealData,
   saveMealData as firestoreSaveMealData
@@ -26,7 +28,7 @@ export function openMealUploadModal() {
   overlay.innerHTML = `
     <div class="modal meal-upload-modal">
       <div class="modal-title">엑셀 식단 업로드</div>
-      <button class="modal-close-x" onclick="closeMealUpload()"></button>
+      <button class="modal-close-x" data-action="closeMealUpload"></button>
 
       <div class="meal-upload-desc">
         <p>
@@ -35,8 +37,8 @@ export function openMealUploadModal() {
         </p>
 
         <div class="meal-upload-area" id="mealUploadArea">
-          <input type="file" id="mealFileInput" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleMealFile(this)" />
-          <div class="meal-upload-dropzone" onclick="document.getElementById('mealFileInput').click()">
+          <input type="file" id="mealFileInput" accept=".xlsx,.xls,.csv" class="hidden" data-action="handleMealFile" />
+          <div class="meal-upload-dropzone" data-action="triggerMealFileInput">
             <div class="meal-upload-dropzone-icon">&#128196;</div>
             <div class="meal-upload-dropzone-text">클릭하여 파일 선택</div>
             <div class="meal-upload-dropzone-hint">.xlsx, .xls, .csv</div>
@@ -52,8 +54,8 @@ export function openMealUploadModal() {
       </div>
 
       <div class="meal-upload-actions">
-        <button class="btn-upload hidden" id="mealApplyBtn" onclick="applyMealUpload()">식단 적용</button>
-        <button class="btn-secondary-sm" onclick="closeMealUpload()">취소</button>
+        <button class="btn-upload hidden" id="mealApplyBtn" data-action="applyMealUpload">식단 적용</button>
+        <button class="btn-secondary-sm" data-action="closeMealUpload">취소</button>
       </div>
     </div>
   `;
@@ -304,10 +306,8 @@ async function applyMealUpload() {
     showToast(`${parsedMealData.length}일분 식단이 적용되었습니다.`, 'success');
     closeMealUpload();
 
-    // 메인 식단 그리드 갱신 (useMeal의 renderMealGrid가 구독으로 자동 갱신되지만, 안전하게 이벤트 발생)
-    if (typeof window.changeMealWeek === 'function') {
-      window.changeMealWeek(0); // 현재 주 다시 렌더링
-    }
+    // 메인 식단 그리드 갱신 (useMeal의 renderMealGrid가 구독으로 자동 갱신되지만, 안전하게 호출)
+    changeMealWeek(0);
   } catch (e) {
     console.error('식단 적용 실패:', e);
     showToast('식단 적용에 실패했습니다.', 'error');
@@ -324,8 +324,8 @@ function closeMealUpload() {
   parsedMealData = null;
 }
 
-// ===== window 노출 =====
-window.openMealUploadModal = openMealUploadModal;
-window.handleMealFile = handleMealFile;
-window.applyMealUpload = applyMealUpload;
-window.closeMealUpload = closeMealUpload;
+// ===== 이벤트 위임 등록 =====
+on('closeMealUpload', () => closeMealUpload());
+on('triggerMealFileInput', () => document.getElementById('mealFileInput').click());
+on('applyMealUpload', () => applyMealUpload());
+on('handleMealFile', (e, el) => handleMealFile(el), 'change');

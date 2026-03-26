@@ -8,6 +8,7 @@ import {
 import { getCurrentUser, getUserRole } from '../state.js';
 import { getMyChildren } from '../../firebase/services/childLinkService.js';
 import { escapeHtml } from '../utils.js';
+import { on } from '../events.js';
 
 let inboxItems = [];
 let currentInboxFilter = 'all';
@@ -98,7 +99,7 @@ export function renderInbox() {
   list.innerHTML = filtered.map((item) => {
     const consentStr = item.consents ? item.consents.map(c => `<span class="inbox-consent-tag">✓ ${escapeHtml(c)}</span>`).join(' ') : '';
     return `
-      <div class="inbox-item" onclick="printInboxItem('${escapeHtml(item.id)}')">
+      <div class="inbox-item" data-action="printInboxItem" data-id="${escapeHtml(item.id)}">
         <span class="inbox-type ${escapeHtml(item.type)}">${escapeHtml(typeLabels[item.type])}</span>
         <div class="inbox-info">
           <div class="inbox-name">${escapeHtml(item.name)}</div>
@@ -107,8 +108,8 @@ export function renderInbox() {
           ${consentStr ? `<div class="inbox-consents">${consentStr}</div>` : ''}
         </div>
         <span class="inbox-date">${escapeHtml(item.date)}</span>
-        <button class="inbox-print-btn" onclick="event.stopPropagation(); printInboxItem('${escapeHtml(item.id)}')">출력</button>
-        <button class="delete-btn" onclick="event.stopPropagation(); deleteInboxItemById('${escapeHtml(item.id)}')">삭제</button>
+        <button class="inbox-print-btn" data-action="printInboxItem" data-id="${escapeHtml(item.id)}">출력</button>
+        <button class="delete-btn" data-action="deleteInboxItemById" data-id="${escapeHtml(item.id)}">삭제</button>
       </div>
     `;
   }).join('');
@@ -314,7 +315,7 @@ function renderMySubmissions() {
   list.innerHTML = filtered.map(item => {
     const consentStr = item.consents ? item.consents.map(c => `<span class="inbox-consent-tag">✓ ${escapeHtml(c)}</span>`).join(' ') : '';
     return `
-      <div class="inbox-item" onclick="printInboxItem('${escapeHtml(item.id)}')">
+      <div class="inbox-item" data-action="printInboxItem" data-id="${escapeHtml(item.id)}">
         <span class="inbox-type ${escapeHtml(item.type)}">${escapeHtml(typeLabels[item.type] || item.type)}</span>
         <div class="inbox-info">
           <div class="inbox-name">${escapeHtml(item.name)}</div>
@@ -345,14 +346,17 @@ export function initInbox() {
   });
 }
 
-// window에 노출
-window.openInbox = openInbox;
-window.closeInbox = closeInbox;
-window.switchInboxTab = switchInboxTab;
-window.printInboxItem = printInboxItem;
-window.deleteInboxItemById = deleteInboxItemById;
-window.searchInbox = searchInbox;
-window.sortInbox = sortInbox;
-window.openMySubmissions = openMySubmissions;
-window.closeMySubmissions = closeMySubmissions;
-window.switchMySubmitTab = switchMySubmitTab;
+// 이벤트 위임 등록
+on('openInbox', () => openInbox());
+on('closeInbox', () => closeInbox());
+on('switchInboxTab', (e, el) => switchInboxTab(el.dataset.tab));
+on('printInboxItem', (e, el) => printInboxItem(el.dataset.id));
+on('deleteInboxItemById', (e, el) => {
+  e.stopPropagation();
+  deleteInboxItemById(el.dataset.id);
+});
+on('searchInbox', (e, el) => searchInbox(el.value), 'keyup');
+on('sortInbox', (e, el) => sortInbox(el.value), 'change');
+on('openMySubmissions', () => openMySubmissions());
+on('closeMySubmissions', () => closeMySubmissions());
+on('switchMySubmitTab', (e, el) => switchMySubmitTab(el.dataset.tab));

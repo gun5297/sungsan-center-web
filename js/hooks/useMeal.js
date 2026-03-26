@@ -1,6 +1,7 @@
 // ===== useMeal: 식단표 (Firestore + localStorage 폴백) =====
 import { sampleMeals } from '../data/sampleData.js';
 import { getWeekDates, isSameDay, getDateKey } from '../utils.js';
+import { on } from '../events.js';
 import {
   getMealData as firestoreGetMealData,
   saveMealData as firestoreSaveMealData,
@@ -107,12 +108,12 @@ function renderMealEditorModal() {
   overlay.innerHTML = `
     <div class="modal meal-editor-modal">
       <div class="modal-title">식단 수정</div>
-      <button class="modal-close-x" onclick="closeMealEditor()"></button>
+      <button class="modal-close-x" data-action="closeMealEditor"></button>
 
       <div class="meal-editor-nav">
-        <button class="month-btn" onclick="changeMealEditorMonth(-1)">&lt;</button>
+        <button class="month-btn" data-action="changeMealEditorMonth" data-dir="-1">&lt;</button>
         <span class="month-label" id="mealEditorMonthLabel"></span>
-        <button class="month-btn" onclick="changeMealEditorMonth(1)">&gt;</button>
+        <button class="month-btn" data-action="changeMealEditorMonth" data-dir="1">&gt;</button>
       </div>
 
       <div class="meal-editor-calendar" id="mealEditorCalendar"></div>
@@ -159,7 +160,7 @@ function renderMealEditorCalendar() {
     if (hasMeal) classes += ' has-meal';
     if (isWeekend) classes += ' weekend';
 
-    html += `<div class="${classes}" onclick="openMealDayEditor('${key}')">${d}${hasMeal ? '<span class="meal-dot"></span>' : ''}</div>`;
+    html += `<div class="${classes}" data-action="openMealDayEditor" data-key="${key}">${d}${hasMeal ? '<span class="meal-dot"></span>' : ''}</div>`;
   }
 
   document.getElementById('mealEditorCalendar').innerHTML = html;
@@ -183,13 +184,13 @@ export function openMealDayEditor(dateKey) {
   const modal = document.querySelector('.meal-editor-modal');
   modal.innerHTML = `
     <div class="modal-title">식단 수정</div>
-    <button class="modal-close-x" onclick="closeMealEditor()"></button>
+    <button class="modal-close-x" data-action="closeMealEditor"></button>
 
     <div class="meal-day-editor">
       <div class="meal-day-nav">
-        <button class="month-btn" onclick="moveMealDay(-1)">&lt;</button>
+        <button class="month-btn" data-action="moveMealDay" data-dir="-1">&lt;</button>
         <span class="meal-day-label" id="mealDayLabel">${displayDate}</span>
-        <button class="month-btn" onclick="moveMealDay(1)">&gt;</button>
+        <button class="month-btn" data-action="moveMealDay" data-dir="1">&gt;</button>
       </div>
 
       <div class="form-group">
@@ -203,8 +204,8 @@ export function openMealDayEditor(dateKey) {
       </div>
 
       <div style="display:flex;gap:12px;margin-top:16px;align-items:center;">
-        <button class="btn-upload" style="margin-top:0;" onclick="saveMealDay()">저장</button>
-        <button class="btn-secondary-sm" onclick="backToMealCalendar()">달력으로</button>
+        <button class="btn-upload" style="margin-top:0;" data-action="saveMealDay">저장</button>
+        <button class="btn-secondary-sm" data-action="backToMealCalendar">달력으로</button>
       </div>
     </div>
   `;
@@ -263,6 +264,40 @@ export function closeMealEditor() {
   renderMealGrid(); // 메인 식단표 갱신
 }
 
+// ===== 이벤트 위임 등록 =====
+
+on('changeMealWeek', (e, el) => {
+  changeMealWeek(parseInt(el.dataset.dir));
+});
+
+on('openMealEditor', () => {
+  openMealEditor();
+});
+
+on('closeMealEditor', () => {
+  closeMealEditor();
+});
+
+on('changeMealEditorMonth', (e, el) => {
+  changeMealEditorMonth(parseInt(el.dataset.dir));
+});
+
+on('openMealDayEditor', (e, el) => {
+  openMealDayEditor(el.dataset.key);
+});
+
+on('moveMealDay', (e, el) => {
+  moveMealDay(parseInt(el.dataset.dir));
+});
+
+on('saveMealDay', () => {
+  saveMealDay();
+});
+
+on('backToMealCalendar', () => {
+  backToMealCalendar();
+});
+
 // ===== 초기화 =====
 
 export async function initMeal() {
@@ -303,13 +338,3 @@ export async function initMeal() {
     // localStorage 데이터로 이미 렌더링되어 있으므로 추가 작업 불필요
   }
 }
-
-// window에 노출
-window.changeMealWeek = changeMealWeek;
-window.openMealEditor = openMealEditor;
-window.closeMealEditor = closeMealEditor;
-window.changeMealEditorMonth = changeMealEditorMonth;
-window.openMealDayEditor = openMealDayEditor;
-window.moveMealDay = moveMealDay;
-window.saveMealDay = saveMealDay;
-window.backToMealCalendar = backToMealCalendar;

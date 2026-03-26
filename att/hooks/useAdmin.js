@@ -1,6 +1,7 @@
 // ===== 관리 화면 (출결 기록, 타임라인, CSV, 초기화) =====
 
 import { getStudents, getTodayRecords, saveTodayRecords, deleteStudentRecord, resetTodayRecords, subscribeTodayRecords } from '../data.js';
+import { on } from '../events.js';
 
 let adminRefreshInterval = null;
 let unsubscribeRecords = null;
@@ -133,7 +134,7 @@ function renderTimeline(students, records) {
       : `<div class="timeline-sms sent">📱 문자 발송 완료</div>`;
 
     const cancelBtn = canCancel
-      ? `<button class="cancel-btn" onclick="cancelAttendance('${s.id}')">출석 취소 (${remaining}초)</button>`
+      ? `<button class="cancel-btn" data-action="cancelAttendance" data-id="${s.id}">출석 취소 (${remaining}초)</button>`
       : `<button class="cancel-btn disabled" disabled>취소 불가</button>`;
 
     const statusClass = r.outTime ? 'left' : 'present';
@@ -159,7 +160,7 @@ function renderTimeline(students, records) {
   }).join('');
 }
 
-export async function cancelAttendance(studentId) {
+async function cancelAttendance(studentId) {
   try {
     const records = await getTodayRecords();
     if (!records[studentId]) return;
@@ -174,7 +175,7 @@ export async function cancelAttendance(studentId) {
   }
 }
 
-export async function exportCSV() {
+async function exportCSV() {
   try {
     const [students, records] = await Promise.all([getStudents(), getTodayRecords()]);
     const today = new Date().toISOString().split('T')[0];
@@ -204,7 +205,7 @@ export async function exportCSV() {
   }
 }
 
-export async function resetToday() {
+async function resetToday() {
   if (confirm('오늘 출결 기록을 모두 삭제하시겠습니까?')) {
     try {
       await resetTodayRecords();
@@ -217,8 +218,8 @@ export async function resetToday() {
   }
 }
 
-// window 노출
-window.switchAdminTab = switchAdminTab;
-window.cancelAttendance = cancelAttendance;
-window.exportCSV = exportCSV;
-window.resetToday = resetToday;
+// 이벤트 위임 등록
+on('switchAdminTab', (e, el) => switchAdminTab(el.dataset.tab));
+on('cancelAttendance', (e, el) => cancelAttendance(el.dataset.id));
+on('exportCSV', () => exportCSV());
+on('resetToday', () => resetToday());

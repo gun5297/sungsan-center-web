@@ -2,6 +2,7 @@
 
 import { ATT_PASSWORD } from '../data.js';
 import { renderAdmin, startAdminRefresh, stopAdminRefresh, switchAdminTab } from './useAdmin.js';
+import { on } from '../events.js';
 
 export function showScreen(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
@@ -18,12 +19,12 @@ export function showScreen(screenId) {
   }
 }
 
-export function goAdmin() {
+function goAdmin() {
   showScreen('screenAdmin');
   switchAdminTab('records');
 }
 
-export function backToMain() {
+function backToMain() {
   const pw = prompt('비밀번호를 입력하세요');
   if (pw === ATT_PASSWORD) {
     window.location.href = 'index.html';
@@ -47,6 +48,7 @@ export function initNavigation() {
   });
 }
 
-// window 노출
-window.goAdmin = goAdmin;
-window.backToMain = backToMain;
+// 이벤트 위임 등록
+on('goAdmin', () => goAdmin());
+on('backToMain', () => backToMain());
+on('showScreen', (e, el) => showScreen(el.dataset.screen));

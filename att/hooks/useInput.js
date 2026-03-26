@@ -3,6 +3,7 @@
 import { getStudents, getTodayRecords, saveTodayRecords } from '../data.js';
 import { playBell } from './useBell.js';
 import { showScreen } from './useScreen.js';
+import { on } from '../events.js';
 
 let inputCode = '';
 
@@ -84,18 +85,18 @@ async function recordAttendance(student) {
   showSuccess(student, type, typeLabel, timeStr);
 }
 
-export function pressNum(n) {
+function pressNum(n) {
   if (inputCode.length >= 4) return;
   inputCode += n;
   updateDisplay();
 }
 
-export function pressDelete() {
+function pressDelete() {
   inputCode = inputCode.slice(0, -1);
   updateDisplay();
 }
 
-export async function pressConfirm() {
+async function pressConfirm() {
   if (inputCode.length === 0) return;
 
   const code = inputCode.padStart(4, '0');
@@ -110,7 +111,7 @@ export async function pressConfirm() {
   await recordAttendance(student);
 }
 
-// window 노출
-window.pressNum = pressNum;
-window.pressDelete = pressDelete;
-window.pressConfirm = pressConfirm;
+// 이벤트 위임 등록
+on('pressNum', (e, el) => pressNum(el.dataset.key));
+on('pressDelete', () => pressDelete());
+on('pressConfirm', () => pressConfirm());

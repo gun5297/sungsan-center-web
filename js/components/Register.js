@@ -7,8 +7,8 @@ export function Register() {
     <p class="section-desc">새로운 원생 등록 또는 상담을 신청하세요.</p>
 
     <div class="register-tabs">
-      <button class="toggle-btn active" data-tab="regTab" onclick="switchRegTab('regTab')">신규 등록</button>
-      <button class="toggle-btn" data-tab="consultTab" onclick="switchRegTab('consultTab')">상담 신청</button>
+      <button class="toggle-btn active" data-action="switchRegTab" data-tab="regTab">신규 등록</button>
+      <button class="toggle-btn" data-action="switchRegTab" data-tab="consultTab">상담 신청</button>
     </div>
 
     <!-- 신규 등록 폼 -->
@@ -114,7 +114,7 @@ export function Register() {
       </div>
 
       <div class="form-actions">
-        <button class="btn-upload" onclick="submitRegister()">등록 신청</button>
+        <button class="btn-upload" data-action="submitRegister">등록 신청</button>
       </div>
     </div>
 
@@ -175,7 +175,7 @@ export function Register() {
       </div>
 
       <div class="form-actions">
-        <button class="btn-upload" onclick="submitConsult()">상담 신청</button>
+        <button class="btn-upload" data-action="submitConsult">상담 신청</button>
       </div>
     </div>
   </section>

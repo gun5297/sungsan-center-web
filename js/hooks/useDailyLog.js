@@ -2,6 +2,7 @@
 import { getDailyLog, saveDailyLog, getRecentLogs } from '../../firebase/services/dailyLogService.js';
 import { getCurrentUser } from '../state.js';
 import { escapeHtml } from '../utils.js';
+import { on, onAll } from '../events.js';
 
 function todayKey() {
   return new Date().toISOString().split('T')[0];
@@ -46,7 +47,7 @@ export async function openDailyLogEditor(dateKey) {
             <div class="log-title">${existing ? '활동 일지 수정' : '활동 일지 작성'}</div>
             <div class="log-subtitle">${formatDisplayDate(key)}</div>
           </div>
-          <button class="log-close-btn" onclick="closeDailyLogEditor()">✕</button>
+          <button class="log-close-btn" data-action="closeDailyLogEditor">✕</button>
         </div>
       </div>
 
@@ -72,15 +73,15 @@ export async function openDailyLogEditor(dateKey) {
         <div id="logPrograms">
           ${programs.map((p, i) => programRow(p, i)).join('')}
         </div>
-        <button class="log-add-program" onclick="addProgramRow()">+ 프로그램 추가</button>
+        <button class="log-add-program" data-action="addProgramRow">+ 프로그램 추가</button>
 
         <div class="log-section-title">특이사항</div>
         <textarea id="logNotes" class="input-field log-notes-field" rows="4" placeholder="오늘의 특이사항, 아동 관찰 내용 등을 기록하세요...">${escapeHtml(existing?.specialNotes || '')}</textarea>
       </div>
 
       <div class="log-footer">
-        <button class="log-btn log-btn-cancel" onclick="closeDailyLogEditor()">취소</button>
-        <button class="log-btn log-btn-save" onclick="saveDailyLogForm()">저장</button>
+        <button class="log-btn log-btn-cancel" data-action="closeDailyLogEditor">취소</button>
+        <button class="log-btn log-btn-save" data-action="saveDailyLogForm">저장</button>
       </div>
     </div>
   `;
@@ -92,7 +93,7 @@ export async function openDailyLogEditor(dateKey) {
 function programRow(p, idx) {
   return `
     <div class="program-row" data-idx="${idx}">
-      <button class="prog-delete-btn" onclick="removeProgramRow(this)">✕</button>
+      <button class="prog-delete-btn" data-action="removeProgramRow">✕</button>
       <div class="prog-grid">
         <div>
           <div class="prog-label">시간</div>
@@ -115,21 +116,21 @@ function programRow(p, idx) {
   `;
 }
 
-window.addProgramRow = function() {
+function addProgramRow() {
   const container = document.getElementById('logPrograms');
   if (!container) return;
   const idx = container.querySelectorAll('.program-row').length;
   const div = document.createElement('div');
   div.innerHTML = programRow({ time: '', name: '', participants: '', note: '' }, idx);
   container.appendChild(div.firstElementChild);
-};
+}
 
-window.removeProgramRow = function(btn) {
-  const row = btn.closest('.program-row');
+function removeProgramRow(el) {
+  const row = el.closest('.program-row');
   if (row) row.remove();
-};
+}
 
-window.saveDailyLogForm = async function() {
+async function saveDailyLogForm() {
   const user = getCurrentUser();
   if (!user) return;
 
@@ -163,7 +164,7 @@ window.saveDailyLogForm = async function() {
     console.error('일지 저장 실패:', e);
     showToast('저장에 실패했습니다: ' + e.message, 'error');
   }
-};
+}
 
 export function closeDailyLogEditor() {
   const overlay = document.getElementById('dailyLogOverlay');
@@ -193,7 +194,7 @@ export async function openDailyLogList() {
             <div class="log-title">활동 일지 목록</div>
             <div class="log-subtitle">최근 2주간 기록</div>
           </div>
-          <button class="log-close-btn" onclick="closeDailyLogList()">✕</button>
+          <button class="log-close-btn" data-action="closeDailyLogList">✕</button>
         </div>
       </div>
       <div class="log-body">
@@ -206,7 +207,7 @@ export async function openDailyLogList() {
           : logs.map(log => {
               const d = new Date(log.date + 'T00:00:00');
               return `
-                <div class="dailylog-item" onclick="closeDailyLogList(); openDailyLogEditor('${escapeHtml(log.date)}')">
+                <div class="dailylog-item" data-action="openDailyLogFromList" data-date="${escapeHtml(log.date)}">
                   <div class="dailylog-item-date-box">
                     <div class="dailylog-date-day">${d.getDate()}</div>
                     <div class="dailylog-date-dow">${days[d.getDay()]}</div>
@@ -238,8 +239,15 @@ export function closeDailyLogList() {
   if (overlay) { overlay.remove(); document.body.style.overflow = ''; }
 }
 
-// window 노출
-window.openDailyLogEditor = openDailyLogEditor;
-window.closeDailyLogEditor = closeDailyLogEditor;
-window.openDailyLogList = openDailyLogList;
-window.closeDailyLogList = closeDailyLogList;
+// 이벤트 위임 등록
+on('openDailyLogEditor', () => openDailyLogEditor());
+on('closeDailyLogEditor', () => closeDailyLogEditor());
+on('openDailyLogList', () => openDailyLogList());
+on('closeDailyLogList', () => closeDailyLogList());
+on('addProgramRow', () => addProgramRow());
+on('removeProgramRow', (e, el) => removeProgramRow(el));
+on('saveDailyLogForm', () => saveDailyLogForm());
+on('openDailyLogFromList', (e, el) => {
+  closeDailyLogList();
+  openDailyLogEditor(el.dataset.date);
+});

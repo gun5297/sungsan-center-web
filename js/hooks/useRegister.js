@@ -1,4 +1,5 @@
 // ===== useRegister: 신규 등록 & 상담 신청 (Firestore) =====
+import { on } from '../events.js';
 import { formatDate, resetFields, validateMaxLength, canSubmit } from '../utils.js';
 import { addInboxItem } from '../../firebase/services/inboxService.js';
 
@@ -103,6 +104,7 @@ export async function submitConsult() {
 }
 
 // window에 노출
-window.switchRegTab = switchRegTab;
-window.submitRegister = submitRegister;
-window.submitConsult = submitConsult;
+// 이벤트 위임 등록
+on('switchRegTab', (e, el) => switchRegTab(el.dataset.tab));
+on('submitRegister', () => submitRegister());
+on('submitConsult', () => submitConsult());

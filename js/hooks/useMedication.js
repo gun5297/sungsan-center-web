@@ -4,6 +4,8 @@ import { getIsAdmin, getCurrentUser } from '../state.js';
 import { subscribeMedications, createMedication, deleteMedication as deleteMedicationFS, completeMedication as completeMedicationFS } from '../../firebase/services/medicationService.js';
 import { addInboxItem } from '../../firebase/services/inboxService.js';
 import { uploadSignature } from '../../firebase/services/signatureService.js';
+import { on, onAll } from '../events.js';
+import { openSignaturePad } from '../signature.js';
 
 let medRecords = [];
 
@@ -25,9 +27,9 @@ export function renderMedSchedule() {
       </div>
       <div class="med-time-badge">${escapeHtml(r.time)}</div>
       <div class="med-period">${escapeHtml(r.from)} ~ ${escapeHtml(r.to)}</div>
-      ${admin && !r.completed ? `<button class="med-complete-btn" onclick="completeMed('${escapeHtml(r.id)}')">투약 완료</button>` : ''}
+      ${admin && !r.completed ? `<button class="med-complete-btn" data-action="completeMed" data-id="${escapeHtml(r.id)}">투약 완료</button>` : ''}
       ${admin && r.completed ? `<span class="med-complete-check">✓</span>` : ''}
-      ${admin ? `<button class="delete-btn" onclick="deleteMed('${escapeHtml(r.id)}')">삭제</button>` : ''}
+      ${admin ? `<button class="delete-btn" data-action="deleteMed" data-id="${escapeHtml(r.id)}">삭제</button>` : ''}
     </div>
   `).join('');
 }
@@ -148,8 +150,18 @@ export async function completeMed(id) {
   }
 }
 
-// window에 노출
-window.deleteMed = deleteMed;
-window.completeMed = completeMed;
-window.submitMedication = submitMedication;
-window.printMedication = printMedication;
+// 이벤트 위임 등록
+on('deleteMed', (e, el) => deleteMed(el.dataset.id));
+on('completeMed', (e, el) => completeMed(el.dataset.id));
+on('submitMedication', () => submitMedication());
+on('printMedication', () => printMedication());
+on('openMedSignature', () => {
+  openSignaturePad((dataUrl) => {
+    const img = document.getElementById('medSignImg');
+    if (img) {
+      img.src = dataUrl;
+      img.style.display = 'block';
+      img.classList.remove('hidden');
+    }
+  });
+});

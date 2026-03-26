@@ -2,6 +2,7 @@
 import { getWeekDates, isSameDay, escapeHtml } from '../utils.js';
 import { getIsAdmin } from '../state.js';
 import { subscribePickups, createPickup, deletePickup as deletePickupFS } from '../../firebase/services/pickupService.js';
+import { on, onAll } from '../events.js';
 
 let pickupWeekOffset = 0;
 let pickupStudents = [];
@@ -45,7 +46,7 @@ export function renderPickupTable() {
 
       html += `<td><span class="pickup-time">${escapeHtml(time)}</span>${status}</td>`;
     });
-    if (admin) html += `<td><button class="delete-btn" onclick="deletePickupStudent('${escapeHtml(s.id)}')">삭제</button></td>`;
+    if (admin) html += `<td><button class="delete-btn" data-action="deletePickupStudent" data-id="${escapeHtml(s.id)}">삭제</button></td>`;
     html += '</tr>';
   });
 
@@ -86,7 +87,7 @@ export function initPickup() {
   });
 }
 
-// window에 노출
-window.changePickupWeek = changePickupWeek;
-window.addPickupStudent = addPickupStudent;
-window.deletePickupStudent = deletePickupStudent;
+// 이벤트 위임 등록
+on('changePickupWeek', (e, el) => changePickupWeek(parseInt(el.dataset.dir)));
+on('addPickupStudent', () => addPickupStudent());
+on('deletePickupStudent', (e, el) => deletePickupStudent(el.dataset.id));

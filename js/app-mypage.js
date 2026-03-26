@@ -1,4 +1,7 @@
 // ===== 마이페이지 진입점 =====
+import { initEvents } from './events.js';
+initEvents();
+
 import './toast.js';
 import './confirm.js';
 import { initMyPage } from './hooks/useMyPage.js';

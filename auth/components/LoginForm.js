@@ -22,7 +22,7 @@ export function LoginForm() {
           <input type="password" id="loginPassword" class="input-field" placeholder="비밀번호" />
         </div>
 
-        <button class="btn-upload" onclick="doLogin()">로그인</button>
+        <button class="btn-upload" data-action="doLogin">로그인</button>
 
         <div class="auth-links" style="margin-bottom:8px;">
           <a href="reset-password.html">비밀번호를 잊으셨나요?</a>

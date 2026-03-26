@@ -134,6 +134,6 @@ export function checkConcurrentEdit(savedAt, currentAt) {
   return savedAt.seconds !== currentAt.seconds;  // 다르면 충돌
 }
 
-// window에 노출 (HTML onclick에서 사용)
-window.closeModal = closeModal;
-window.escapeHtml = escapeHtml;
+// 이벤트 위임 등록
+import { on } from './events.js';
+on('closeModal', (e, el) => closeModal(el));

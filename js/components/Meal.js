@@ -7,15 +7,15 @@ export function Meal() {
     <p class="section-desc">아이들의 건강한 식사를 확인하세요.</p>
 
     <div class="meal-week-nav">
-      <button class="month-btn" onclick="changeMealWeek(-1)">&lt;</button>
+      <button class="month-btn" data-action="changeMealWeek" data-dir="-1">&lt;</button>
       <span class="month-label" id="mealWeekLabel"></span>
-      <button class="month-btn" onclick="changeMealWeek(1)">&gt;</button>
+      <button class="month-btn" data-action="changeMealWeek" data-dir="1">&gt;</button>
     </div>
 
     <div class="meal-grid" id="mealGrid"></div>
 
     <div style="text-align:center;margin-top:16px;">
-      <button class="edit-schedule-btn admin-only" onclick="openMealEditor()">식단 수정</button>
+      <button class="edit-schedule-btn admin-only" data-action="openMealEditor">식단 수정</button>
     </div>
   </section>
 

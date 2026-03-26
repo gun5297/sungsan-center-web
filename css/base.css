@@ -451,6 +451,12 @@ body.admin-mode .notice-actions {
   width: auto;
 }
 
+.modal-button-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
 /* 모달 닫기 X 버튼 (공통) */
 .modal-close-x {
   position: absolute;

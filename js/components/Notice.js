@@ -11,23 +11,23 @@ export function Notice() {
         <h3>가정통신문 업로드</h3>
         <input type="text" id="noticeTitle" placeholder="제목을 입력하세요" class="input-field" />
         <div class="format-toolbar">
-          <button type="button" class="format-btn" onclick="insertFormatting('bold')" title="굵게">
+          <button type="button" class="format-btn" data-action="insertFormatting" data-format="bold" title="굵게">
             <strong>B</strong>
           </button>
-          <button type="button" class="format-btn" onclick="insertFormatting('underline')" title="밑줄">
+          <button type="button" class="format-btn" data-action="insertFormatting" data-format="underline" title="밑줄">
             <u>U</u>
           </button>
-          <button type="button" class="format-btn" onclick="insertFormatting('hr')" title="구분선">
+          <button type="button" class="format-btn" data-action="insertFormatting" data-format="hr" title="구분선">
             ―
           </button>
-          <button type="button" class="format-btn" onclick="insertFormatting('br')" title="줄바꿈">
+          <button type="button" class="format-btn" data-action="insertFormatting" data-format="br" title="줄바꿈">
             ↵
           </button>
         </div>
         <textarea id="noticeContent" placeholder="내용을 입력하세요" class="input-field textarea"></textarea>
         <div class="file-upload" id="fileUpload">
           <input type="file" id="fileInput" accept=".pdf,.jpg,.png,.doc,.docx" hidden />
-          <div class="file-drop" onclick="document.getElementById('fileInput').click()">
+          <div class="file-drop" data-action="triggerFileInput">
             <div class="file-icon">+</div>
             <p>파일을 선택하거나 여기에 드래그하세요</p>
             <span>PDF, JPG, PNG, DOC (최대 10MB)</span>
@@ -39,7 +39,7 @@ export function Notice() {
           <option value="통신문">가정통신문</option>
           <option value="긴급">긴급 안내</option>
         </select>
-        <button class="btn-upload" onclick="addNotice()">업로드</button>
+        <button class="btn-upload" data-action="addNotice">업로드</button>
       </div>
     </div>
 

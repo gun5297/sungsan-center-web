@@ -17,18 +17,18 @@ export function LockScreen() {
         </div>
         <div class="lock-error hidden" id="lockError">비밀번호가 틀렸습니다</div>
         <div class="numpad lock-numpad">
-          <button class="num-btn" onclick="pressLock('1')">1</button>
-          <button class="num-btn" onclick="pressLock('2')">2</button>
-          <button class="num-btn" onclick="pressLock('3')">3</button>
-          <button class="num-btn" onclick="pressLock('4')">4</button>
-          <button class="num-btn" onclick="pressLock('5')">5</button>
-          <button class="num-btn" onclick="pressLock('6')">6</button>
-          <button class="num-btn" onclick="pressLock('7')">7</button>
-          <button class="num-btn" onclick="pressLock('8')">8</button>
-          <button class="num-btn" onclick="pressLock('9')">9</button>
-          <button class="num-btn fn-btn" onclick="pressLockDelete()">지우기</button>
-          <button class="num-btn" onclick="pressLock('0')">0</button>
-          <button class="num-btn fn-btn confirm-btn" onclick="pressLockConfirm()">확인</button>
+          <button class="num-btn" data-action="pressLock" data-key="1">1</button>
+          <button class="num-btn" data-action="pressLock" data-key="2">2</button>
+          <button class="num-btn" data-action="pressLock" data-key="3">3</button>
+          <button class="num-btn" data-action="pressLock" data-key="4">4</button>
+          <button class="num-btn" data-action="pressLock" data-key="5">5</button>
+          <button class="num-btn" data-action="pressLock" data-key="6">6</button>
+          <button class="num-btn" data-action="pressLock" data-key="7">7</button>
+          <button class="num-btn" data-action="pressLock" data-key="8">8</button>
+          <button class="num-btn" data-action="pressLock" data-key="9">9</button>
+          <button class="num-btn fn-btn" data-action="pressLockDelete">지우기</button>
+          <button class="num-btn" data-action="pressLock" data-key="0">0</button>
+          <button class="num-btn fn-btn confirm-btn" data-action="pressLockConfirm">확인</button>
         </div>
         <a class="lock-back-link" href="index.html">← 메인으로 돌아가기</a>
       </div>

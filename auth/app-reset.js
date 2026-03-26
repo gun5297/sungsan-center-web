@@ -2,6 +2,10 @@
 import { ResetPasswordForm } from './components/ResetPasswordForm.js';
 import { auth } from '../firebase/config.js';
 import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import { on, initEvents } from '../js/events.js';
+
+// 0단계: 이벤트 위임 초기화
+initEvents();
 
 // 1단계: 컴포넌트 마운트
 document.getElementById('app').innerHTML = ResetPasswordForm();
@@ -21,7 +25,7 @@ function showSuccess(msg) {
   if (el) { el.textContent = msg; el.style.display = 'block'; }
 }
 
-window.resetPassword = async function() {
+async function resetPassword() {
   const email = document.getElementById('resetEmail').value.trim();
 
   if (!email || !email.includes('@')) {
@@ -59,4 +63,7 @@ window.resetPassword = async function() {
       </div>
     `;
   }
-};
+}
+
+// 이벤트 위임 등록
+on('resetPassword', () => resetPassword());

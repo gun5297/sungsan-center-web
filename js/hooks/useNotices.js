@@ -12,6 +12,7 @@ import {
 import { logAction } from '../../firebase/services/auditService.js';
 import { markAsRead, getReadCount } from '../../firebase/services/noticeReadService.js';
 import { getCurrentUser, isLoggedIn, getIsAdmin } from '../state.js';
+import { on, onAll } from '../events.js';
 
 let notices = [];
 // 수정 모달 열 때 저장한 서버 타임스탬프 (충돌 감지용)
@@ -71,17 +72,17 @@ export function renderNotices() {
     return;
   }
   list.innerHTML = notices.map(n => `
-    <div class="notice-card" onclick="openNotice('${escapeHtml(n.id)}')">
+    <div class="notice-card" data-action="openNotice" data-id="${escapeHtml(n.id)}">
       <div class="notice-header">
         <span class="notice-badge type-${escapeHtml(n.category)}">${escapeHtml(n.category)}</span>
         <span class="notice-date">${escapeHtml(n.date)}</span>
       </div>
       <div class="notice-title">${escapeHtml(n.title)}</div>
       <div class="notice-preview">${formatContent(n.content)}</div>
-      ${n.file ? `<div class="notice-file" onclick="event.stopPropagation();">${n.fileUrl ? `<a href="${encodeURI(n.fileUrl)}" target="_blank" class="notice-file-link">📎 ${escapeHtml(n.file)}</a>` : `📎 ${escapeHtml(n.file)}`}</div>` : ''}
+      ${n.file ? `<div class="notice-file" data-action="stopPropagation">${n.fileUrl ? `<a href="${encodeURI(n.fileUrl)}" target="_blank" class="notice-file-link">📎 ${escapeHtml(n.file)}</a>` : `📎 ${escapeHtml(n.file)}`}</div>` : ''}
       <div class="notice-actions">
-        ${canManage() ? `<button class="edit-btn" onclick="event.stopPropagation(); editNotice('${escapeHtml(n.id)}')">수정</button>` : ''}
-        ${canManage() ? `<button class="delete-btn" onclick="event.stopPropagation(); deleteNotice('${escapeHtml(n.id)}')">삭제</button>` : ''}
+        ${canManage() ? `<button class="edit-btn" data-action="editNotice" data-id="${escapeHtml(n.id)}">수정</button>` : ''}
+        ${canManage() ? `<button class="delete-btn" data-action="deleteNotice" data-id="${escapeHtml(n.id)}">삭제</button>` : ''}
       </div>
     </div>
   `).join('');
@@ -150,9 +151,9 @@ export function editNotice(id) {
         <option value="통신문" ${notice.category === '통신문' ? 'selected' : ''}>가정통신문</option>
         <option value="긴급" ${notice.category === '긴급' ? 'selected' : ''}>긴급 안내</option>
       </select>
-      <div style="display:flex;gap:12px;align-items:center;">
-        <button class="btn-upload" style="margin-top:0;" onclick="saveEditNotice('${escapeHtml(id)}')">저장</button>
-        <button class="modal-close" onclick="closeModal(this)">취소</button>
+      <div class="modal-button-row">
+        <button class="btn-upload" data-action="saveEditNotice" data-id="${escapeHtml(id)}">저장</button>
+        <button class="modal-close" data-action="closeModal">취소</button>
       </div>
     </div>
   `;
@@ -218,7 +219,7 @@ export async function openNotice(id) {
       </div>
       <div class="modal-body">${formatContent(notice.content)}</div>
       ${notice.file ? `<div class="notice-file-box">${notice.fileUrl ? `${isImageFile(notice.file) ? `<img src="${encodeURI(notice.fileUrl)}" class="notice-file-preview" />` : ''}<a href="${encodeURI(notice.fileUrl)}" target="_blank" download class="notice-file-download">📎 ${escapeHtml(notice.file)} — 다운로드</a>` : `📎 ${escapeHtml(notice.file)}`}</div>` : ''}
-      <button class="modal-close" onclick="closeModal(this)">닫기</button>
+      <button class="modal-close" data-action="closeModal">닫기</button>
     </div>
   `;
   document.body.appendChild(overlay);
@@ -252,10 +253,20 @@ export function initNotices() {
   });
 }
 
-// window에 노출
-window.addNotice = addNotice;
-window.deleteNotice = deleteNotice;
-window.editNotice = editNotice;
-window.saveEditNotice = saveEditNotice;
-window.openNotice = openNotice;
-window.insertFormatting = insertFormatting;
+// 이벤트 위임 등록
+onAll({
+  addNotice: () => addNotice(),
+  deleteNotice: (e, el) => {
+    e.stopPropagation();
+    deleteNotice(el.dataset.id);
+  },
+  editNotice: (e, el) => {
+    e.stopPropagation();
+    editNotice(el.dataset.id);
+  },
+  saveEditNotice: (e, el) => saveEditNotice(el.dataset.id),
+  openNotice: (e, el) => openNotice(el.dataset.id),
+  insertFormatting: (e, el) => insertFormatting(el.dataset.format),
+  stopPropagation: (e) => e.stopPropagation(),
+  triggerFileInput: () => document.getElementById('fileInput').click()
+});

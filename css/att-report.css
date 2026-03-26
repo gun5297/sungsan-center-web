@@ -1,0 +1,129 @@
+/* ===== 출석 리포트 모달 ===== */
+
+.att-report-modal {
+  max-width: 420px;
+}
+
+.att-report-selectors {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.att-report-selectors .form-group {
+  flex: 1;
+}
+
+.att-report-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.att-report-actions .btn-upload,
+.att-report-actions .btn-secondary-sm {
+  flex: 1;
+}
+
+/* 미리보기 */
+.att-report-preview {
+  margin-top: 12px;
+}
+
+.att-report-summary {
+  background: var(--bg-sub);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 8px;
+}
+
+.att-report-summary-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.att-report-stat {
+  text-align: center;
+  flex: 1;
+  min-width: 80px;
+}
+
+.att-report-stat-num {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.att-report-stat-num.primary {
+  color: var(--primary);
+}
+
+.att-report-stat-num.blue {
+  color: #2196F3;
+}
+
+.att-report-stat-num.green {
+  color: #4CAF50;
+}
+
+.att-report-stat-label {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+/* 테이블 */
+.att-report-table-wrap {
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+}
+
+.att-report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.att-report-table thead tr {
+  background: var(--bg-sub);
+  position: sticky;
+  top: 0;
+}
+
+.att-report-table th {
+  padding: 8px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.att-report-table th:first-child {
+  text-align: left;
+}
+
+.att-report-table td {
+  padding: 6px 8px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.att-report-table td:first-child {
+  text-align: left;
+}
+
+.att-report-rate-high { color: #4CAF50; font-weight: 600; }
+.att-report-rate-mid { color: #FF9800; font-weight: 600; }
+.att-report-rate-low { color: #F44336; font-weight: 600; }
+
+/* 로딩/에러 상태 */
+.att-report-loading {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-sub);
+}
+
+.att-report-error {
+  text-align: center;
+  padding: 20px;
+  color: var(--danger);
+}

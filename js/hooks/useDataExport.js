@@ -71,7 +71,8 @@ export async function exportMedications() {
   showToast('투약 기록이 다운로드되었습니다.', 'success');
 }
 
-// window 노출
-window.exportChildren = exportChildren;
-window.exportNotices = exportNotices;
-window.exportMedications = exportMedications;
+// 이벤트 위임 등록
+import { on } from '../events.js';
+on('exportChildren', () => exportChildren());
+on('exportNotices', () => exportNotices());
+on('exportMedications', () => exportMedications());

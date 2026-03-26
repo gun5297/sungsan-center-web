@@ -6,7 +6,7 @@
   <!--
     CSP (Content Security Policy):
     - default-src 'self'  : 기본적으로 동일 출처만 허용
-    - script-src          : CDN(SheetJS, Firebase) 명시적 허용 + 'strict-dynamic' 없음 (인라인 스크립트 차단)
+    - script-src          : CDN(SheetJS, Firebase) 명시적 허용, 인라인 스크립트 차단 (이벤트 위임 사용)
     - connect-src         : Firebase API 통신 허용
     - img-src             : Firebase Storage + data URI(서명 이미지) 허용
     - frame-ancestors     : 클릭재킹 방지
@@ -18,7 +18,8 @@
     script-src 'self'
       https://cdn.sheetjs.com
       https://www.gstatic.com
-      https://cdn.jsdelivr.net;
+      https://cdn.jsdelivr.net
+      https://apis.google.com;
     style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com;
     font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:;
     connect-src 'self'
@@ -29,15 +30,21 @@
       https://identitytoolkit.googleapis.com
       https://securetoken.googleapis.com
       https://storage.googleapis.com
+      https://www.gstatic.com
       wss://*.firebaseio.com;
     img-src 'self' data: blob:
       https://firebasestorage.googleapis.com
       https://lh3.googleusercontent.com;
+    frame-src 'self'
+      https://*.firebaseapp.com
+      https://apis.google.com;
     object-src 'none';
     base-uri 'self';
   " />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <title>성산지역아동센터</title>
   <meta name="theme-color" content="#FF7854" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="성산센터" />
@@ -51,11 +58,7 @@
 
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script type="module" src="js/app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
-    }
-  </script>
+  <script src="js/register-sw.js"></script>
 
 </body>
 </html>

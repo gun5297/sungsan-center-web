@@ -1,6 +1,7 @@
 // ===== 아동 관리 (CRUD) — Firestore 연동 =====
 
 import { ATT_PASSWORD, getStudents, createStudent, updateStudent, deleteStudentFs, getAllStudents } from '../data.js';
+import { on } from '../../js/events.js';
 
 let manageUnlocked = false;
 let editingStudentId = null;
@@ -25,8 +26,8 @@ async function renderStudentList() {
           <div class="manage-row-detail">${s.school} · ${s.parent}</div>
         </div>
         <div class="manage-row-actions">
-          <button class="manage-edit-btn" onclick="editStudent('${s.id}')">수정</button>
-          <button class="manage-del-btn" onclick="deleteStudent('${s.id}')">삭제</button>
+          <button class="manage-edit-btn" data-action="editStudent" data-id="${s.id}">수정</button>
+          <button class="manage-del-btn" data-action="deleteStudent" data-id="${s.id}">삭제</button>
         </div>
       </div>
     `).join('');
@@ -42,7 +43,7 @@ function clearStudentForm() {
   document.getElementById('stuParent').value = '';
 }
 
-export function unlockManage() {
+function unlockManage() {
   const pw = document.getElementById('managePw').value;
   if (pw === ATT_PASSWORD) {
     manageUnlocked = true;
@@ -56,7 +57,7 @@ export function unlockManage() {
   }
 }
 
-export async function addStudent() {
+async function addStudent() {
   const id = document.getElementById('stuId').value.trim().padStart(4, '0');
   const name = document.getElementById('stuName').value.trim();
   const school = document.getElementById('stuSchool').value.trim();
@@ -104,7 +105,7 @@ export async function addStudent() {
   }
 }
 
-export async function editStudent(id) {
+async function editStudent(id) {
   try {
     const students = await getStudents();
     const s = students.find(st => st.id === id);
@@ -125,7 +126,7 @@ export async function editStudent(id) {
   }
 }
 
-export function cancelEditStudent() {
+function cancelEditStudent() {
   editingStudentId = null;
   editingDocId = null;
   document.getElementById('stuSubmitBtn').textContent = '추가';
@@ -133,7 +134,7 @@ export function cancelEditStudent() {
   clearStudentForm();
 }
 
-export async function deleteStudent(id) {
+async function deleteStudent(id) {
   if (!confirm('이 아동을 삭제하시겠습니까?')) return;
 
   try {
@@ -154,9 +155,12 @@ export async function deleteStudent(id) {
   }
 }
 
-// window 노출
-window.unlockManage = unlockManage;
-window.addStudent = addStudent;
-window.editStudent = editStudent;
-window.cancelEditStudent = cancelEditStudent;
-window.deleteStudent = deleteStudent;
+// 이벤트 위임 등록
+on('unlockManage', (e, el) => unlockManage());
+on('unlockManage', (e, el) => {
+  if (e.key === 'Enter') unlockManage();
+}, 'keydown');
+on('addStudent', () => addStudent());
+on('editStudent', (e, el) => editStudent(el.dataset.id));
+on('cancelEditStudent', () => cancelEditStudent());
+on('deleteStudent', (e, el) => deleteStudent(el.dataset.id));

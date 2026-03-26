@@ -25,16 +25,6 @@ service cloud.firestore {
       return isSignedIn() && getUserData().approved == true;
     }
 
-    // 익명 인증 사용자 (출결 태블릿)
-    function isAnonymous() {
-      return isSignedIn() && request.auth.token.firebase.sign_in_provider == 'anonymous';
-    }
-
-    // 익명 또는 승인된 사용자
-    function isAuthenticatedUser() {
-      return isSignedIn();
-    }
-
     // 결석/투약 제출 필드 검증 (스팸 방지)
     function validAbsenceCreate() {
       let d = request.resource.data;
@@ -223,7 +213,10 @@ service cloud.firestore {
     match /childLinks/{linkId} {
       allow read: if isSignedIn();
       allow create: if isApproved();
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin();
+      // 본인 연결 해제 또는 관리자 삭제
+      allow delete: if (isApproved() && resource.data.userId == request.auth.uid)
+        || isAdmin();
     }
 
     // ===== 알림 큐 =====

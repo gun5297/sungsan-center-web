@@ -3,6 +3,7 @@ import { schoolEvents as baseEvents } from '../data/schoolEvents.js';
 import { getHolidays, mergeHolidays } from '../data/holidays.js';
 import { getDateKey } from '../utils.js';
 import { getIsAdmin } from '../state.js';
+import { on, onAll } from '../events.js';
 import {
   getWeekdaySchedule as firestoreGetWeekday,
   saveWeekdaySchedule as firestoreSaveWeekday,
@@ -152,7 +153,7 @@ export function renderCalendar() {
       }).join('') + '</div>';
     }
 
-    html += `<div class="${classes}" onclick="selectDay(${d})"><span class="cal-num">${d}</span>${eventsHtml}</div>`;
+    html += `<div class="${classes}" data-action="selectDay" data-day="${d}"><span class="cal-num">${d}</span>${eventsHtml}</div>`;
   }
 
   const totalCells = firstDay + daysInMonth;
@@ -237,19 +238,19 @@ export function openScheduleEditor() {
   overlay.innerHTML = `
     <div class="modal" style="max-width:540px;">
       <div class="modal-title">시간표 수정</div>
-      <button class="modal-close-x" onclick="closeScheduleEditor(this)"></button>
+      <button class="modal-close-x" data-action="closeScheduleEditor"></button>
 
       <div id="scheduleEditorRows">
         ${schedule.map((s, i) => scheduleRowHTML(s, i)).join('')}
       </div>
-      <button class="btn-secondary-sm" onclick="addScheduleRow()" style="width:100%;">+ 시간 추가</button>
+      <button class="btn-secondary-sm" data-action="addScheduleRow" style="width:100%;">+ 시간 추가</button>
 
       <!-- 적용 범위 설정 -->
       <div style="margin-top:16px;padding:16px;background:var(--bg-sub);border-radius:10px;">
         <div style="font-size:0.82rem;font-weight:700;color:var(--text-sub);margin-bottom:10px;">적용 범위</div>
 
         <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;font-weight:600;cursor:pointer;margin-bottom:8px;">
-          <input type="radio" name="applyMode" value="weekday" checked onchange="toggleApplyMode()" />
+          <input type="radio" name="applyMode" value="weekday" checked data-action="toggleApplyMode" />
           요일별 기본 시간표로 적용
         </label>
         <div id="applyWeekdayOptions" style="margin-left:22px;margin-bottom:12px;">
@@ -264,7 +265,7 @@ export function openScheduleEditor() {
         </div>
 
         <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;font-weight:600;cursor:pointer;margin-bottom:8px;">
-          <input type="radio" name="applyMode" value="period" onchange="toggleApplyMode()" />
+          <input type="radio" name="applyMode" value="period" data-action="toggleApplyMode" />
           특정 기간에만 적용
         </label>
         <div id="applyPeriodOptions" style="margin-left:22px;display:none;">
@@ -286,8 +287,8 @@ export function openScheduleEditor() {
       </div>
 
       <div style="display:flex;gap:12px;margin-top:16px;align-items:center;">
-        <button class="btn-upload" style="margin-top:0;" onclick="saveScheduleEdit()">저장</button>
-        <button class="modal-close" onclick="closeScheduleEditor(this)">취소</button>
+        <button class="btn-upload" style="margin-top:0;" data-action="saveScheduleEdit">저장</button>
+        <button class="modal-close" data-action="closeScheduleEditor">취소</button>
       </div>
     </div>
   `;
@@ -305,7 +306,7 @@ function scheduleRowHTML(s, i) {
       <select class="input-field select-field" data-field="type" style="width:80px;">
         ${TYPE_OPTIONS.replace(`value="${s ? s.type : ''}"`, `value="${s ? s.type : ''}" selected`)}
       </select>
-      <button class="delete-btn" onclick="removeScheduleRow(this)" style="flex-shrink:0;">삭제</button>
+      <button class="delete-btn" data-action="removeScheduleRow" style="flex-shrink:0;">삭제</button>
     </div>
   `;
 }
@@ -316,8 +317,8 @@ function toggleApplyMode() {
   document.getElementById('applyPeriodOptions').style.display = mode === 'period' ? 'block' : 'none';
 }
 
-function closeScheduleEditor(btn) {
-  const overlay = btn.closest('.modal-overlay');
+function closeScheduleEditor(el) {
+  const overlay = el.closest('.modal-overlay');
   overlay.classList.remove('active');
   setTimeout(() => overlay.remove(), 300);
 }
@@ -330,13 +331,13 @@ function addScheduleRow() {
     <input type="text" class="input-field" placeholder="09:00 ~ 10:00" data-field="time" style="flex:1;" />
     <input type="text" class="input-field" placeholder="활동명" data-field="name" style="flex:1;" />
     <select class="input-field select-field" data-field="type" style="width:80px;">${TYPE_OPTIONS}</select>
-    <button class="delete-btn" onclick="removeScheduleRow(this)" style="flex-shrink:0;">삭제</button>
+    <button class="delete-btn" data-action="removeScheduleRow" style="flex-shrink:0;">삭제</button>
   `;
   container.appendChild(row);
 }
 
-function removeScheduleRow(btn) {
-  btn.closest('.schedule-edit-row').remove();
+function removeScheduleRow(el) {
+  el.closest('.schedule-edit-row').remove();
 }
 
 async function saveScheduleEdit() {
@@ -483,12 +484,12 @@ export async function initCalendar() {
   }
 }
 
-// window에 노출
-window.changeMonth = changeMonth;
-window.selectDay = selectDay;
-window.openScheduleEditor = openScheduleEditor;
-window.closeScheduleEditor = closeScheduleEditor;
-window.addScheduleRow = addScheduleRow;
-window.removeScheduleRow = removeScheduleRow;
-window.saveScheduleEdit = saveScheduleEdit;
-window.toggleApplyMode = toggleApplyMode;
+// 이벤트 위임 등록
+on('changeMonth', (e, el) => changeMonth(parseInt(el.dataset.dir)));
+on('selectDay', (e, el) => selectDay(parseInt(el.dataset.day)));
+on('openScheduleEditor', () => openScheduleEditor());
+on('closeScheduleEditor', (e, el) => closeScheduleEditor(el));
+on('addScheduleRow', () => addScheduleRow());
+on('removeScheduleRow', (e, el) => removeScheduleRow(el));
+on('saveScheduleEdit', () => saveScheduleEdit());
+on('toggleApplyMode', () => toggleApplyMode(), 'change');

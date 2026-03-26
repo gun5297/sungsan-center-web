@@ -61,8 +61,8 @@ export function Hero() {
       </div>
     </div>
     <div class="dashboard-actions">
-      <button class="btn-primary" onclick="openDailyLogEditor()">활동 일지 작성</button>
-      <button class="btn-secondary" onclick="openDailyLogList()">일지 목록 보기</button>
+      <button class="btn-primary" data-action="openDailyLogEditor">활동 일지 작성</button>
+      <button class="btn-secondary" data-action="openDailyLogList">일지 목록 보기</button>
     </div>
   </div>
 

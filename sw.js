@@ -50,6 +50,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
 
+  // http(s) 외 스킴(chrome-extension 등)은 캐시 불가 — 무시
+  if (!request.url.startsWith('http')) return;
+
   // Firebase/외부 API 요청은 캐시하지 않음
   if (request.url.includes('firebasestorage') ||
       request.url.includes('firebaseio') ||

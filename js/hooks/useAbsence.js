@@ -1,8 +1,10 @@
 // ===== useAbsence: 조퇴/결석 신청서 (Firestore) =====
+import { on } from '../events.js';
 import { formatDate, todayString, resetFields, skeletonCards, escapeHtml, validateMaxLength, canSubmit } from '../utils.js';
 import { subscribeAbsences, createAbsence } from '../../firebase/services/absenceService.js';
 import { addInboxItem } from '../../firebase/services/inboxService.js';
 import { uploadSignature } from '../../firebase/services/signatureService.js';
+import { openSignaturePad } from '../signature.js';
 
 let absenceRecords = [];
 
@@ -142,6 +144,11 @@ export function initAbsence() {
   });
 }
 
-// window에 노출
-window.submitAbsence = submitAbsence;
-window.printAbsence = printAbsence;
+// 이벤트 위임 등록
+on('submitAbsence', () => submitAbsence());
+on('openAbsSignature', () => {
+  openSignaturePad(function(d) {
+    document.getElementById('absSignImg').src = d;
+    document.getElementById('absSignImg').classList.remove('hidden');
+  });
+});

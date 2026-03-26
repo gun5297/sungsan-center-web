@@ -1,5 +1,6 @@
 // ===== useAdmin: Firebase Auth + Firestore 역할 기반 관리자 =====
 import { getIsAdmin, setIsAdmin, setCurrentUser, setUserRole, canManage } from '../state.js';
+import { on } from '../events.js';
 import { logout, onAuthChange } from '../../firebase/auth.js';
 import { getUserDoc, createUserDoc, hasNoDirector, isAdminRole } from '../../firebase/services/userService.js';
 import { subscribeTodayRecords } from '../../firebase/services/attendanceService.js';
@@ -94,25 +95,40 @@ export function initAdmin() {
 }
 
 // ===== 대시보드 데이터 로드 =====
+let _dashboardCleanup = null;
+
+function cleanupDashboard() {
+  if (_dashboardCleanup) {
+    _dashboardCleanup.forEach(fn => fn());
+    _dashboardCleanup = null;
+  }
+}
+
 function initDashboard() {
+  cleanupDashboard();
+  _dashboardCleanup = [];
+
   // 오늘 출석 실시간 구독
-  subscribeTodayRecords((records) => {
+  const unsubRecords = subscribeTodayRecords((records) => {
     const el = document.getElementById('dashAttVal');
     if (el) {
       const count = Object.values(records).filter(r => r.inTime).length;
       el.textContent = count;
     }
   });
+  _dashboardCleanup.push(unsubRecords);
 
-  // 서류함 — inbox 구독은 useInbox에서 하므로, 간단히 DOM 업데이트
-  // inboxBadge가 이미 업데이트되므로 그 값을 복사
-  const observer = new MutationObserver(() => {
+  // 서류함 — inboxBadge 값을 대시보드에 복사
+  const inboxObs = new MutationObserver(() => {
     const badge = document.getElementById('inboxBadge');
     const dashEl = document.getElementById('dashInboxVal');
     if (badge && dashEl) dashEl.textContent = badge.textContent || '0';
   });
   const badge = document.getElementById('inboxBadge');
-  if (badge) observer.observe(badge, { childList: true, characterData: true, subtree: true });
+  if (badge) {
+    inboxObs.observe(badge, { childList: true, characterData: true, subtree: true });
+    _dashboardCleanup.push(() => inboxObs.disconnect());
+  }
 
   // 투약 중 — medSchedule의 자식 수 감시
   const medObs = new MutationObserver(() => {
@@ -124,7 +140,10 @@ function initDashboard() {
     }
   });
   const medSchedule = document.getElementById('medSchedule');
-  if (medSchedule) medObs.observe(medSchedule, { childList: true, subtree: true });
+  if (medSchedule) {
+    medObs.observe(medSchedule, { childList: true, subtree: true });
+    _dashboardCleanup.push(() => medObs.disconnect());
+  }
 
   // 오늘 식단 — 있는지 여부
   const mealGrid = document.getElementById('mealGrid');
@@ -132,19 +151,23 @@ function initDashboard() {
   if (mealGrid && dashMeal) {
     const todayCard = mealGrid.querySelector('.meal-card.today');
     dashMeal.textContent = todayCard ? '등록됨' : '-';
-    new MutationObserver(() => {
+    const mealObs = new MutationObserver(() => {
       const tc = mealGrid.querySelector('.meal-card.today');
       dashMeal.textContent = tc ? '등록됨' : '-';
-    }).observe(mealGrid, { childList: true, subtree: true });
+    });
+    mealObs.observe(mealGrid, { childList: true, subtree: true });
+    _dashboardCleanup.push(() => mealObs.disconnect());
   }
 }
 
-// 관리자 로그인 완료 후 대시보드 초기화
+// 관리자 로그인 완료 후 대시보드 초기화, 로그아웃 시 정리
 onAdminRender(() => {
   if (getIsAdmin() && document.getElementById('dashboard')) {
     initDashboard();
+  } else {
+    cleanupDashboard();
   }
 });
 
-// window에 노출
-window.toggleAdminLogin = toggleAdminLogin;
+// 이벤트 위임 등록
+on('toggleAdminLogin', () => toggleAdminLogin());

@@ -135,6 +135,12 @@
   margin-bottom: 20px;
 }
 
+.auth-pending-btn {
+  display: inline-block;
+  text-align: center;
+  margin-top: 16px;
+}
+
 /* 반응형 */
 @media (max-width: 480px) {
   .auth-card {

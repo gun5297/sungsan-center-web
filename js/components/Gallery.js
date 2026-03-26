@@ -17,7 +17,7 @@ export function Gallery() {
           <div class="form-group"><label class="form-label">날짜</label><input type="date" id="galDate" class="input-field" /></div>
           <div class="form-group"><label class="form-label">사진 업로드</label><input type="file" id="galPhoto" accept="image/*" multiple class="input-field" /></div>
         </div>
-        <button class="btn-upload" onclick="addGalleryItem()">추가</button>
+        <button class="btn-upload" data-action="addGalleryItem">추가</button>
       </div>
     </div>
 

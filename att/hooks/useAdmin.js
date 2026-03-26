@@ -2,7 +2,7 @@
 
 import { getStudents, getTodayRecords, saveTodayRecords, deleteStudentRecord, resetTodayRecords, subscribeTodayRecords } from '../data.js';
 import { on } from '../../js/events.js';
-import { escapeHtml } from '../../js/utils.js';
+import { escapeHtml, escapeCSV } from '../../js/utils.js';
 
 let adminRefreshInterval = null;
 let unsubscribeRecords = null;
@@ -193,8 +193,7 @@ async function exportCSV() {
         status = '출석중'; inTime = r.inTime; outTime = '';
       }
       csv += [s.id, s.name, s.school, inTime, outTime, status, s.parent]
-        .map(v => `"${String(v).replace(/"/g, '""').replace(/^([=+\-@\t\r])/,"'$1")}"`)
-        .join(',') + '\n';
+        .map(escapeCSV).join(',') + '\n';
     });
 
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });

@@ -46,6 +46,8 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+const VALID_CACHE_TYPES = ['text/', 'application/javascript', 'application/json', 'image/'];
+
 // 요청 가로채기: 네트워크 우선, 실패 시 캐시
 self.addEventListener('fetch', (event) => {
   const { request } = event;
@@ -70,15 +72,13 @@ self.addEventListener('fetch', (event) => {
   }
 
   // 정적 자산: 캐시 우선, 백그라운드 업데이트
+  const isSameOrigin = request.url.startsWith(self.location.origin);
   event.respondWith(
     caches.match(request).then((cached) => {
       const fetchPromise = fetch(request).then((response) => {
-        // 동일 출처 + 200 OK + 유효한 content-type만 캐시
-        if (response && response.status === 200 && response.type !== 'opaque') {
+        if (isSameOrigin && response && response.status === 200 && response.type !== 'opaque') {
           const ct = response.headers.get('content-type') || '';
-          const validTypes = ['text/', 'application/javascript', 'application/json', 'image/'];
-          const isValid = validTypes.some(t => ct.includes(t));
-          if (isValid && new URL(response.url).origin === self.location.origin) {
+          if (VALID_CACHE_TYPES.some(t => ct.includes(t))) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
           }

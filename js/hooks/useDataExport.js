@@ -1,13 +1,11 @@
 // ===== useDataExport: 관리자 데이터 CSV 내보내기 =====
 import { getIsAdmin } from '../state.js';
+import { escapeCSV } from '../utils.js';
 
-// CSV 생성 유틸리티
 function toCSV(headers, rows) {
-  const bom = '\uFEFF';  // 엑셀 한글 깨짐 방지
-  const headerLine = headers.join(',');
-  const dataLines = rows.map(row =>
-    row.map(cell => `"${String(cell || '').replace(/"/g, '""')}"`).join(',')
-  );
+  const bom = '\uFEFF';
+  const headerLine = headers.map(escapeCSV).join(',');
+  const dataLines = rows.map(row => row.map(escapeCSV).join(','));
   return bom + [headerLine, ...dataLines].join('\n');
 }
 
@@ -24,8 +22,7 @@ function downloadCSV(filename, csv) {
 // 아동 목록 내보내기
 export async function exportChildren() {
   if (!getIsAdmin()) return;
-  const { getDocs, query, orderBy } = await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js");
-  const { collection } = await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js");
+  const { getDocs, query, orderBy, collection } = await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js");
   const { db } = await import('../../firebase/config.js');
 
   const snap = await getDocs(query(collection(db, 'children'), orderBy('name')));
@@ -42,8 +39,7 @@ export async function exportChildren() {
 // 공지사항 내보내기
 export async function exportNotices() {
   if (!getIsAdmin()) return;
-  const { getDocs, query, orderBy } = await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js");
-  const { collection } = await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js");
+  const { getDocs, query, orderBy, collection } = await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js");
   const { db } = await import('../../firebase/config.js');
 
   const snap = await getDocs(query(collection(db, 'notices'), orderBy('createdAt', 'desc')));
@@ -58,8 +54,7 @@ export async function exportNotices() {
 // 투약 기록 내보내기
 export async function exportMedications() {
   if (!getIsAdmin()) return;
-  const { getDocs, query, orderBy } = await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js");
-  const { collection } = await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js");
+  const { getDocs, query, orderBy, collection } = await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js");
   const { db } = await import('../../firebase/config.js');
 
   const snap = await getDocs(query(collection(db, 'medications'), orderBy('createdAt', 'desc')));

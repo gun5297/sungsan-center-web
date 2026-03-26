@@ -42,6 +42,7 @@ export async function getPasswords() {
 export async function updatePasswords(data) {
   await setDoc(passwordsRef, data, { merge: true });
   if (data.attendance) {
+    _cachedHash = null;
     await syncAttLockHash(data.attendance);
   }
 }
@@ -53,18 +54,20 @@ async function syncAttLockHash(plainPassword) {
 }
 
 // ===== 태블릿 잠금 화면에서 사용 =====
-// publicConfig/attLock 을 읽어 해시 비교 (비밀번호 평문 불필요)
+let _cachedHash = null;
+const HASH_CACHE_TTL = 5 * 60 * 1000;
+let _cacheTime = 0;
+
 export async function checkAttendancePassword(input) {
   try {
-    const snap = await getDoc(attLockRef);
-    if (!snap.exists()) {
-      // publicConfig 없으면 기본값 해시와 비교 (최초 배포)
-      const defaultHash = await sha256(DEFAULTS.attendance);
-      return (await sha256(input)) === defaultHash;
+    let storedHash = _cachedHash;
+    if (!storedHash || Date.now() - _cacheTime > HASH_CACHE_TTL) {
+      const snap = await getDoc(attLockRef);
+      storedHash = snap.exists() ? snap.data().hash : await sha256(DEFAULTS.attendance);
+      _cachedHash = storedHash;
+      _cacheTime = Date.now();
     }
-    const storedHash = snap.data().hash;
-    const inputHash  = await sha256(input);
-    return inputHash === storedHash;
+    return (await sha256(input)) === storedHash;
   } catch (e) {
     console.error('[settingsService] 출결 비밀번호 확인 실패:', e);
     throw e;

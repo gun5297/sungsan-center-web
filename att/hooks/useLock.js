@@ -6,16 +6,14 @@
 
 import { checkAttendancePassword } from '../../firebase/services/settingsService.js';
 import { loginAnonymously } from '../../firebase/auth.js';
+import { auth } from '../../firebase/config.js';
 import { showScreen } from './useScreen.js';
 import { on } from '../../js/events.js';
 
 let lockCode = '';
-let anonymousReady = false;
 
 // 페이지 로드 시 즉시 익명 로그인 (publicConfig 읽기 권한 확보)
-loginAnonymously()
-  .then(() => { anonymousReady = true; })
-  .catch(e => console.warn('[useLock] 초기 익명 인증 실패:', e));
+loginAnonymously().catch(e => console.warn('[useLock] 초기 익명 인증 실패:', e));
 
 // ===== 무차별 대입 방어 =====
 const MAX_ATTEMPTS = 5;
@@ -108,14 +106,9 @@ async function pressLockConfirm() {
     failedAttempts = 0;
     lockedUntil = 0;
 
-    // 초기 익명 인증이 아직 완료되지 않았다면 재시도
-    if (!anonymousReady) {
-      try {
-        await loginAnonymously();
-        anonymousReady = true;
-      } catch (e) {
-        console.warn('[useLock] 익명 인증 실패 — 출결 기록이 저장되지 않을 수 있습니다:', e);
-      }
+    if (!auth.currentUser) {
+      try { await loginAnonymously(); }
+      catch (e) { console.warn('[useLock] 익명 인증 실패 — 출결 기록이 저장되지 않을 수 있습니다:', e); }
     }
 
     const errorEl = document.getElementById('lockError');

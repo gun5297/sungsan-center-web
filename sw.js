@@ -1,5 +1,5 @@
 // ===== Service Worker — 성산지역아동센터 PWA =====
-const CACHE_NAME = 'sungsan-v2';
+const CACHE_NAME = 'sungsan-v3';
 const STATIC_ASSETS = [
   './',
   './index.html',

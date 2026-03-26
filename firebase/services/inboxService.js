@@ -33,12 +33,12 @@ export async function getInboxItems() {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
-// 접수번호 생성
+// 접수번호 생성 — Date.now() 마지막 6자리(ms 단위)로 동시 접수 충돌 방지
 function generateReceiptNo(type) {
   const prefix = { absence: 'ABS', medication: 'MED', register: 'REG', consult: 'CON' };
   const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
-  const rand = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
-  return `${prefix[type] || 'DOC'}-${date}-${rand}`;
+  const ts = String(Date.now()).slice(-6);
+  return `${prefix[type] || 'DOC'}-${date}-${ts}`;
 }
 
 // 서류 추가 (폼 제출 시 호출)

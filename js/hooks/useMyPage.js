@@ -232,6 +232,20 @@ async function renderMyPage(root, user, userDoc) {
     </div>
     ` : ''}
 
+    ${isAdmin ? `
+    <div class="mypage-card mt mypage-retention-banner">
+      <div class="mypage-section-title">⚠️ 개인정보 파기 안내 (관리자 전용)</div>
+      <p class="mypage-retention-desc">개인정보보호법 제21조에 따라 보관기간이 경과한 개인정보는 파기해야 합니다.</p>
+      <ul class="mypage-retention-list">
+        <li>투약 기록 (<code>medications</code>): 작성일로부터 <strong>1년</strong> 경과 시 삭제</li>
+        <li>아동 정보 (<code>students</code>, <code>children</code>): 퇴소 후 <strong>3년</strong> 경과 시 삭제</li>
+        <li>결석/조퇴 기록 (<code>absences</code>): 제출일로부터 <strong>1년</strong> 경과 시 삭제</li>
+        <li>서류함 (<code>inbox</code>): 처리 완료 후 <strong>1년</strong> 경과 시 삭제</li>
+      </ul>
+      <p class="mypage-retention-note">현재 자동 파기 기능이 없습니다. <strong>매년 1회</strong> 수동으로 파기하고 파기 일지를 작성하세요.</p>
+    </div>
+    ` : ''}
+
     <!-- 정보 수정 모달 -->
     <div class="edit-modal-overlay" id="editModal">
       <div class="edit-modal">

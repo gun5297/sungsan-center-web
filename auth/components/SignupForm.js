@@ -43,7 +43,7 @@ export function SignupForm() {
           <div class="form-consent">
             <label class="consent-check">
               <input type="checkbox" id="signupConsent" />
-              <span><strong class="required-tag">[필수]</strong> 개인정보 수집·이용 동의: 센터 이용자 관리 및 소통을 위해 이름, 이메일, 연락처, 직책 정보를 수집합니다. 수집된 정보는 회원 탈퇴 시까지 보관되며, 탈퇴 후 즉시 파기됩니다. <a href="privacy.html" target="_blank" style="color:var(--primary);text-decoration:underline;">개인정보처리방침 전문 보기</a></span>
+              <span><strong class="required-tag">[필수]</strong> 개인정보 수집·이용 동의: 센터 이용자 관리 및 소통을 위해 이름, 이메일, 연락처, 직책 정보를 수집합니다. 수집된 정보는 회원 탈퇴 시까지 보관되며, 탈퇴 후 즉시 파기됩니다. 수집된 정보는 <strong>Firebase(미국 Google LLC 서버)</strong>에 보관됩니다(국외이전). <a href="privacy.html" target="_blank" style="color:var(--primary);text-decoration:underline;">개인정보처리방침 전문 보기</a></span>
             </label>
           </div>
 

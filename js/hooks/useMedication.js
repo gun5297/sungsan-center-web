@@ -70,6 +70,7 @@ export async function submitMedication() {
     return;
   }
 
+  const birth = document.getElementById('medBirth') ? document.getElementById('medBirth').value : '';
   const hospital = document.getElementById('medHospital') ? document.getElementById('medHospital').value.trim() : '';
   const note = document.getElementById('medNote') ? document.getElementById('medNote').value.trim() : '';
   const cHealth = document.getElementById('medConsentHealth');
@@ -79,7 +80,7 @@ export async function submitMedication() {
   if (!cHealth.checked || !c1.checked || !c2.checked || !c3.checked) { showToast('모든 동의 항목에 체크해주세요.', 'warning'); return; }
 
   try {
-    await createMedication({ name, drug, dose, time, symptom, hospital, from, to: to || from, storage, note });
+    await createMedication({ name, birth, drug, dose, time, symptom, hospital, from, to: to || from, storage, note });
 
     const dateStr = formatDate(new Date());
     // 전자서명 이미지 가져오기 → Storage 업로드
@@ -97,7 +98,7 @@ export async function submitMedication() {
 
     const result = await addInboxItem({
       type: 'medication', name: `${name} (${drug})`, summary: `${dose} · ${time} · ${from}~${to || from}`, date: dateStr,
-      data: { name, drug, dose, time, symptom, from, to: to || from, storage, hospital, note, signature: signatureData },
+      data: { name, birth, drug, dose, time, symptom, from, to: to || from, storage, hospital, note, signature: signatureData },
       consents: ['건강정보(민감정보) 수집 동의', '부작용 안내 동의', '약 정보 책임 확인', '응급조치 동의']
     });
     const receiptNo = result?.receiptNo || '';
@@ -105,7 +106,7 @@ export async function submitMedication() {
     showToast(receiptNo ? `투약 의뢰서가 제출되었습니다.\n접수번호: ${receiptNo}` : '투약 의뢰서가 제출되었습니다.', 'success');
     cHealth.checked = false; c1.checked = false; c2.checked = false; c3.checked = false;
     // 폼 초기화
-    resetFields('medName', 'medDrug', 'medDose', 'medSymptom', 'medHospital', 'medNote');
+    resetFields('medName', 'medBirth', 'medDrug', 'medDose', 'medSymptom', 'medHospital', 'medNote');
   } catch (e) {
     console.error('제출 오류:', e);
     showToast('제출 중 오류가 발생했습니다. 다시 시도해 주세요.', 'error');

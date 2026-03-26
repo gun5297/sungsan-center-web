@@ -86,7 +86,7 @@ export function Medication() {
       <div class="form-consent">
         <label class="consent-check">
           <input type="checkbox" id="medConsentHealth" />
-          <span><strong class="required-tag">[필수]</strong> 본 의뢰서에 기재된 건강 관련 정보(증상, 진단명, 약 정보, 알레르기 등)는 아동의 안전한 투약 관리를 위한 목적으로만 수집·이용되며, 작성일로부터 1년간 보관 후 파기됩니다. 이에 동의합니다.</span>
+          <span><strong class="required-tag">[필수]</strong> 본 의뢰서에 기재된 <strong>민감정보(건강정보)</strong>(증상, 진단명, 약 정보, 알레르기 등)는 아동의 안전한 투약 관리를 위한 목적으로만 수집·이용되며, 작성일로부터 1년간 보관 후 파기됩니다. (개인정보보호법 제23조) — <a href="privacy.html" target="_blank" style="color:var(--primary);text-decoration:underline;">개인정보처리방침 보기</a> — 이에 동의합니다.</span>
         </label>
         <label class="consent-check">
           <input type="checkbox" id="medConsent1" />

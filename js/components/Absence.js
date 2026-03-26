@@ -59,7 +59,7 @@ export function Absence() {
       <div class="form-consent">
         <label class="consent-check">
           <input type="checkbox" id="absConsent1" />
-          <span><strong class="required-tag">[필수]</strong> 결석/조퇴 사유에 기재된 내용이 사실임을 확인하며, 아동의 안전 관리를 위해 센터에서 해당 정보를 활용하는 데 동의합니다.</span>
+          <span><strong class="required-tag">[필수]</strong> 결석/조퇴 사유에 기재된 내용이 사실임을 확인하며, 아동의 안전 관리를 위해 센터에서 해당 정보를 활용하는 데 동의합니다. — <a href="privacy.html" target="_blank" style="color:var(--primary);text-decoration:underline;">개인정보처리방침 보기</a></span>
         </label>
       </div>
       <div class="form-consent">

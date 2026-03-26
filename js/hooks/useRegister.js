@@ -27,10 +27,11 @@ export async function submitRegister() {
     return;
   }
 
+  const cGuardian = document.getElementById('regConsentGuardian');
   const c1 = document.getElementById('regConsent1');
   const c2 = document.getElementById('regConsent2');
   const c3 = document.getElementById('regConsent3');
-  if (!c1.checked || !c2.checked) { showToast('필수 동의 항목에 체크해주세요.', 'warning'); return; }
+  if (!cGuardian.checked || !c1.checked || !c2.checked) { showToast('필수 동의 항목에 체크해주세요.', 'warning'); return; }
 
   const birth = document.getElementById('regChildBirth').value;
   const gender = document.getElementById('regGender').value;
@@ -56,7 +57,7 @@ export async function submitRegister() {
     const receiptNo = result?.receiptNo || '';
 
     showToast(receiptNo ? `${name} 아동의 이용 신청이 접수되었습니다.\n접수번호: ${receiptNo}\n담당자 확인 후 연락드리겠습니다.` : `${name} 아동의 이용 신청이 접수되었습니다.\n담당자 확인 후 연락드리겠습니다.`, 'success');
-    c1.checked = false; c2.checked = false; c3.checked = false;
+    cGuardian.checked = false; c1.checked = false; c2.checked = false; c3.checked = false;
     // 폼 초기화
     resetFields('regChildName', 'regGuardian', 'regPhone', 'regChildBirth', 'regSchool', 'regEmergency', 'regAddress', 'regNote');
     document.querySelectorAll('#regDays input:checked').forEach(c => c.checked = false);

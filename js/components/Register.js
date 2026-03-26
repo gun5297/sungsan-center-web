@@ -100,12 +100,16 @@ export function Register() {
 
       <div class="form-consent">
         <label class="consent-check">
+          <input type="checkbox" id="regConsentGuardian" />
+          <span><strong class="required-tag">[필수]</strong> 본인은 위 아동의 법정대리인(친권자·후견인)임을 확인합니다. (개인정보보호법 제22조의2 — 만 14세 미만 아동 개인정보 수집 시 법정대리인 동의 필수)</span>
+        </label>
+        <label class="consent-check">
           <input type="checkbox" id="regConsent1" />
           <span><strong class="required-tag">[필수]</strong> 본인은 위 아동의 보호자로서 기재 내용이 사실임을 확인하며, 센터 이용규정 및 안전수칙을 준수할 것에 동의합니다.</span>
         </label>
         <label class="consent-check">
           <input type="checkbox" id="regConsent2" />
-          <span><strong class="required-tag">[필수]</strong> 아동의 개인정보(성명, 생년월일, 건강정보 등)를 센터 운영 목적으로 수집·이용하는 것에 동의합니다. (보유기간: 퇴소 후 3년)</span>
+          <span><strong class="required-tag">[필수]</strong> 아동의 개인정보(성명, 생년월일, 건강정보 등)를 센터 운영 목적으로 수집·이용하는 것에 동의합니다. (보유기간: 퇴소 후 3년) — <a href="privacy.html" target="_blank" style="color:var(--primary);text-decoration:underline;">개인정보처리방침 보기</a></span>
         </label>
         <label class="consent-check">
           <input type="checkbox" id="regConsent3" />

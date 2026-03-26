@@ -9,7 +9,7 @@ let unsubscribeRecords = null;
 
 export function startAdminRefresh() {
   if (adminRefreshInterval) return;
-  // 1초마다 SMS 타이머 카운트다운용 렌더링
+  // 1초마다 취소 버튼 카운트다운용 렌더링
   adminRefreshInterval = setInterval(() => {
     const panel = document.getElementById('panelRecords');
     if (panel && !panel.classList.contains('hidden')) {
@@ -80,7 +80,7 @@ function renderAdminFromCache() {
   renderTimeline(cachedStudents, cachedRecords);
 }
 
-// 캐시 기반 타임라인만 렌더 (1초 카운트다운용)
+// 캐시 기반 타임라인만 렌더 (취소 버튼 카운트다운용)
 function renderTimelineFromCache() {
   if (!cachedStudents || !cachedRecords) return;
   renderTimeline(cachedStudents, cachedRecords);
@@ -130,9 +130,7 @@ function renderTimeline(students, records) {
     const remaining = Math.max(0, 60 - Math.floor(elapsed / 1000));
     const canCancel = elapsed < 60000;
 
-    const smsHtml = canCancel
-      ? `<div class="timeline-sms pending">📱 ${remaining}초 후 문자 발송 예정</div>`
-      : `<div class="timeline-sms sent">📱 문자 발송 완료</div>`;
+    const smsHtml = `<div class="timeline-sms pending">알림 서비스 준비 중</div>`;
 
     const cancelBtn = canCancel
       ? `<button class="cancel-btn" data-action="cancelAttendance" data-id="${s.id}">출석 취소 (${remaining}초)</button>`

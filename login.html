@@ -7,7 +7,10 @@
   <title>로그인 - 성산지역아동센터</title>
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
-    script-src 'self' https://www.gstatic.com;
+    script-src 'self'
+      https://www.gstatic.com
+      https://www.google.com
+      https://www.recaptcha.net;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     font-src 'self' https://fonts.gstatic.com;
     connect-src 'self'
@@ -16,7 +19,14 @@
       https://*.firebaseapp.com
       https://identitytoolkit.googleapis.com
       https://securetoken.googleapis.com
-      https://www.gstatic.com;
+      https://www.gstatic.com
+      wss://*.firebaseio.com
+      https://www.google.com
+      https://www.recaptcha.net;
+    frame-src 'self'
+      https://*.firebaseapp.com
+      https://www.google.com
+      https://www.recaptcha.net;
     img-src 'self' data:;
     object-src 'none';
     base-uri 'self';

@@ -22,13 +22,17 @@ const app = initializeApp(firebaseConfig);
 // 봇/스크립트 도구의 Firestore 직접 접근 차단
 // RECAPTCHA_SITE_KEY: Google reCAPTCHA 관리 콘솔에서 발급
 // https://www.google.com/recaptcha/admin/create (유형: reCAPTCHA v3)
-const RECAPTCHA_SITE_KEY = 'REPLACE_WITH_YOUR_RECAPTCHA_V3_SITE_KEY';
+const RECAPTCHA_SITE_KEY = '6LdfipgsAAAAAK7_6Czc055MFcKn9-KX-GkpBydv';
 
-if (RECAPTCHA_SITE_KEY !== 'REPLACE_WITH_YOUR_RECAPTCHA_V3_SITE_KEY') {
-  initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),
-    isTokenAutoRefreshEnabled: true,
-  });
+if (RECAPTCHA_SITE_KEY) {
+  try {
+    initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),
+      isTokenAutoRefreshEnabled: true,
+    });
+  } catch (e) {
+    console.warn('[config] App Check 초기화 실패 (기능에 영향 없음):', e);
+  }
 }
 
 export const db = getFirestore(app);

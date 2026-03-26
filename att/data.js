@@ -42,16 +42,17 @@ let cachedStudents = null;
 let studentsSubscribed = false;
 
 // Firestore 실시간 구독 시작 — 학생 데이터를 캐시에 유지
+// 익명 사용자(출결 태블릿)는 students 읽기 권한 없음 → 승인된 사용자만 구독
 function ensureStudentsSubscription() {
   if (studentsSubscribed) return;
   studentsSubscribed = true;
   try {
-    fsSubscribeStudents((students) => {
-      cachedStudents = students;
-    });
+    fsSubscribeStudents(
+      (students) => { cachedStudents = students; },
+      (err) => { console.warn('[att/data] 학생 구독 권한 없음 (익명 사용자 정상):', err.code); }
+    );
   } catch (e) {
     console.error('[att/data] 학생 구독 실패:', e);
-    // localStorage 폴백 제거 — 인증 실패 시 빈 상태 유지
   }
 }
 

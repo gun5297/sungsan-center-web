@@ -35,13 +35,18 @@ export async function getAllStudentsWithContacts() {
   }));
 }
 
-// 실시간 구독 (id/name/school만 — 익명 출결 태블릿 캐시용)
-export function subscribeStudents(callback) {
+// 실시간 구독 (id/name/school만 — 승인된 사용자 전용)
+// onError 핸들러 미제공 시 권한 오류가 unhandled rejection이 되므로 반드시 전달
+export function subscribeStudents(callback, onError) {
   const q = query(studentsCol, orderBy('id'));
-  return onSnapshot(q, (snapshot) => {
-    const students = snapshot.docs.map(d => ({ docId: d.id, ...d.data() }));
-    callback(students);
-  });
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const students = snapshot.docs.map(d => ({ docId: d.id, ...d.data() }));
+      callback(students);
+    },
+    onError || ((err) => console.warn('[studentService] subscribeStudents 오류:', err.code))
+  );
 }
 
 // 생성 — students(공개)와 studentPhones(비공개) 분리 저장

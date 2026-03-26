@@ -53,7 +53,7 @@ export async function submitAbsence() {
   const dateStr = formatDate(new Date());
   const guardian = document.getElementById('absGuardian').value.trim();
   const phone = document.getElementById('absPhone').value.trim();
-  const absDate = document.getElementById('absDate').value;
+  const absDate = document.getElementById('absDate')?.value || '';
   const consentHealth = document.getElementById('absConsentHealth');
   if (!consentHealth.checked) { showToast('건강정보 수집 동의에 체크해주세요.', 'warning'); return; }
   const consent = document.getElementById('absConsent');

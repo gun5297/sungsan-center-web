@@ -21,19 +21,25 @@ export function Absence() {
         </select>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">아동 이름 *</label>
-        <input type="text" id="absName" class="input-field" placeholder="홍길동" />
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">아동 이름 *</label>
+          <input type="text" id="absName" class="input-field" placeholder="홍길동" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">보호자 성명</label>
+          <input type="text" id="absGuardian" class="input-field" placeholder="보호자 이름" />
+        </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">반 / 학년</label>
-          <input type="text" id="absClass" class="input-field" placeholder="3학년" />
+          <input type="text" id="absSchool" class="input-field" placeholder="3학년" />
         </div>
         <div class="form-group">
-          <label class="form-label">담당 교사</label>
-          <input type="text" id="absTeacher" class="input-field" placeholder="담당 교사명" />
+          <label class="form-label">보호자 연락처</label>
+          <input type="tel" id="absPhone" class="input-field" placeholder="010-0000-0000" />
         </div>
       </div>
 
@@ -58,14 +64,14 @@ export function Absence() {
 
       <div class="form-consent">
         <label class="consent-check">
-          <input type="checkbox" id="absConsent1" />
-          <span><strong class="required-tag">[필수]</strong> 결석/조퇴 사유에 기재된 내용이 사실임을 확인하며, 아동의 안전 관리를 위해 센터에서 해당 정보를 활용하는 데 동의합니다. — <a href="privacy.html" target="_blank" style="color:var(--primary);text-decoration:underline;">개인정보처리방침 보기</a></span>
+          <input type="checkbox" id="absConsentHealth" />
+          <span><strong class="required-tag">[필수]</strong> 본 신청서에 기재된 <strong>민감정보(건강정보)</strong>(진단명, 의료정보 등)를 포함한 개인정보를 아동 안전 관리 목적으로 수집·이용하는 것에 동의합니다. (개인정보보호법 제23조) — <a href="privacy.html" target="_blank" style="color:var(--primary);text-decoration:underline;">개인정보처리방침 보기</a></span>
         </label>
       </div>
       <div class="form-consent">
         <label class="consent-check">
-          <input type="checkbox" id="absConsent2" />
-          <span><strong class="optional-tag">[선택]</strong> 진단명/의료정보 수집에 동의합니다. (미동의 시 해당 항목은 제출되지 않습니다.)</span>
+          <input type="checkbox" id="absConsent" />
+          <span><strong class="required-tag">[필수]</strong> 결석/조퇴 사유에 기재된 내용이 사실임을 확인하며, 아동의 안전 관리를 위해 센터에서 해당 정보를 활용하는 데 동의합니다.</span>
         </label>
       </div>
 

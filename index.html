@@ -18,7 +18,8 @@
     script-src 'self'
       https://cdn.sheetjs.com
       https://www.gstatic.com
-      https://cdn.jsdelivr.net;
+      https://cdn.jsdelivr.net
+      https://apis.google.com;
     style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com;
     font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:;
     connect-src 'self'
@@ -29,15 +30,20 @@
       https://identitytoolkit.googleapis.com
       https://securetoken.googleapis.com
       https://storage.googleapis.com
+      https://www.gstatic.com
       wss://*.firebaseio.com;
     img-src 'self' data: blob:
       https://firebasestorage.googleapis.com
       https://lh3.googleusercontent.com;
+    frame-src 'self'
+      https://*.firebaseapp.com
+      https://apis.google.com;
     object-src 'none';
     base-uri 'self';
   " />
   <title>성산지역아동센터</title>
   <meta name="theme-color" content="#FF7854" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="성산센터" />
@@ -51,11 +57,7 @@
 
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script type="module" src="js/app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
-    }
-  </script>
+  <script src="js/register-sw.js"></script>
 
 </body>
 </html>

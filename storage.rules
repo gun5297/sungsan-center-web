@@ -4,11 +4,20 @@ service firebase.storage {
 
     // ===== 헬퍼 함수 =====
 
-    // Firestore에서 사용자 역할 조회
+    // 실명 인증 관리자 (Firestore role + approved 확인)
     function isAdminUser() {
       return request.auth != null
+        && request.auth.token.firebase.sign_in_provider != 'anonymous'
         && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role
             in ['admin', 'director', 'teacher', 'social_worker']
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.approved
+            == true;
+    }
+
+    // 승인된 실명 사용자 (갤러리 읽기용)
+    function isApprovedUser() {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider != 'anonymous'
         && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.approved
             == true;
     }
@@ -17,9 +26,9 @@ service firebase.storage {
       return request.auth != null;
     }
 
-    // 이미지 파일 타입 검증
+    // 이미지 MIME 타입 검증
     function isImage() {
-      return request.resource.contentType.matches('image/.*');
+      return request.resource.contentType.matches('image/(jpeg|png|gif|webp)');
     }
 
     // 파일 크기 제한 (5MB)
@@ -28,24 +37,26 @@ service firebase.storage {
     }
 
     // ===== 갤러리 이미지 =====
-    // 읽기: 로그인 사용자 / 업로드·삭제: 관리자만
+    // 읽기: 승인된 실명 사용자 (익명 제외)
+    // 업로드·삭제: 관리자만 + 이미지 타입 + 5MB 이하
     match /gallery/{allPaths=**} {
-      allow read: if isSignedIn();
+      allow read: if isApprovedUser();
       allow write: if isAdminUser() && isImage() && underSizeLimit();
     }
 
     // ===== 전자서명 =====
-    // 읽기: 로그인 사용자 (서류 출력용)
-    // 쓰기: 비로그인 학부모도 제출 가능 — PNG 타입 + 512KB 제한으로 악용 방어
+    // 읽기: 승인된 실명 사용자 (서류 출력용)
+    // 쓰기: 비로그인 허용 — PNG 타입 + 100KB 제한 (비용 공격 완화)
+    // ⚠️ 주의: App Check 없이는 반복 업로드 완전 차단 불가
     match /signatures/{allPaths=**} {
-      allow read: if isSignedIn();
+      allow read: if isApprovedUser();
       allow write: if request.resource.contentType == 'image/png'
-        && request.resource.size < 512 * 1024;
+        && request.resource.size < 100 * 1024;  // 512KB → 100KB로 축소
     }
 
     // ===== 공지사항 첨부파일 =====
-    // 읽기: 누구나 (공개 공지의 첨부)
-    // 업로드·삭제: 관리자만
+    // 읽기: 누구나 (공개 공지 첨부물)
+    // 업로드·삭제: 관리자만 + 5MB 이하
     match /notices/{allPaths=**} {
       allow read: if true;
       allow write: if isAdminUser() && underSizeLimit();

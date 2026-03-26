@@ -8,26 +8,35 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // 익명 Auth 여부 (출결 태블릿 전용)
+    function isAnonymous() {
+      return request.auth != null && request.auth.token.firebase.sign_in_provider == 'anonymous';
+    }
+
+    // 실명 인증된 사용자 (익명 Auth 제외)
+    function isNamedUser() {
+      return isSignedIn() && !isAnonymous();
+    }
+
     function getUserData() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
-    // 관리자 판별: Firestore users 문서의 role + approved 체크
-    // 프론트엔드 상태값은 신뢰하지 않음 — 항상 서버측에서 재확인
+    // 관리자: role + approved Firestore 서버측 검증 (클라이언트 신뢰 금지)
     function isAdmin() {
-      return isSignedIn()
+      return isNamedUser()
         && getUserData().role in ['admin', 'director', 'teacher', 'social_worker']
         && getUserData().approved == true;
     }
 
-    // 승인된 사용자 (관리자 포함)
+    // 승인된 실명 사용자 (관리자 포함)
     function isApproved() {
-      return isSignedIn() && getUserData().approved == true;
+      return isNamedUser() && getUserData().approved == true;
     }
 
-    // 요청 크기 제한 — 비용 공격 방어 (대용량 쓰기 차단)
+    // 문서 필드 수 제한 — 비용 공격 방어
     function underSizeLimit() {
-      return request.resource.data.size() < 50;  // 필드 수 50개 이하
+      return request.resource.data.size() < 30;
     }
 
     // ===== 필드 검증 함수 =====
@@ -35,51 +44,55 @@ service cloud.firestore {
     function validAbsenceCreate() {
       let d = request.resource.data;
       return d.keys().hasAll(['type', 'name', 'reason', 'from', 'date'])
+        && d.keys().hasOnly(['type', 'name', 'reason', 'from', 'date', 'school', 'createdAt'])
         && d.type in ['결석', '조퇴', '지각']
         && d.name is string && d.name.size() >= 1 && d.name.size() <= 20
         && d.reason is string && d.reason.size() >= 1 && d.reason.size() <= 500
         && d.from is string && d.from.size() <= 20
-        && d.date is string && d.date.matches('^[0-9]{4}[.\\-][0-9]{2}[.\\-][0-9]{2}$')
-        && underSizeLimit();
+        && d.date is string && d.date.matches('^[0-9]{4}[.\\-][0-9]{2}[.\\-][0-9]{2}$');
     }
 
     function validMedicationCreate() {
       let d = request.resource.data;
       return d.keys().hasAll(['name', 'drug', 'dose', 'time', 'from'])
+        && d.keys().hasOnly(['name', 'drug', 'dose', 'time', 'from', 'to', 'note', 'createdAt'])
         && d.name is string && d.name.size() >= 1 && d.name.size() <= 20
         && d.drug is string && d.drug.size() >= 1 && d.drug.size() <= 100
         && d.dose is string && d.dose.size() <= 50
         && d.time is string && d.time.size() <= 20
-        && d.from is string && d.from.size() <= 20
-        && underSizeLimit();
+        && d.from is string && d.from.size() <= 20;
     }
 
     function validInboxCreate() {
       let d = request.resource.data;
       return d.keys().hasAll(['type', 'name', 'date'])
+        && d.keys().hasOnly(['type', 'name', 'summary', 'date', 'data', 'consents', 'receiptNo', 'createdAt'])
         && d.type in ['absence', 'medication', 'register', 'consult']
         && d.name is string && d.name.size() >= 1 && d.name.size() <= 50
-        && d.date is string && d.date.size() <= 20
-        && underSizeLimit();
+        && d.date is string && d.date.size() <= 20;
     }
 
+    // 출결 records 필드: map(string→map) 구조 검증
     function validAttendanceWrite() {
       let d = request.resource.data;
       return d.keys().hasOnly(['records', 'date'])
         && d.date is string
-        && d.date.size() == 10;  // YYYY-MM-DD
+        && d.date.size() == 10
+        && d.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && d.records is map;
     }
 
     // ===== 사용자 =====
     match /users/{userId} {
-      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
-      // 신규 가입 시 자신의 문서만 생성 (role 고정: general)
-      allow create: if isSignedIn() && request.auth.uid == userId
+      allow read: if isNamedUser() && (request.auth.uid == userId || isAdmin());
+      // 가입 시: 반드시 role=general, approved=false 강제
+      allow create: if isNamedUser() && request.auth.uid == userId
         && request.resource.data.keys().hasAll(['email', 'name', 'role', 'approved'])
+        && request.resource.data.keys().hasOnly(['email', 'name', 'role', 'approved', 'phone', 'photoConsent', 'createdAt'])
         && request.resource.data.role == 'general'
-        && request.resource.data.approved == false;  // 반드시 미승인 상태로 생성
-      // 자신은 이름·연락처만 수정 / 관리자는 전체 수정
-      allow update: if isSignedIn() && (
+        && request.resource.data.approved == false;
+      // 본인: 이름·연락처·사진동의만 수정 가능 / 관리자: 전체 수정
+      allow update: if isNamedUser() && (
         (request.auth.uid == userId
           && request.resource.data.diff(resource.data).affectedKeys()
               .hasOnly(['name', 'phone', 'photoConsent']))
@@ -88,62 +101,62 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // ===== 공지사항 =====
+    // ===== 공지사항 — 공개 읽기 허용 =====
     match /notices/{noticeId} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
     }
 
-    // ===== 갤러리 =====
+    // ===== 갤러리 — 승인된 실명 사용자만 =====
     match /gallery/{itemId} {
       allow read: if isApproved();
       allow create, update, delete: if isAdmin();
     }
 
-    // ===== 식단 =====
+    // ===== 식단·시간표·픽업 — 공개 읽기 =====
     match /meals/{mealId} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
     }
 
-    // ===== 시간표 =====
     match /schedules/{scheduleId} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
     }
 
-    // ===== 출결 기록 =====
-    match /attendance/{dateId} {
-      allow read: if isSignedIn();
-      allow create, update: if isSignedIn() && validAttendanceWrite();
-      allow delete: if isAdmin();
-    }
-
-    // ===== 학생 명단 =====
-    match /students/{studentId} {
-      allow read: if isSignedIn();
+    match /pickups/{pickupId} {
+      allow read: if true;
       allow create, update, delete: if isAdmin();
     }
 
-    // ===== 결석/조퇴 =====
+    // ===== 출결 기록 =====
+    // 쓰기: 익명 Auth(태블릿) + 구조 검증
+    // 읽기: 승인된 실명 사용자 또는 관리자
+    match /attendance/{dateId} {
+      allow read: if isApproved();
+      // 태블릿(익명)은 쓰기만, 실명 관리자도 수정 가능
+      allow create, update: if (isAnonymous() || isAdmin()) && validAttendanceWrite();
+      allow delete: if isAdmin();
+    }
+
+    // ===== 학생 명단 — 개인정보: 승인된 실명 사용자만 =====
+    match /students/{studentId} {
+      allow read: if isApproved();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ===== 결석/조퇴 — 비로그인 제출 허용 (필드 검증) =====
     match /absences/{absenceId} {
-      allow read: if isSignedIn();
-      // 비로그인 학부모도 제출 가능 — 필드 검증 + 크기 제한으로 스팸 방어
+      allow read: if isApproved();
       allow create: if validAbsenceCreate();
       allow update, delete: if isAdmin();
     }
 
     // ===== 투약 =====
     match /medications/{medId} {
-      allow read: if isSignedIn();
+      allow read: if isApproved();
       allow create: if validMedicationCreate();
       allow update, delete: if isAdmin();
-    }
-
-    // ===== 픽업 =====
-    match /pickups/{pickupId} {
-      allow read: if true;
-      allow create, update, delete: if isAdmin();
     }
 
     // ===== 서류함 =====
@@ -156,83 +169,86 @@ service cloud.firestore {
     // ===== 신규 등록/상담 =====
     match /registrations/{id} {
       allow create: if request.resource.data.keys().hasAll(['name', 'date'])
+        && request.resource.data.keys().hasOnly(['name', 'date', 'type', 'summary', 'data', 'consents', 'createdAt'])
         && request.resource.data.name is string
-        && request.resource.data.name.size() <= 50
-        && underSizeLimit();
+        && request.resource.data.name.size() <= 50;
       allow read, update, delete: if isAdmin();
     }
 
-    // ===== 설정 (비밀번호 등) — 관리자만 =====
+    // ===== 설정 — 관리자만 =====
     match /settings/{settingId} {
-      allow read: if isAdmin();
-      allow write: if isAdmin();
+      allow read, write: if isAdmin();
     }
 
-    // ===== 출결 태블릿 공개 설정 =====
-    // PIN 해시만 저장 (평문 없음) — 잠금 해제 전 읽기 필요하므로 공개
+    // ===== 출결 태블릿 공개 설정 (PIN 해시) =====
     match /publicConfig/{configId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // ===== 감사 로그 — 추가만 가능 (위변조 불가) =====
+    // ===== 감사 로그 — 추가 전용 =====
     match /auditLogs/{logId} {
       allow read: if isAdmin();
-      allow create: if isSignedIn()
+      allow create: if isNamedUser()
         && request.resource.data.keys().hasAll(['action', 'userId', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['action', 'resource', 'resourceId', 'message', 'userId', 'createdAt'])
         && request.resource.data.action is string
-        && request.resource.data.action.size() <= 100;
+        && request.resource.data.action.size() <= 100
+        && request.resource.data.userId == request.auth.uid;
       allow update, delete: if false;
     }
 
     // ===== 공지 읽음 확인 =====
     match /noticeReads/{readId} {
-      allow read: if isSignedIn();
-      allow create, update: if isSignedIn()
+      allow read: if isAdmin();
+      allow create: if isNamedUser()
         && request.resource.data.keys().hasOnly(['noticeId', 'userId', 'readAt'])
-        && request.resource.data.userId == request.auth.uid;
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.noticeId is string;
+      // 업데이트 불필요 (읽음 상태는 생성으로 충분)
+      allow update: if false;
       allow delete: if false;
     }
 
     // ===== 활동 일지 =====
     match /dailyLogs/{logId} {
-      allow read: if isSignedIn();
+      allow read: if isApproved();
       allow create, update, delete: if isAdmin();
     }
 
-    // ===== 아동 통합 명단 =====
+    // ===== 아동 통합 명단 — 개인정보: 승인된 실명 사용자만 =====
     match /children/{childId} {
-      allow read: if isSignedIn();
+      allow read: if isApproved();
       allow create, update, delete: if isAdmin();
     }
 
     // ===== 아동-보호자 연결 =====
     match /childLinks/{linkId} {
-      allow read: if isSignedIn()
-        && (resource.data.userId == request.auth.uid || isAdmin());
+      allow read: if isApproved()
+        && (resource != null && resource.data.userId == request.auth.uid || isAdmin());
       allow create: if isApproved();
       allow update: if isAdmin();
-      allow delete: if (isApproved() && resource.data.userId == request.auth.uid)
-        || isAdmin();
+      allow delete: if (isApproved() && resource.data.userId == request.auth.uid) || isAdmin();
     }
 
     // ===== 전자서명 메타데이터 =====
     match /signatures/{sigId} {
-      allow read: if isSignedIn();
+      allow read: if isApproved();
       allow create: if request.resource.data.keys().hasAll(['path', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['path', 'type', 'linkedTo', 'createdAt'])
         && request.resource.data.path is string
-        && request.resource.data.path.size() <= 200
-        && underSizeLimit();
+        && request.resource.data.path.size() <= 200;
       allow delete: if isAdmin();
     }
 
     // ===== 알림 큐 =====
     match /notifications/{notiId} {
       allow read: if isAdmin();
-      allow create: if isSignedIn()
+      allow create: if (isAnonymous() || isNamedUser())
         && request.resource.data.keys().hasAll(['type', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['type', 'message', 'studentId', 'createdAt'])
         && request.resource.data.type is string
-        && underSizeLimit();
+        && request.resource.data.type.size() <= 50;
       allow update: if isAdmin();
       allow delete: if false;
     }

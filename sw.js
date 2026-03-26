@@ -1,5 +1,5 @@
 // ===== Service Worker — 성산지역아동센터 PWA =====
-const CACHE_NAME = 'sungsan-v1';
+const CACHE_NAME = 'sungsan-v2';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -55,13 +55,8 @@ self.addEventListener('fetch', (event) => {
   // http(s) 외 스킴(chrome-extension 등)은 캐시 불가 — 무시
   if (!request.url.startsWith('http')) return;
 
-  // Firebase/외부 API 요청은 캐시하지 않음
-  if (request.url.includes('firebasestorage') ||
-      request.url.includes('firebaseio') ||
-      request.url.includes('googleapis.com') ||
-      request.url.includes('gstatic.com')) {
-    return;
-  }
+  // 동일 출처만 캐시 — 외부 API/Firebase/CDN 제외
+  if (!request.url.startsWith(self.location.origin)) return;
 
   // HTML 요청: 네트워크 우선
   if (request.mode === 'navigate') {
@@ -72,7 +67,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // 정적 자산: 캐시 우선, 백그라운드 업데이트
-  const isSameOrigin = request.url.startsWith(self.location.origin);
+  const isSameOrigin = true;
   event.respondWith(
     caches.match(request).then((cached) => {
       const fetchPromise = fetch(request).then((response) => {

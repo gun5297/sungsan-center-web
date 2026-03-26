@@ -1,67 +1,66 @@
 // ===== 갤러리 Firestore 서비스 =====
-// 전환 대상: js/hooks/useGallery.js
-//
-// 현재: galleryItems 배열 (JS 변수, 휘발성)
-// 전환: Firestore gallery 컬렉션 + Firebase Storage (이미지)
-//
-// 이미지 업로드:
-//   현재: FileReader로 base64 → 메모리에만 보관
-//   전환: Firebase Storage에 업로드 → photoUrl 필드에 다운로드 URL 저장
 
 import { galleryCol } from '../collections.js';
-import { storage } from '../config.js';
+import { storage, db } from '../config.js';
 import {
-  doc, getDocs, addDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp
+  doc, getDocs, addDoc, deleteDoc, onSnapshot,
+  query, orderBy, limit, startAfter, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import {
   ref, uploadBytes, getDownloadURL, deleteObject
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-storage.js";
-import { db } from '../config.js';
 
-// 실시간 구독
-export function subscribeGallery(callback) {
-  const q = query(galleryCol, orderBy('createdAt', 'desc'));
+const PAGE_SIZE = 12;
+
+// 최신 N개 실시간 구독 (홈 화면용)
+export function subscribeGallery(callback, pageSize = PAGE_SIZE) {
+  const q = query(galleryCol, orderBy('createdAt', 'desc'), limit(pageSize));
   return onSnapshot(q, (snapshot) => {
-    const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const items = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     callback(items);
   }, (error) => {
     console.error('갤러리 구독 오류:', error);
   });
 }
 
-// 조회
-export async function getGalleryItems() {
-  const q = query(galleryCol, orderBy('createdAt', 'desc'));
+// 페이지네이션 조회
+export async function getGalleryPaged(lastDoc = null) {
+  let q = query(galleryCol, orderBy('createdAt', 'desc'), limit(PAGE_SIZE));
+  if (lastDoc) q = query(galleryCol, orderBy('createdAt', 'desc'), startAfter(lastDoc), limit(PAGE_SIZE));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return {
+    items: snapshot.docs.map(d => ({ id: d.id, ...d.data() })),
+    lastDoc: snapshot.docs[snapshot.docs.length - 1] || null,
+    hasMore: snapshot.docs.length === PAGE_SIZE
+  };
 }
 
 // 이미지 업로드 → { url, storagePath } 반환
 export async function uploadPhoto(file) {
-  const storagePath = `gallery/${Date.now()}_${file.name}`;
+  const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const storagePath = `gallery/${Date.now()}_${safeFileName}`;
   const storageRef = ref(storage, storagePath);
   await uploadBytes(storageRef, file);
   const url = await getDownloadURL(storageRef);
   return { url, storagePath };
 }
 
-// 생성 (이미지 URL + Storage 경로 포함)
+// 생성
 export async function createGalleryItem({ title, category, date, photoUrl, storagePath }) {
   return await addDoc(galleryCol, {
-    title, category, date, photoUrl, storagePath: storagePath || null,
+    title, category, date,
+    photoUrl: photoUrl || null,
+    storagePath: storagePath || null,
     createdAt: serverTimestamp()
   });
 }
 
-// 삭제 (storagePath로 Storage 이미지 삭제 — HTTPS URL은 ref()에서 동작하지 않음)
+// 삭제 (Firestore 문서 + Storage 이미지)
 export async function deleteGalleryItem(id, storagePath) {
-  const docRef = doc(db, 'gallery', id);
-  await deleteDoc(docRef);
-
+  await deleteDoc(doc(db, 'gallery', id));
   if (storagePath) {
     try {
-      const storageRef = ref(storage, storagePath);
-      await deleteObject(storageRef);
+      await deleteObject(ref(storage, storagePath));
     } catch (e) {
       console.warn('Storage 이미지 삭제 실패:', e);
     }

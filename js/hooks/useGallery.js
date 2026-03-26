@@ -27,6 +27,26 @@ function updateGalleryVisibility() {
   }
 }
 
+// Intersection Observer로 이미지 lazy loading
+function initLazyImages(container) {
+  if (!('IntersectionObserver' in window)) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const url = el.dataset.src;
+        if (url) {
+          el.style.backgroundImage = `url('${url}')`;
+          el.removeAttribute('data-src');
+        }
+        observer.unobserve(el);
+      }
+    });
+  }, { rootMargin: '100px' });
+
+  container.querySelectorAll('.gallery-img[data-src]').forEach(el => observer.observe(el));
+}
+
 export function renderGallery() {
   updateGalleryVisibility();
   const grid = document.getElementById('galleryGrid');
@@ -37,12 +57,15 @@ export function renderGallery() {
     return;
   }
   grid.innerHTML = galleryItems.map((item, i) => {
-    const bg = item.photoUrl
-      ? `background-image:url('${encodeURI(item.photoUrl)}'); background-size:cover; background-position:center;`
+    // lazy loading: data-src 사용 (뷰포트 진입 시 배경 이미지 로드)
+    const style = item.photoUrl
+      ? `background-size:cover; background-position:center;`
       : `background: ${GALLERY_GRADIENTS[i % GALLERY_GRADIENTS.length]};`;
+    const dataSrc = item.photoUrl ? `data-src="${encodeURI(item.photoUrl)}"` : '';
+
     return `
       <div class="gallery-card">
-        <div class="gallery-img" style="${bg}">
+        <div class="gallery-img" style="${style}" ${dataSrc}>
           <span>${escapeHtml(item.category)}</span>
         </div>
         <div class="gallery-info">
@@ -53,6 +76,8 @@ export function renderGallery() {
       </div>
     `;
   }).join('');
+
+  initLazyImages(grid);
 }
 
 export async function addGalleryItem() {
@@ -70,7 +95,6 @@ export async function addGalleryItem() {
     const totalFiles = files ? files.length : 0;
 
     if (totalFiles > 1) {
-      // 다중 파일 업로드
       for (let i = 0; i < totalFiles; i++) {
         showToast(`${i + 1}/${totalFiles} 업로드 중...`, 'info');
         const resized = await resizeImage(files[i]);
@@ -79,7 +103,6 @@ export async function addGalleryItem() {
       }
       showToast(`${totalFiles}개 활동이 추가되었습니다.`, 'success');
     } else {
-      // 단일 파일 또는 파일 없이 업로드
       let photoUrl = null;
       let storagePath = null;
       if (totalFiles === 1) {
@@ -109,14 +132,11 @@ export async function deleteGalleryItem(id, storagePath) {
 let _unsubGallery = null;
 
 export function initGallery() {
-  // 로딩 표시
   const grid = document.getElementById('galleryGrid');
   if (grid) grid.innerHTML = skeletonCards(3);
 
-  // 이전 구독 해제
   if (_unsubGallery) _unsubGallery();
 
-  // Firestore 실시간 구독
   _unsubGallery = subscribeGallery((data) => {
     galleryItems = data;
     renderGallery();
@@ -126,14 +146,10 @@ export function initGallery() {
   const gallerySection = document.getElementById('gallery');
   if (gallerySection) {
     gallerySection.addEventListener('contextmenu', (e) => {
-      if (e.target.tagName === 'IMG' || e.target.closest('.gallery-card')) {
-        e.preventDefault();
-      }
+      if (e.target.tagName === 'IMG' || e.target.closest('.gallery-card')) e.preventDefault();
     });
     gallerySection.addEventListener('dragstart', (e) => {
-      if (e.target.closest('.gallery-card')) {
-        e.preventDefault();
-      }
+      if (e.target.closest('.gallery-card')) e.preventDefault();
     });
   }
 }

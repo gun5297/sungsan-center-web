@@ -1,0 +1,77 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  # ===== 기본 검사 =====
+  check:
+    name: 코드 검사
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: HTML 파일 CSP 확인
+        run: |
+          MISSING=()
+          for f in index.html login.html signup.html mypage.html pending.html reset-password.html attendance.html; do
+            if [ -f "$f" ] && ! grep -q "Content-Security-Policy" "$f"; then
+              MISSING+=("$f")
+            fi
+          done
+          if [ ${#MISSING[@]} -gt 0 ]; then
+            echo "❌ CSP 누락: ${MISSING[*]}"
+            exit 1
+          fi
+          echo "✅ 모든 HTML 파일에 CSP 설정됨"
+
+      - name: Firestore 규칙 기본 검증
+        run: |
+          if grep -q "allow read, write: if true" firestore.rules; then
+            echo "❌ firestore.rules에 'allow read, write: if true' 발견 — 보안 위험"
+            exit 1
+          fi
+          echo "✅ Firestore 규칙 기본 검사 통과"
+
+      - name: console.log 프로덕션 체크 (경고만)
+        run: |
+          COUNT=$(grep -r "console\.log" js/ firebase/ auth/ att/ --include="*.js" | grep -v "console\.error\|console\.warn" | wc -l)
+          echo "ℹ️  console.log 사용 횟수: $COUNT"
+
+  # ===== Firebase 규칙 배포 =====
+  deploy-rules:
+    name: Firebase 규칙 배포
+    runs-on: ubuntu-latest
+    needs: check
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Firebase CLI 설치
+        run: npm install -g firebase-tools
+
+      - name: Firestore + Storage 규칙 배포
+        run: firebase deploy --only firestore:rules,storage --token "${{ secrets.FIREBASE_TOKEN }}" --project sungsan-center
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+  # ===== GitHub Pages 배포 확인 =====
+  verify-deploy:
+    name: 배포 확인
+    runs-on: ubuntu-latest
+    needs: deploy-rules
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    steps:
+      - name: GitHub Pages 응답 확인
+        run: |
+          sleep 30
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://ubin2612.github.io/sungsan-center-web/)
+          echo "HTTP 상태: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "⚠️  페이지 응답 이상 ($STATUS)"
+          else
+            echo "✅ 배포 정상"
+          fi

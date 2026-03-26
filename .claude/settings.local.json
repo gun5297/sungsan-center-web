@@ -1,7 +1,13 @@
 {
+  "permissions": {
+    "allow": [
+      "Skill(update-config)",
+      "Skill(update-config:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "playwright",
     "firebase"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

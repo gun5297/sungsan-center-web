@@ -65,7 +65,7 @@
 }
 
 .fixed-toolbar.open .toolbar-menu {
-  max-height: 300px;
+  max-height: 420px;
   opacity: 1;
 }
 
@@ -121,6 +121,8 @@
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
+  white-space: normal;
+  min-width: 120px;
 }
 
 .toolbar-admin.logged-in:hover {

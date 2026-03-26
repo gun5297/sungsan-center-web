@@ -2,6 +2,7 @@
 
 import { getStudents, getTodayRecords, saveTodayRecords, deleteStudentRecord, resetTodayRecords, subscribeTodayRecords } from '../data.js';
 import { on } from '../../js/events.js';
+import { escapeHtml } from '../../js/utils.js';
 
 let adminRefreshInterval = null;
 let unsubscribeRecords = null;
@@ -147,8 +148,8 @@ function renderTimeline(students, records) {
           <div class="timeline-top">
             <div class="timeline-avatar">${s.id}</div>
             <div class="timeline-info">
-              <div class="timeline-name">${s.name}</div>
-              <div class="timeline-school">${s.school}</div>
+              <div class="timeline-name">${escapeHtml(s.name)}</div>
+              <div class="timeline-school">${escapeHtml(s.school)}</div>
             </div>
             <span class="att-row-status ${statusClass}">${statusLabel}</span>
           </div>
@@ -191,7 +192,9 @@ async function exportCSV() {
       } else {
         status = '출석중'; inTime = r.inTime; outTime = '';
       }
-      csv += `${s.id},${s.name},${s.school},${inTime},${outTime},${status},${s.parent}\n`;
+      csv += [s.id, s.name, s.school, inTime, outTime, status, s.parent]
+        .map(v => `"${String(v).replace(/"/g, '""').replace(/^([=+\-@\t\r])/,"'$1")}"`)
+        .join(',') + '\n';
     });
 
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });

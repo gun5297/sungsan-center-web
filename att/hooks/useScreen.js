@@ -1,8 +1,8 @@
 // ===== 화면 전환 & 히스토리 관리 =====
 
-import { ATT_PASSWORD } from '../data.js';
 import { renderAdmin, startAdminRefresh, stopAdminRefresh, switchAdminTab } from './useAdmin.js';
 import { on } from '../../js/events.js';
+import { checkAttendancePassword } from '../../firebase/services/settingsService.js';
 
 export function showScreen(screenId) {
   document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
@@ -24,25 +24,36 @@ function goAdmin() {
   switchAdminTab('records');
 }
 
-function backToMain() {
+async function backToMain() {
   const pw = prompt('비밀번호를 입력하세요');
-  if (pw === ATT_PASSWORD) {
-    window.location.href = 'index.html';
-  } else if (pw !== null) {
-    alert('비밀번호가 틀렸습니다.');
+  if (pw === null) return;
+  try {
+    const ok = await checkAttendancePassword(pw);
+    if (ok) {
+      window.location.href = 'index.html';
+    } else {
+      alert('비밀번호가 틀렸습니다.');
+    }
+  } catch (e) {
+    console.error('[useScreen] 비밀번호 확인 실패:', e);
+    alert('비밀번호 확인에 실패했습니다.');
   }
 }
 
 export function initNavigation() {
   history.replaceState({ screen: 'lock' }, '');
 
-  window.addEventListener('popstate', function() {
+  window.addEventListener('popstate', async function() {
     const mainScreen = document.getElementById('screenMain');
     if (mainScreen && !mainScreen.classList.contains('hidden')) {
       history.pushState({ screen: 'main' }, '');
       const pw = prompt('메인으로 돌아가려면 비밀번호를 입력하세요');
-      if (pw === ATT_PASSWORD) {
-        window.location.href = 'index.html';
+      if (pw === null) return;
+      try {
+        const ok = await checkAttendancePassword(pw);
+        if (ok) window.location.href = 'index.html';
+      } catch (e) {
+        console.error('[useScreen] 비밀번호 확인 실패:', e);
       }
     }
   });

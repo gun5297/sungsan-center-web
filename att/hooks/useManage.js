@@ -1,7 +1,9 @@
 // ===== 아동 관리 (CRUD) — Firestore 연동 =====
 
-import { ATT_PASSWORD, getStudents, createStudent, updateStudent, deleteStudentFs, getAllStudents } from '../data.js';
+import { getStudents, createStudent, updateStudent, deleteStudentFs, getAllStudents } from '../data.js';
 import { on } from '../../js/events.js';
+import { escapeHtml } from '../../js/utils.js';
+import { checkAttendancePassword } from '../../firebase/services/settingsService.js';
 
 let manageUnlocked = false;
 let editingStudentId = null;
@@ -22,8 +24,8 @@ async function renderStudentList() {
       <div class="manage-row">
         <div class="manage-row-id">${s.id}</div>
         <div class="manage-row-info">
-          <div class="manage-row-name">${s.name}</div>
-          <div class="manage-row-detail">${s.school} · ${s.parent}</div>
+          <div class="manage-row-name">${escapeHtml(s.name)}</div>
+          <div class="manage-row-detail">${escapeHtml(s.school)} · ${escapeHtml(s.parent)}</div>
         </div>
         <div class="manage-row-actions">
           <button class="manage-edit-btn" data-action="editStudent" data-id="${s.id}">수정</button>
@@ -43,16 +45,22 @@ function clearStudentForm() {
   document.getElementById('stuParent').value = '';
 }
 
-function unlockManage() {
+async function unlockManage() {
   const pw = document.getElementById('managePw').value;
-  if (pw === ATT_PASSWORD) {
-    manageUnlocked = true;
-    document.getElementById('manageLock').classList.add('hidden');
-    document.getElementById('manageUnlocked').classList.remove('hidden');
-    document.getElementById('managePw').value = '';
-    document.getElementById('manageLockError').classList.add('hidden');
-    renderStudentList();
-  } else {
+  try {
+    const ok = await checkAttendancePassword(pw);
+    if (ok) {
+      manageUnlocked = true;
+      document.getElementById('manageLock').classList.add('hidden');
+      document.getElementById('manageUnlocked').classList.remove('hidden');
+      document.getElementById('managePw').value = '';
+      document.getElementById('manageLockError').classList.add('hidden');
+      renderStudentList();
+    } else {
+      document.getElementById('manageLockError').classList.remove('hidden');
+    }
+  } catch (e) {
+    console.error('[useManage] 비밀번호 확인 실패:', e);
     document.getElementById('manageLockError').classList.remove('hidden');
   }
 }

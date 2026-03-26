@@ -2,7 +2,7 @@
 // 보안 강화:
 // 1. 5회 실패 시 30초 잠금 (무차별 대입 방어)
 // 2. 비밀번호를 Firestore settings에서 동적으로 가져옴
-// 3. 성공 시 Firebase 익명 Auth 로그인 → 이후 Firestore write 인증됨
+// 3. 익명 Auth로 로그인 후 Firestore read/write 인증
 
 import { checkAttendancePassword } from '../../firebase/services/settingsService.js';
 import { loginAnonymously } from '../../firebase/auth.js';
@@ -10,6 +10,12 @@ import { showScreen } from './useScreen.js';
 import { on } from '../../js/events.js';
 
 let lockCode = '';
+let anonymousReady = false;
+
+// 페이지 로드 시 즉시 익명 로그인 (publicConfig 읽기 권한 확보)
+loginAnonymously()
+  .then(() => { anonymousReady = true; })
+  .catch(e => console.warn('[useLock] 초기 익명 인증 실패:', e));
 
 // ===== 무차별 대입 방어 =====
 const MAX_ATTEMPTS = 5;
@@ -102,11 +108,14 @@ async function pressLockConfirm() {
     failedAttempts = 0;
     lockedUntil = 0;
 
-    // 익명 Firebase Auth 로그인 (Firestore write 권한 획득)
-    try {
-      await loginAnonymously();
-    } catch (e) {
-      console.warn('[useLock] 익명 인증 실패 — 출결 기록이 저장되지 않을 수 있습니다:', e);
+    // 초기 익명 인증이 아직 완료되지 않았다면 재시도
+    if (!anonymousReady) {
+      try {
+        await loginAnonymously();
+        anonymousReady = true;
+      } catch (e) {
+        console.warn('[useLock] 익명 인증 실패 — 출결 기록이 저장되지 않을 수 있습니다:', e);
+      }
     }
 
     const errorEl = document.getElementById('lockError');

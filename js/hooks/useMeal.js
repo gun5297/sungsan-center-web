@@ -1,6 +1,6 @@
 // ===== useMeal: 식단표 (Firestore + localStorage 폴백) =====
 import { sampleMeals } from '../data/sampleData.js';
-import { getWeekDates, isSameDay, getDateKey } from '../utils.js';
+import { getWeekDates, isSameDay, getDateKey, escapeHtml } from '../utils.js';
 import { on } from '../events.js';
 import {
   getMealData as firestoreGetMealData,
@@ -79,9 +79,9 @@ export function renderMealGrid() {
         <div class="meal-day">${dayNames[i]}</div>
         <div class="meal-date">${d.getDate()}</div>
         <div class="meal-type">점심</div>
-        <div class="meal-menu">${(meal.lunch || '').replace(/\n/g, '<br>')}</div>
+        <div class="meal-menu">${escapeHtml(meal.lunch || '').replace(/\n/g, '<br>')}</div>
         <div class="meal-type">간식</div>
-        <div class="meal-menu">${(meal.snack || '').replace(/\n/g, '<br>')}</div>
+        <div class="meal-menu">${escapeHtml(meal.snack || '').replace(/\n/g, '<br>')}</div>
       </div>
     `;
   }).join('');

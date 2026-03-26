@@ -3,6 +3,7 @@ import { getIsAdmin } from '../state.js';
 import { on } from '../events.js';
 import { getRecordsByMonth } from '../../firebase/services/attendanceService.js';
 import { getAllStudents } from '../../firebase/services/studentService.js';
+import { escapeHtml } from '../utils.js';
 
 let reportData = null;
 
@@ -156,7 +157,7 @@ async function generateAttReport() {
           <tbody>
             ${stats.map(s => `
               <tr>
-                <td>${s.name}</td>
+                <td>${escapeHtml(s.name)}</td>
                 <td>${s.attendDays}</td>
                 <td>${s.absentDays}</td>
                 <td class="${s.attendRate >= 90 ? 'att-report-rate-high' : s.attendRate >= 70 ? 'att-report-rate-mid' : 'att-report-rate-low'}">${s.attendRate}%</td>
@@ -236,7 +237,7 @@ function printAttReport() {
     <tbody>
       ${stats.map((s, i) => `
         <tr>
-          <td>${i + 1}</td><td style="text-align:left;">${s.name}</td><td>${s.school || '-'}</td>
+          <td>${i + 1}</td><td style="text-align:left;">${escapeHtml(s.name)}</td><td>${escapeHtml(s.school || '-')}</td>
           <td>${s.attendDays}</td><td>${s.absentDays}</td><td>${s.lateDays}</td><td>${s.leftDays}</td>
           <td>${s.avgIn}</td><td>${s.avgOut}</td>
           <td class="${s.attendRate >= 90 ? 'rate-high' : s.attendRate >= 70 ? 'rate-mid' : 'rate-low'}">${s.attendRate}%</td>

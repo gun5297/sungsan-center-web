@@ -36,11 +36,11 @@ service firebase.storage {
 
     // ===== 전자서명 =====
     // 읽기: 로그인 사용자 (서류 출력용)
-    // 쓰기: 비로그인 학부모도 제출 가능 — 파일 크기 + PNG 타입 검증
+    // 쓰기: 비로그인 학부모도 제출 가능 — PNG 타입 + 512KB 제한으로 악용 방어
     match /signatures/{allPaths=**} {
       allow read: if isSignedIn();
       allow write: if request.resource.contentType == 'image/png'
-        && request.resource.size < 512 * 1024;  // 서명 이미지: 512KB 제한
+        && request.resource.size < 512 * 1024;
     }
 
     // ===== 공지사항 첨부파일 =====

@@ -73,9 +73,15 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(request).then((cached) => {
       const fetchPromise = fetch(request).then((response) => {
-        if (response && response.status === 200) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+        // 동일 출처 + 200 OK + 유효한 content-type만 캐시
+        if (response && response.status === 200 && response.type !== 'opaque') {
+          const ct = response.headers.get('content-type') || '';
+          const validTypes = ['text/', 'application/javascript', 'application/json', 'image/'];
+          const isValid = validTypes.some(t => ct.includes(t));
+          if (isValid && new URL(response.url).origin === self.location.origin) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
         }
         return response;
       }).catch(() => cached);

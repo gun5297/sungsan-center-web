@@ -29,11 +29,11 @@ service cloud.firestore {
     function validAbsenceCreate() {
       let d = request.resource.data;
       return d.keys().hasAll(['type', 'name', 'reason', 'from', 'date'])
-        && d.type is string && d.type.size() <= 10
+        && d.type in ['결석', '조퇴', '지각']
         && d.name is string && d.name.size() >= 1 && d.name.size() <= 20
         && d.reason is string && d.reason.size() >= 1 && d.reason.size() <= 500
         && d.from is string && d.from.size() <= 20
-        && d.date is string && d.date.size() <= 20;
+        && d.date is string && d.date.matches('^[0-9]{4}[.\\-][0-9]{2}[.\\-][0-9]{2}$');
     }
 
     function validMedicationCreate() {
@@ -120,27 +120,25 @@ service cloud.firestore {
     }
 
     // ===== 학생 명단 =====
-    // 개인정보 포함 — 인증 필수
+    // 개인정보 포함 — 승인된 사용자 또는 관리자만 읽기
+    // 태블릿(익명 Auth)은 PIN 인증 후 Firestore 접근 — isSignedIn()으로 허용
     match /students/{studentId} {
-      // 로그인한 사용자만 열람 (익명 Auth 포함 — PIN 통과 후 접근)
       allow read: if isSignedIn();
-      // 추가·수정·삭제는 관리자만
       allow create, update, delete: if isAdmin();
     }
 
     // ===== 결석/조퇴 =====
     match /absences/{absenceId} {
-      // 읽기: 로그인 사용자 (관리자 or 본인 아동 연결된 학부모)
       allow read: if isSignedIn();
-      // 생성: 필드 검증 통과 시 비로그인도 허용 (학부모 폼 제출)
+      // 생성: 비로그인 학부모도 제출 가능 — 필드 검증으로 스팸 방어
       allow create: if validAbsenceCreate();
-      // 수정·삭제: 관리자만
       allow update, delete: if isAdmin();
     }
 
     // ===== 투약 =====
     match /medications/{medId} {
       allow read: if isSignedIn();
+      // 생성: 비로그인 학부모도 제출 가능 — 필드 검증으로 스팸 방어
       allow create: if validMedicationCreate();
       allow update, delete: if isAdmin();
     }
@@ -153,15 +151,15 @@ service cloud.firestore {
 
     // ===== 서류함 =====
     match /inbox/{inboxId} {
-      // 관리자만 전체 목록 읽기
       allow read: if isAdmin();
-      // 생성: 필드 검증 통과 시 비로그인도 허용 (학부모 폼 제출)
+      // 생성: 비로그인 학부모도 제출 가능 — 필드 검증으로 스팸 방어
       allow create: if validInboxCreate();
       allow update, delete: if isAdmin();
     }
 
     // ===== 신규 등록/상담 =====
     match /registrations/{id} {
+      // 생성: 비로그인 학부모도 제출 가능 — 필드 검증으로 스팸 방어
       allow create: if request.resource.data.keys().hasAll(['name', 'date'])
         && request.resource.data.name is string
         && request.resource.data.name.size() <= 50;
@@ -175,11 +173,10 @@ service cloud.firestore {
     }
 
     // ===== 출결 태블릿 공개 설정 =====
-    // 태블릿이 인증 전에도 읽어야 하는 최소 설정만 허용
-    // 실제 비밀번호 해시만 포함 (평문 비밀번호 저장 금지)
+    // PIN 해시 포함 — 로그인한 사용자만 읽기 (익명 Auth 포함)
     match /publicConfig/{configId} {
-      allow read: if true;       // 태블릿이 읽어야 하므로 공개
-      allow write: if isAdmin(); // 관리자만 설정 변경
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
     }
 
     // ===== 감사 로그 =====
@@ -211,7 +208,9 @@ service cloud.firestore {
 
     // ===== 아동-보호자 연결 =====
     match /childLinks/{linkId} {
-      allow read: if isSignedIn();
+      // 본인 연결만 읽기 또는 관리자
+      allow read: if isSignedIn()
+        && (resource.data.userId == request.auth.uid || isAdmin());
       allow create: if isApproved();
       allow update: if isAdmin();
       // 본인 연결 해제 또는 관리자 삭제

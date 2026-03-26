@@ -1,14 +1,5 @@
 /* ===== 출석기록 페이지 ===== */
 
-/* 날짜 네비게이션 */
-.records-date-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px 20px !important;
-}
-
 .records-date-btn {
   background: none;
   border: 1px solid var(--border);
@@ -106,25 +97,6 @@
   flex: 1;
 }
 
-.records-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--primary-light);
-  color: var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 0.75rem;
-  flex-shrink: 0;
-}
-
-.records-avatar.small {
-  width: 28px;
-  height: 28px;
-  font-size: 0.65rem;
-}
 
 .records-info {
   flex: 1;

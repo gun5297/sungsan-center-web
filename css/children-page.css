@@ -1,16 +1,6 @@
 /* ===== 아동관리 페이지 ===== */
 
-/* records-page.css의 날짜 네비 재사용 */
 .ch-date-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px 20px !important;
-  margin-top: 16px;
-}
-
-.ch-list-card {
   margin-top: 16px;
 }
 
@@ -72,6 +62,7 @@
 
 /* 목록 카드 */
 .ch-list-card {
+  margin-top: 16px;
   padding: 0 !important;
   overflow: hidden;
 }
@@ -98,20 +89,6 @@
 
 .ch-row:hover {
   background: var(--bg-sub);
-}
-
-.ch-row-id {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--primary-light);
-  color: var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 0.75rem;
-  flex-shrink: 0;
 }
 
 .ch-row-info {
@@ -170,21 +147,6 @@
 .ch-row-actions {
   display: flex;
   gap: 6px;
-}
-
-.ch-history-btn,
-.ch-edit-btn,
-.ch-del-btn {
-  padding: 4px 10px;
-  border-radius: var(--radius-xs);
-  font-size: 0.75rem;
-  font-weight: 700;
-  font-family: var(--font);
-  cursor: pointer;
-  transition: all var(--transition);
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--text-sub);
 }
 
 .ch-history-btn:hover {

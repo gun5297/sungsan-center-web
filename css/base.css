@@ -344,6 +344,52 @@ body.admin-mode .notice-actions {
   to { transform: rotate(360deg); }
 }
 
+/* ===== 공유 컴포넌트 ===== */
+
+/* 아동 번호 원형 아바타 */
+.avatar-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.avatar-circle.avatar-small {
+  width: 28px;
+  height: 28px;
+  font-size: 0.65rem;
+}
+
+/* 날짜 네비게이션 컨테이너 */
+.date-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px !important;
+}
+
+/* 소형 경계선 액션 버튼 (이력/수정/삭제 등) */
+.btn-action-sm {
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all var(--transition);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-sub);
+}
+
 /* ===== ANIMATION ===== */
 .fade-up {
   opacity: 0;

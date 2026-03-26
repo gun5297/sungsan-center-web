@@ -44,7 +44,7 @@ service cloud.firestore {
     function validAbsenceCreate() {
       let d = request.resource.data;
       return d.keys().hasAll(['type', 'name', 'reason', 'from', 'date'])
-        && d.keys().hasOnly(['type', 'name', 'reason', 'from', 'date', 'school', 'guardian', 'phone', 'to', 'createdAt'])
+        && d.keys().hasOnly(['type', 'name', 'reason', 'from', 'date', 'school', 'guardian', 'phone', 'to', 'birth', 'createdAt'])
         && d.type in ['결석', '조퇴', '지각']
         && d.name is string && d.name.size() >= 1 && d.name.size() <= 20
         && d.reason is string && d.reason.size() >= 1 && d.reason.size() <= 500
@@ -55,7 +55,7 @@ service cloud.firestore {
     function validMedicationCreate() {
       let d = request.resource.data;
       return d.keys().hasAll(['name', 'drug', 'dose', 'time', 'from'])
-        && d.keys().hasOnly(['name', 'drug', 'dose', 'time', 'from', 'to', 'note', 'createdAt'])
+        && d.keys().hasOnly(['name', 'drug', 'dose', 'time', 'from', 'to', 'note', 'birth', 'symptom', 'hospital', 'storage', 'createdAt'])
         && d.name is string && d.name.size() >= 1 && d.name.size() <= 20
         && d.drug is string && d.drug.size() >= 1 && d.drug.size() <= 100
         && d.dose is string && d.dose.size() <= 50
@@ -131,17 +131,17 @@ service cloud.firestore {
 
     // ===== 출결 기록 =====
     // 쓰기: 익명 Auth(태블릿) + 구조 검증
-    // 읽기: 승인된 실명 사용자 또는 관리자
+    // 읽기: 승인된 실명 사용자 또는 익명(태블릿 — 당일 기록 확인용)
     match /attendance/{dateId} {
-      allow read: if isApproved();
+      allow read: if isApproved() || isAnonymous();
       // 태블릿(익명)은 쓰기만, 실명 관리자도 수정 가능
       allow create, update: if (isAnonymous() || isAdmin()) && validAttendanceWrite();
       allow delete: if isAdmin();
     }
 
-    // ===== 학생 명단 — 개인정보: 승인된 실명 사용자만 =====
+    // ===== 학생 명단 — 익명(태블릿) 읽기 허용: 출결 ID 조회 필요 =====
     match /students/{studentId} {
-      allow read: if isApproved();
+      allow read: if isApproved() || isAnonymous();
       allow create, update, delete: if isAdmin();
     }
 

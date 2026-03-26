@@ -31,9 +31,9 @@ export async function getMedications() {
 }
 
 // 제출
-export async function createMedication({ name, drug, dose, time, symptom, hospital, from, to, storage, note }) {
+export async function createMedication({ name, birth, drug, dose, time, symptom, hospital, from, to, storage, note }) {
   return await addDoc(medicationsCol, {
-    name, drug, dose, time, symptom, hospital, from, to, storage, note,
+    name, birth: birth || '', drug, dose, time, symptom, hospital, from, to, storage, note,
     createdAt: serverTimestamp()
   });
 }

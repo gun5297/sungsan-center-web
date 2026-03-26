@@ -20,7 +20,8 @@ import { collection } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-f
 
 export const noticesCol    = collection(db, 'notices');
 export const mealsCol      = collection(db, 'meals');
-export const studentsCol   = collection(db, 'students');
+export const studentsCol      = collection(db, 'students');
+export const studentPhonesCol = collection(db, 'studentPhones');
 export const attendanceCol = collection(db, 'attendance');
 export const absencesCol   = collection(db, 'absences');
 export const medicationsCol = collection(db, 'medications');

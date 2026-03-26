@@ -1,6 +1,6 @@
 // ===== 아동 관리 (CRUD) — Firestore 연동 =====
 
-import { getStudents, createStudent, updateStudent, deleteStudentFs, getAllStudents } from '../data.js';
+import { createStudent, updateStudent, deleteStudentFs, getAllStudentsWithContacts } from '../data.js';
 import { on } from '../../js/events.js';
 import { escapeHtml } from '../../js/utils.js';
 import { checkAttendancePassword } from '../../firebase/services/settingsService.js';
@@ -12,7 +12,7 @@ let editingDocId = null;
 
 async function renderStudentList() {
   try {
-    const students = await getStudents();
+    const students = await getAllStudentsWithContacts();
     const list = document.getElementById('manageStudentList');
 
     if (students.length === 0) {
@@ -77,7 +77,7 @@ async function addStudent() {
   }
 
   try {
-    const students = await getStudents();
+    const students = await getAllStudentsWithContacts();
 
     if (editingStudentId) {
       // 수정 모드
@@ -115,7 +115,7 @@ async function addStudent() {
 
 async function editStudent(id) {
   try {
-    const students = await getStudents();
+    const students = await getAllStudentsWithContacts();
     const s = students.find(st => st.id === id);
     if (!s) return;
 
@@ -146,7 +146,7 @@ async function deleteStudent(id) {
   if (!confirm('이 아동을 삭제하시겠습니까?')) return;
 
   try {
-    const students = await getStudents();
+    const students = await getAllStudentsWithContacts();
     const s = students.find(st => st.id === id);
     if (!s) return;
 

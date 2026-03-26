@@ -12,6 +12,7 @@ import {
 
 import {
   getAllStudents as fsGetAllStudents,
+  getAllStudentsWithContacts as fsGetAllStudentsWithContacts,
   subscribeStudents as fsSubscribeStudents,
   createStudent as fsCreateStudent,
   updateStudent as fsUpdateStudent,
@@ -126,6 +127,7 @@ export {
   fsResetTodayRecords as resetTodayRecords,
   fsSubscribeTodayRecords as subscribeTodayRecords,
   fsGetAllStudents as getAllStudents,
+  fsGetAllStudentsWithContacts as getAllStudentsWithContacts,
   fsSubscribeStudents as subscribeStudents,
   fsCreateStudent as createStudent,
   fsUpdateStudent as updateStudent,

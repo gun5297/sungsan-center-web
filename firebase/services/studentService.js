@@ -1,48 +1,70 @@
 // ===== 학생 Firestore 서비스 =====
-// 전환 대상: att/data.js (localStorage → Firestore)
 //
-// 현재: localStorage att_students
-// 전환: Firestore students 컬렉션
+// 보안 설계:
+//   students       → {id, name, school}  — 익명(출결 태블릿) read 허용
+//   studentPhones  → {parent}            — isApproved() 전용 (전화번호 분리)
 //
-// att/hooks/useManage.js 전환 가이드:
-//   getStudents() → await getAllStudents()
-//   saveStudents() → await createStudent() / updateStudent()
+// 출결 태블릿은 id/name/school만 필요, parent는 불필요.
+// 관리자(useManage.js)는 getAllStudentsWithContacts()로 전화번호 포함 조회.
 
-import { studentsCol } from '../collections.js';
+import { studentsCol, studentPhonesCol } from '../collections.js';
 import {
   doc, getDocs, addDoc, setDoc, deleteDoc, onSnapshot, query, orderBy
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from '../config.js';
 
-// 전체 조회
+// 전체 조회 (id/name/school만 — 출결 태블릿용)
 export async function getAllStudents() {
   const q = query(studentsCol, orderBy('id'));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
+  return snapshot.docs.map(d => ({ docId: d.id, ...d.data() }));
 }
 
-// 실시간 구독
+// 전화번호 포함 전체 조회 (관리자 전용)
+export async function getAllStudentsWithContacts() {
+  const [studSnap, phoneSnap] = await Promise.all([
+    getDocs(query(studentsCol, orderBy('id'))),
+    getDocs(studentPhonesCol),
+  ]);
+  const phones = {};
+  phoneSnap.docs.forEach(d => { phones[d.id] = d.data().parent || ''; });
+  return studSnap.docs.map(d => ({
+    docId: d.id,
+    ...d.data(),
+    parent: phones[d.id] || '',
+  }));
+}
+
+// 실시간 구독 (id/name/school만 — 익명 출결 태블릿 캐시용)
 export function subscribeStudents(callback) {
   const q = query(studentsCol, orderBy('id'));
   return onSnapshot(q, (snapshot) => {
-    const students = snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
+    const students = snapshot.docs.map(d => ({ docId: d.id, ...d.data() }));
     callback(students);
   });
 }
 
-// 생성
+// 생성 — students(공개)와 studentPhones(비공개) 분리 저장
 export async function createStudent({ id, name, school, parent }) {
-  return await addDoc(studentsCol, { id, name, school, parent });
+  const ref = await addDoc(studentsCol, { id, name, school });
+  await setDoc(doc(db, 'studentPhones', ref.id), { parent: parent || '' });
+  return ref;
 }
 
-// 수정 (Firestore 문서 ID 사용)
+// 수정
 export async function updateStudent(docId, data) {
+  const { parent, ...studentData } = data;
   const ref = doc(db, 'students', docId);
-  return await setDoc(ref, data, { merge: true });
+  await setDoc(ref, studentData, { merge: true });
+  if (parent !== undefined) {
+    await setDoc(doc(db, 'studentPhones', docId), { parent: parent || '' }, { merge: true });
+  }
 }
 
-// 삭제
+// 삭제 — 두 컬렉션 모두 삭제
 export async function deleteStudent(docId) {
-  const ref = doc(db, 'students', docId);
-  return await deleteDoc(ref);
+  await deleteDoc(doc(db, 'students', docId));
+  try {
+    await deleteDoc(doc(db, 'studentPhones', docId));
+  } catch {}
 }

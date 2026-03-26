@@ -71,11 +71,11 @@ export async function doSignup() {
 
   } catch (error) {
     if (error.code === 'auth/email-already-in-use') {
-      showError('이미 사용 중인 이메일입니다.');
+      showError('가입할 수 없는 이메일입니다. 이미 가입하셨다면 로그인해 주세요.');
     } else if (error.code === 'auth/weak-password') {
       showError('비밀번호는 6자리 이상이어야 합니다.');
     } else {
-      showError('가입 중 오류가 발생했습니다: ' + error.message);
+      showError('가입 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
     }
   }
 }

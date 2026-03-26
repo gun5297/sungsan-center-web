@@ -68,6 +68,11 @@ export function skeletonRows(count = 3) {
   ).join('');
 }
 
+export function escapeCSV(value) {
+  const str = String(value ?? '').replace(/"/g, '""');
+  return `"${str.replace(/^([=+\-@\t\r])/, "'$1")}"`;
+}
+
 export function escapeHtml(str) {
   if (!str) return '';
   return String(str)

@@ -46,6 +46,8 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+const VALID_CACHE_TYPES = ['text/', 'application/javascript', 'application/json', 'image/'];
+
 // 요청 가로채기: 네트워크 우선, 실패 시 캐시
 self.addEventListener('fetch', (event) => {
   const { request } = event;
@@ -70,12 +72,16 @@ self.addEventListener('fetch', (event) => {
   }
 
   // 정적 자산: 캐시 우선, 백그라운드 업데이트
+  const isSameOrigin = request.url.startsWith(self.location.origin);
   event.respondWith(
     caches.match(request).then((cached) => {
       const fetchPromise = fetch(request).then((response) => {
-        if (response && response.status === 200) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+        if (isSameOrigin && response && response.status === 200 && response.type !== 'opaque') {
+          const ct = response.headers.get('content-type') || '';
+          if (VALID_CACHE_TYPES.some(t => ct.includes(t))) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
         }
         return response;
       }).catch(() => cached);

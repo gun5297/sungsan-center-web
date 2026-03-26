@@ -177,6 +177,14 @@
   color: #ff7854;
 }
 
+/* 페이지 제목 (출석기록/아동관리 등 별도 페이지용) */
+.mypage-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
 /* 승인 대기 섹션 */
 .mypage-section-title {
   font-size: 1.05rem;

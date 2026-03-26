@@ -1,5 +1,45 @@
 /* ===== 출석기록 페이지 ===== */
 
+/* 페이지 레이아웃 */
+.records-page {
+  min-height: 100vh;
+  background: var(--bg);
+  padding: 24px 16px 80px;
+}
+
+#recordsRoot {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* mypage-card 너비 제한 해제 */
+#recordsRoot .mypage-card {
+  max-width: none;
+}
+
+/* 헤더 재정의 (페이지 상단용) */
+#recordsRoot .mypage-header {
+  margin-bottom: 20px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+#recordsRoot .mypage-back-link {
+  display: inline-flex;
+  align-items: center;
+  text-align: left;
+  margin-top: 0;
+}
+
+/* 날짜 네비게이션 카드 */
+.mypage-card.date-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+}
+
+
 .records-date-btn {
   background: none;
   border: 1px solid var(--border);

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self'
+      'sha256-vvt4KWwuNr51XfE5m+hzeNEGhiOfZzG97ccfqGsPwvE='
+      https://www.gstatic.com
+      https://www.google.com
+      https://www.recaptcha.net;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' data: https://fonts.gstatic.com;
+    connect-src 'self'
+      https://*.googleapis.com
+      https://*.firebaseio.com
+      https://*.firebaseapp.com
+      https://firestore.googleapis.com
+      https://identitytoolkit.googleapis.com
+      https://securetoken.googleapis.com
+      https://www.gstatic.com
+      wss://*.firebaseio.com
+      https://www.google.com
+      https://www.recaptcha.net;
+    frame-src 'self'
+      https://*.firebaseapp.com
+      https://www.google.com
+      https://www.recaptcha.net;
+    img-src 'self' data: blob:;
+    object-src 'none';
+    base-uri 'self';
+  " />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <title>출석기록 - 성산지역아동센터</title>
+  <link rel="stylesheet" href="records.css" />
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="js/app-records.js"></script>
+</body>
+</html>

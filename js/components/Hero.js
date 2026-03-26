@@ -16,25 +16,6 @@ export function Hero() {
     </div>
   </section>
 
-  <div class="stats fade-up">
-    <div class="stat-card">
-      <div class="stat-number">99</div>
-      <div class="stat-label">재원 아동<br>정원 99명</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number">99</div>
-      <div class="stat-label">담당 선생님<br>각 반 배정</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number">99</div>
-      <div class="stat-label">운영 프로그램<br>특별활동 포함</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number">99%</div>
-      <div class="stat-label">학부모 만족도<br>설문 기준</div>
-    </div>
-  </div>
-
   <!-- 관리자 대시보드 (admin-only) -->
   <div class="dashboard admin-only" id="dashboard">
     <h2 class="dashboard-title">오늘의 요약</h2>

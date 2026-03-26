@@ -177,7 +177,7 @@ export async function openDailyLogList() {
   if (!user) { showToast('로그인이 필요합니다.', 'warning'); return; }
 
   let logs = [];
-  try { logs = await getRecentLogs(14); } catch (e) { console.error(e); }
+  try { logs = await getRecentLogs(14); } catch (e) { console.error('최근 일지 조회 실패:', e); }
 
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay active';

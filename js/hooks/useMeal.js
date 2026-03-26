@@ -319,10 +319,8 @@ export async function initMeal() {
       renderMealGrid();
     } else if (hasLocal && !hasFirestore) {
       // localStorage에만 데이터가 있으면 Firestore로 마이그레이션
-      console.log('식단 데이터 Firestore 마이그레이션 중...');
       await firestoreSaveMealData(localData);
       cachedMealData = localData;
-      console.log('식단 데이터 마이그레이션 완료');
     }
 
     // 3) 실시간 구독 시작

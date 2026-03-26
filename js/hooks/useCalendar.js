@@ -435,9 +435,7 @@ export async function initCalendar() {
       weekdaySchedule = firestoreWeekday;
       saveLocalWeekdaySchedule(firestoreWeekday);
     } else if (hasLocalWeekday && !hasFirestoreWeekday) {
-      console.log('요일별 시간표 Firestore 마이그레이션 중...');
       await firestoreSaveWeekday(localWeekday);
-      console.log('요일별 시간표 마이그레이션 완료');
     }
 
     // 날짜별 시간표
@@ -445,9 +443,7 @@ export async function initCalendar() {
       dateSchedule = firestoreDate;
       saveLocalDateSchedule(firestoreDate);
     } else if (hasLocalDate && !hasFirestoreDate) {
-      console.log('날짜별 시간표 Firestore 마이그레이션 중...');
       await firestoreSaveDate(localDate);
-      console.log('날짜별 시간표 마이그레이션 완료');
     }
 
     renderCalendar();

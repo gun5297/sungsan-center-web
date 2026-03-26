@@ -8,14 +8,15 @@
 
 import { absencesCol } from '../collections.js';
 import {
-  getDocs, addDoc, onSnapshot, query, orderBy, serverTimestamp
+  getDocs, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { db } from '../config.js';
 
 // 실시간 구독
 export function subscribeAbsences(callback) {
   const q = query(absencesCol, orderBy('createdAt', 'desc'));
   return onSnapshot(q, (snapshot) => {
-    const records = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const records = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
     callback(records);
   }, (error) => {
     console.error('결석 구독 오류:', error);
@@ -26,7 +27,12 @@ export function subscribeAbsences(callback) {
 export async function getAbsences() {
   const q = query(absencesCol, orderBy('createdAt', 'desc'));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+// 삭제
+export async function deleteAbsence(id) {
+  return await deleteDoc(doc(db, 'absences', id));
 }
 
 // 제출

@@ -71,5 +71,5 @@ export async function deleteStudent(docId) {
   await deleteDoc(doc(db, 'students', docId));
   try {
     await deleteDoc(doc(db, 'studentPhones', docId));
-  } catch {}
+  } catch (e) { console.warn('[studentService] studentPhones 삭제 실패 (문서 없을 수 있음):', e); }
 }

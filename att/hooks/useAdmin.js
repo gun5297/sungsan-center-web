@@ -7,6 +7,7 @@ import { getCurrentUser } from '../../firebase/auth.js';
 
 let adminRefreshInterval = null;
 let unsubscribeRecords = null;
+let currentFilter = 'all';
 
 export function startAdminRefresh() {
   if (adminRefreshInterval) return;
@@ -49,8 +50,8 @@ export function switchAdminTab(tab) {
 }
 
 // 캐시된 데이터 (Firestore 구독 + 1초 렌더링에 사용)
-let cachedStudents = null;
-let cachedRecords = null;
+let cachedStudents = [];
+let cachedRecords = {};
 
 export async function renderAdmin() {
   const now = new Date();
@@ -59,7 +60,18 @@ export async function renderAdmin() {
     `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 (${dayNames[now.getDay()]})`;
 
   try {
-    const [students, records] = await Promise.all([getStudents(), getTodayRecords()]);
+    let students = [];
+    try {
+      students = await getStudents();
+    } catch (err) {
+      console.warn('[useAdmin] 학생 목록 조회 권한 없음 (비로그인). 빈 목록으로 대체:', err.code || err.message);
+    }
+    let records = {};
+    try {
+      records = await getTodayRecords();
+    } catch (err) {
+      console.warn('[useAdmin] 출결 기록 조회 실패. 빈 기록으로 대체:', err.code || err.message);
+    }
     cachedStudents = students;
     cachedRecords = records;
     renderSummary(students, records);
@@ -71,14 +83,12 @@ export async function renderAdmin() {
 
 // 캐시 기반 렌더 (Firestore 구독 콜백용)
 function renderAdminFromCache() {
-  if (!cachedStudents || !cachedRecords) return;
   renderSummary(cachedStudents, cachedRecords);
   renderTimeline(cachedStudents, cachedRecords);
 }
 
 // 캐시 기반 타임라인만 렌더 (취소 버튼 카운트다운용)
 function renderTimelineFromCache() {
-  if (!cachedStudents || !cachedRecords) return;
   renderTimeline(cachedStudents, cachedRecords);
 }
 
@@ -92,39 +102,83 @@ function renderSummary(students, records) {
 
   const absentCount = Math.max(0, students.length - (inCount + outCount));
 
+  const activeClass = (filter) => currentFilter === filter ? ' filter-active' : '';
+  const dimClass = (filter) => currentFilter !== 'all' && currentFilter !== filter ? ' filter-dim' : '';
+
+  const resetBtn = currentFilter !== 'all'
+    ? `<div class="filter-reset-wrap"><button class="filter-reset-btn" data-action="setFilter" data-filter="all">✕ 전체보기</button></div>`
+    : '';
+
   document.getElementById('adminSummary').innerHTML = `
-    <div class="summary-card">
+    <div class="summary-card${activeClass('in')}${dimClass('in')}" data-action="setFilter" data-filter="in">
       <div class="summary-num in">${inCount}</div>
       <div class="summary-label">출석 중</div>
     </div>
-    <div class="summary-card">
+    <div class="summary-card${activeClass('out')}${dimClass('out')}" data-action="setFilter" data-filter="out">
       <div class="summary-num out">${outCount}</div>
       <div class="summary-label">하원 완료</div>
     </div>
-    <div class="summary-card">
+    <div class="summary-card${activeClass('absent')}${dimClass('absent')}" data-action="setFilter" data-filter="absent">
       <div class="summary-num not">${absentCount}</div>
       <div class="summary-label">미출석</div>
     </div>
-  `;
+  ` + resetBtn;
 }
 
 function renderTimeline(students, records) {
   const now = Date.now();
   const user = getCurrentUser();
-  const isAdminLogged = user && !user.isAnonymous; // 익명이 아닌 정식 로그인
+  const isAdminLogged = user && !user.isAnonymous;
 
+  // ── 필터링: currentFilter에 따라 표시할 ID 목록 결정 ──
   const checkedInIds = Object.keys(records)
     .sort((a, b) => (records[a].inTs || 0) - (records[b].inTs || 0));
 
-  if (checkedInIds.length === 0) {
+  const allStudentIds = students.map(st => st.id);
+  const absentIds = allStudentIds.filter(id => !records[id]);
+
+  let targetIds;
+  if (currentFilter === 'in') {
+    targetIds = checkedInIds.filter(id => !records[id].outTime);
+  } else if (currentFilter === 'out') {
+    targetIds = checkedInIds.filter(id => records[id].outTime);
+  } else if (currentFilter === 'absent') {
+    // 미출석은 로그인 상태에서만 표시
+    targetIds = isAdminLogged ? absentIds : [];
+  } else {
+    // 'all' — 출석 기록 + (로그인 시) 미출석
+    targetIds = isAdminLogged ? [...checkedInIds, ...absentIds] : checkedInIds;
+  }
+
+  if (targetIds.length === 0) {
+    const msg = currentFilter === 'absent'
+      ? (isAdminLogged ? '미출석 아동이 없습니다' : '로그인 후 확인할 수 있습니다')
+      : '해당하는 아동이 없습니다';
     document.getElementById('adminList').innerHTML =
-      '<div class="timeline-empty">오늘 출석한 아동이 없습니다</div>';
+      `<div class="timeline-empty">${msg}</div>`;
     return;
   }
 
-  document.getElementById('adminList').innerHTML = checkedInIds.map(id => {
+  document.getElementById('adminList').innerHTML = targetIds.map(id => {
     const r = records[id];
     const s = students.find(st => st.id === id) || { name: '미등록 아동', school: '' };
+
+    // 미출석 아동 (기록 없음)
+    if (!r) {
+      const avatarStatusClass = 'status-absent';
+      return `
+        <div class="att-card">
+          <div class="att-card-avatar ${avatarStatusClass}">${escapeHtml(s.name.charAt(0))}</div>
+          <div class="att-card-body">
+            <div class="att-card-name">${escapeHtml(s.name)} <span class="att-card-id">(${escapeHtml(id)})</span></div>
+            <div class="att-card-status"><span class="att-row-status absent">미출석</span></div>
+          </div>
+          <div class="att-card-right">
+            <div class="att-card-school">${escapeHtml(s.school)}</div>
+          </div>
+        </div>
+      `;
+    }
 
     const elapsed = r.inTs ? now - r.inTs : Infinity;
     const remaining = Math.max(0, 60 - Math.floor(elapsed / 1000));
@@ -137,40 +191,32 @@ function renderTimeline(students, records) {
     const statusClass = r.outTime ? 'left' : 'present';
     const statusLabel = r.outTime ? '하원' : '출석';
     const timeDisplay = r.outTime ? `${r.inTime} - ${r.outTime}` : `${r.inTime}`;
+    const avatarStatusClass = r.outTime ? 'status-out' : 'status-in';
 
     if (isAdminLogged) {
-      // 관리자 로그인 상태: 메인 화면과 같은 CSS 디자인 + 취소버튼(모든 기능)
-      const avatarBg = r.outTime ? 'var(--primary-light, #ffeae6)' : 'var(--success-light, #e8f5e9)';
-      const avatarColor = r.outTime ? 'var(--primary, #ff5722)' : 'var(--success, #4caf50)';
-
       return `
-        <div class="timeline-item" style="display:flex; align-items:center; gap:16px; padding: 16px; background:var(--bg-card, #fff); border-radius:12px; margin-bottom:12px; border:1px solid var(--border, #eee); box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-          <div class="att-avatar" style="width:44px; height:44px; border-radius:50%; background:${avatarBg}; color:${avatarColor}; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:1.1rem; flex-shrink:0;">
-            ${escapeHtml(s.name.charAt(0))}
+        <div class="att-card">
+          <div class="att-card-avatar ${avatarStatusClass}">${escapeHtml(s.name.charAt(0))}</div>
+          <div class="att-card-body">
+            <div class="att-card-name">${escapeHtml(s.name)} <span class="att-card-id">(${id})</span></div>
+            <div class="att-card-status"><span class="att-row-status ${statusClass}">${statusLabel}</span> ${timeDisplay}</div>
           </div>
-          <div class="att-info" style="flex:1; display:flex; flex-direction:column; gap:4px;">
-            <div class="att-name" style="font-weight:800; font-size:1.05rem; color:var(--text-main, #333);">${escapeHtml(s.name)} <span style="font-size:0.8rem; font-weight:600; color:var(--text-sub); margin-left:4px;">(${id})</span></div>
-            <div class="att-status" style="font-size:0.85rem; color:var(--text-sub, #666);">
-              <span class="att-row-status ${statusClass}" style="margin-right:4px;">${statusLabel}</span>
-              ${timeDisplay}
-            </div>
-          </div>
-          <div class="att-right-area" style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
-            <div class="att-school" style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">${escapeHtml(s.school)}</div>
+          <div class="att-card-right">
+            <div class="att-card-school">${escapeHtml(s.school)}</div>
             <div class="timeline-actions">${cancelBtn}</div>
           </div>
         </div>
       `;
     } else {
-      // 일반 기기 모드: 단순 시간 + 번호만 표시
+      // 비로그인: 동일 카드뷰 레이아웃, 개인정보 제거
       return `
-        <div class="timeline-item">
-          <div class="timeline-time" style="font-size: 0.95rem;">${timeDisplay}</div>
-          <div class="timeline-body" style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; gap:12px; align-items:center;">
-              <div class="timeline-avatar">${id}</div>
-              <span class="att-row-status ${statusClass}">${statusLabel}</span>
-            </div>
+        <div class="att-card">
+          <div class="att-card-avatar ${avatarStatusClass}">${escapeHtml(id.slice(-2))}</div>
+          <div class="att-card-body">
+            <div class="att-card-name">아동 <span class="att-card-id">(${escapeHtml(id)})</span></div>
+            <div class="att-card-status"><span class="att-row-status ${statusClass}">${statusLabel}</span> ${timeDisplay}</div>
+          </div>
+          <div class="att-card-right">
             <div class="timeline-actions">${cancelBtn}</div>
           </div>
         </div>
@@ -197,3 +243,8 @@ async function cancelAttendance(studentId) {
 
 // 이벤트 위임 등록
 on('cancelAttendance', (e, el) => cancelAttendance(el.dataset.id));
+on('setFilter', (e, el) => {
+  const filter = el.dataset.filter;
+  currentFilter = currentFilter === filter ? 'all' : filter; // 토글
+  renderAdminFromCache();
+});

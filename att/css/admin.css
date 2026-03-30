@@ -65,6 +65,7 @@
 /* ===== ADMIN SUMMARY & LIST ===== */
 #screenAdmin .admin-summary {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   padding: 20px 24px;
 }
@@ -92,6 +93,142 @@
   color: var(--text-sub);
   font-weight: 600;
   margin-top: 4px;
+}
+
+#screenAdmin .summary-card[data-action] {
+  cursor: pointer;
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+#screenAdmin .summary-card[data-action]:active {
+  transform: scale(0.96);
+}
+
+#screenAdmin .summary-card.filter-dim {
+  opacity: 0.4;
+}
+
+#screenAdmin .summary-card.filter-active {
+  outline: 2.5px solid var(--primary);
+  outline-offset: -2.5px;
+  background: var(--primary-light);
+  transform: scale(1.02);
+}
+
+/* 전체보기 리셋 버튼 */
+#screenAdmin .filter-reset-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 0;
+}
+
+#screenAdmin .filter-reset-btn {
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--text-sub);
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 9px 24px;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  letter-spacing: -0.01em;
+}
+
+#screenAdmin .filter-reset-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+  box-shadow: 0 2px 8px rgba(255,120,84,0.12);
+}
+
+#screenAdmin .filter-reset-btn:active {
+  transform: scale(0.96);
+}
+
+/* ===== CARD VIEW (공통 — 로그인/비로그인 공유) ===== */
+#screenAdmin .att-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--card);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+#screenAdmin .att-card-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+#screenAdmin .att-card-avatar.status-in {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+#screenAdmin .att-card-avatar.status-out {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+#screenAdmin .att-card-avatar.status-absent {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+#screenAdmin .att-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#screenAdmin .att-card-name {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+#screenAdmin .att-card-name .att-card-id {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-sub);
+  margin-left: 4px;
+}
+
+#screenAdmin .att-card-status {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+}
+
+#screenAdmin .att-card-status .att-row-status {
+  margin-right: 4px;
+}
+
+#screenAdmin .att-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+#screenAdmin .att-card-school {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-sub);
 }
 
 #screenAdmin .admin-list {

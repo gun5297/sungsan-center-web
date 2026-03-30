@@ -21,7 +21,7 @@ export function Hero() {
     <h2 class="dashboard-title">오늘의 요약</h2>
     <div class="dashboard-grid">
       <div class="dash-card" id="dashAttendance">
-        <div class="dash-icon">&#128101;</div>
+        <div class="dash-icon">🧒</div>
         <div class="dash-value" id="dashAttVal">-</div>
         <div class="dash-label">오늘 출석</div>
       </div>

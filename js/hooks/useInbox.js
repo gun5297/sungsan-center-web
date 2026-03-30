@@ -27,13 +27,31 @@ export function getInboxItems() {
 
 export function updateInboxBadge() {
   const badge = document.getElementById('inboxBadge');
-  if (badge) badge.textContent = inboxItems.length;
+  if (!badge) return;
+
+  const lastSeen = parseInt(localStorage.getItem('inboxLastSeen') || '0', 10);
+  const newCount = inboxItems.filter(item => {
+    if (!item.createdAt) return false;
+    const ts = item.createdAt.toMillis ? item.createdAt.toMillis() : item.createdAt;
+    return ts > lastSeen;
+  }).length;
+
+  if (newCount > 0) {
+    badge.textContent = newCount;
+    badge.style.display = '';
+  } else {
+    badge.textContent = '0';
+    badge.style.display = 'none';
+  }
 }
 
 export function openInbox() {
   document.getElementById('inboxModal').classList.add('active');
   document.body.style.overflow = 'hidden';
   logAction('read', 'inbox', '', '서류함 열람');
+  // 열람 시점 기록 → 뱃지 0으로
+  localStorage.setItem('inboxLastSeen', String(Date.now()));
+  updateInboxBadge();
   // 검색/정렬 상태 초기화
   currentSearchKeyword = '';
   currentSortBy = 'newest';

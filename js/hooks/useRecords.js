@@ -46,7 +46,7 @@ function renderPage(root) {
   root.innerHTML = `
     <div class="mypage-header">
       <a href="index.html" class="mypage-back-link">← 메인으로</a>
-      <h1 class="mypage-title">출석기록</h1>
+      <h1 class="mypage-title">출석 기록</h1>
     </div>
 
     <div class="mypage-card date-nav">
@@ -218,7 +218,7 @@ function renderTimeline() {
 
 async function exportCSV() {
   // [보안] 개인정보 다운로드 감사 로그 기록
-  logAction('export', 'attendance', _currentDate, `출석기록 CSV 다운로드 (${_currentDate})`);
+  logAction('export', 'attendance', _currentDate, `출석 기록 CSV 다운로드 (${_currentDate})`);
 
   let csv = '번호,이름,학교,등원시간,하원시간,상태\n';
   _students.forEach(s => {
@@ -232,7 +232,7 @@ async function exportCSV() {
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `출결기록_${_currentDate}.csv`;
+  link.download = `출석기록_${_currentDate}.csv`;
   link.click();
   // [보안] Blob URL 메모리 누수 방지
   URL.revokeObjectURL(link.href);

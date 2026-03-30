@@ -41,7 +41,7 @@ function renderPage(root) {
   root.innerHTML = `
     <div class="mypage-header">
       <a href="index.html" class="mypage-back-link">← 메인으로</a>
-      <h1 class="mypage-title">아동관리</h1>
+      <h1 class="mypage-title">아동 관리</h1>
     </div>
 
     <!-- 아동 등록/수정 폼 -->

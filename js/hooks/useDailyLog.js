@@ -82,6 +82,7 @@ export async function openDailyLogEditor(dateKey) {
       </div>
 
       <div class="log-footer">
+        ${!existing ? `<button class="log-btn log-btn-copy" data-action="copyYesterdayLog" data-date="${key}">어제 일지 복사</button>` : ''}
         <button class="log-btn log-btn-cancel" data-action="closeDailyLogEditor">취소</button>
         <button class="log-btn log-btn-save" data-action="saveDailyLogForm">저장</button>
       </div>
@@ -183,7 +184,7 @@ export async function openDailyLogList() {
   if (!user) { showToast('로그인이 필요합니다.', 'warning'); return; }
 
   let logs = [];
-  try { logs = await getRecentLogs(14); } catch (e) { console.error('최근 일지 조회 실패:', e); }
+  try { logs = await getRecentLogs(30); } catch (e) { console.error('최근 일지 조회 실패:', e); }
 
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay active';
@@ -256,4 +257,21 @@ on('saveDailyLogForm', () => saveDailyLogForm());
 on('openDailyLogFromList', (e, el) => {
   closeDailyLogList();
   openDailyLogEditor(el.dataset.date);
+});
+on('copyYesterdayLog', async (e, el) => {
+  const todayDate = el.dataset.date;
+  const d = new Date(todayDate.split('-').map(Number).reduce((a, v, i) => (i === 0 ? new Date(v, 0, 1) : i === 1 ? (a.setMonth(v - 1), a) : (a.setDate(v), a)), new Date()));
+  d.setDate(d.getDate() - 1);
+  const yesterdayKey = getDateKey(d);
+  try {
+    const prev = await getDailyLog(yesterdayKey);
+    if (!prev) { showToast('어제 일지가 없습니다.', 'warning'); return; }
+    document.getElementById('logWeather').value = prev.weather || '맑음';
+    document.getElementById('logTotal').value = prev.totalChildren || '';
+    const container = document.getElementById('logPrograms');
+    if (prev.programs?.length) {
+      container.innerHTML = prev.programs.map((p, i) => programRow(p, i)).join('');
+    }
+    showToast('어제 일지를 복사했습니다.', 'success');
+  } catch (err) { showToast('복사 실패: ' + err.message, 'error'); }
 });

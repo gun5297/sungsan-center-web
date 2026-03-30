@@ -63,6 +63,13 @@ export async function getMySubmissions(childNames) {
   );
 }
 
+// 서류 상태 업데이트
+export async function updateInboxStatus(id, status) {
+  const { updateDoc } = await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js");
+  const ref = doc(db, 'inbox', id);
+  return await updateDoc(ref, { status });
+}
+
 // 서류 삭제
 export async function deleteInboxItem(id) {
   const ref = doc(db, 'inbox', id);

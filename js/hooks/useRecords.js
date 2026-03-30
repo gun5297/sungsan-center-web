@@ -1,7 +1,7 @@
 // ===== useRecords: 출석기록 페이지 =====
 import { onAuthChange } from '../../firebase/auth.js';
 import { getUserDoc, isAdminRole } from '../../firebase/services/userService.js';
-import { getRecordsByDate } from '../../firebase/services/attendanceService.js';
+import { getRecordsByDate, getRecordsByMonth } from '../../firebase/services/attendanceService.js';
 import { getAllStudents } from '../../firebase/services/studentService.js';
 // [리뷰] 중복 todayKey 제거 → utils.js의 getDateKey 재사용
 import { escapeHtml, escapeCSV, getDateKey } from '../utils.js';
@@ -66,12 +66,15 @@ function renderPage(root) {
 
     <div class="mypage-card records-export-card">
       <button class="btn-upload" id="exportRecordsBtn">엑셀 다운로드</button>
+      <button class="btn-secondary-sm" id="monthlyReportBtn" style="margin-top:8px;">월간 출석 요약</button>
     </div>
+    <div id="monthlyReport" style="display:none;"></div>
   `;
 
   document.getElementById('prevDate').addEventListener('click', () => changeDate(-1));
   document.getElementById('nextDate').addEventListener('click', () => changeDate(1));
   document.getElementById('exportRecordsBtn').addEventListener('click', exportCSV);
+  document.getElementById('monthlyReportBtn').addEventListener('click', showMonthlyReport);
 
   loadAndRender();
 }
@@ -241,4 +244,57 @@ async function exportCSV() {
   link.click();
   // [보안] Blob URL 메모리 누수 방지
   URL.revokeObjectURL(link.href);
+}
+
+async function showMonthlyReport() {
+  const d = parseDateKey(_currentDate);
+  const year = d.getFullYear();
+  const month = d.getMonth() + 1;
+  const container = document.getElementById('monthlyReport');
+  container.style.display = '';
+  container.innerHTML = '<div class="mypage-card" style="margin-top:16px;"><div class="loading-state">월간 요약 불러오는 중...</div></div>';
+
+  try {
+    const [students, monthRecords] = await Promise.all([
+      getAllStudents(),
+      getRecordsByMonth(year, month)
+    ]);
+
+    // 날짜별 records 맵 구성
+    const dayMap = {};
+    monthRecords.forEach(doc => { dayMap[doc.date] = doc.records || {}; });
+    const totalDays = Object.keys(dayMap).length;
+
+    let html = `<div class="mypage-card" style="margin-top:16px;padding:20px;">
+      <div style="font-size:1rem;font-weight:800;margin-bottom:12px;">${year}년 ${month}월 출석 요약 (${totalDays}일)</div>
+      <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+      <thead><tr style="border-bottom:2px solid var(--border);">
+        <th style="text-align:left;padding:8px;">번호</th>
+        <th style="text-align:left;padding:8px;">이름</th>
+        <th style="text-align:left;padding:8px;">학교</th>
+        <th style="padding:8px;">출석</th>
+        <th style="padding:8px;">결석</th>
+        <th style="padding:8px;">출석률</th>
+      </tr></thead><tbody>`;
+
+    students.forEach(s => {
+      let attended = 0;
+      Object.values(dayMap).forEach(records => { if (records[s.id]) attended++; });
+      const absent = totalDays - attended;
+      const rate = totalDays > 0 ? Math.round(attended / totalDays * 100) : 0;
+      html += `<tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:8px;">${escapeHtml(s.id)}</td>
+        <td style="padding:8px;font-weight:700;">${escapeHtml(s.name)}</td>
+        <td style="padding:8px;">${escapeHtml(s.school)}</td>
+        <td style="padding:8px;text-align:center;color:var(--success);font-weight:700;">${attended}</td>
+        <td style="padding:8px;text-align:center;color:var(--danger);font-weight:700;">${absent}</td>
+        <td style="padding:8px;text-align:center;font-weight:700;">${rate}%</td>
+      </tr>`;
+    });
+
+    html += '</tbody></table></div></div>';
+    container.innerHTML = html;
+  } catch (e) {
+    container.innerHTML = `<div class="mypage-card" style="margin-top:16px;"><div class="empty-state">월간 요약을 불러올 수 없습니다.</div></div>`;
+  }
 }

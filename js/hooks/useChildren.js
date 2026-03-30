@@ -72,6 +72,11 @@ function renderPage(root) {
           <button class="btn-upload" id="chSubmitBtn">추가</button>
           <button class="btn-secondary-sm ch-cancel-btn hidden" id="chCancelBtn">취소</button>
         </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+          <label class="ch-label">CSV 일괄 등록 (번호,이름,학교/학년,보호자연락처)</label>
+          <input type="file" id="chCsvInput" accept=".csv" class="input-field" style="margin-top:6px;" />
+          <button class="btn-secondary-sm" id="chCsvImportBtn" style="margin-top:6px;">CSV 불러오기</button>
+        </div>
       </div>
     </div>
 
@@ -101,6 +106,7 @@ function renderPage(root) {
 
   document.getElementById('chSubmitBtn').addEventListener('click', saveStudent);
   document.getElementById('chCancelBtn').addEventListener('click', cancelEdit);
+  document.getElementById('chCsvImportBtn').addEventListener('click', importCsv);
   document.getElementById('chPrevDate').addEventListener('click', () => changeAttDate(-1));
   document.getElementById('chNextDate').addEventListener('click', () => changeAttDate(1));
   document.getElementById('chHistoryClose').addEventListener('click', closeHistory);
@@ -229,6 +235,31 @@ async function _doSaveStudent() {
     console.error('[useChildren] 저장 실패:', e);
     showToast('저장에 실패했습니다.', 'error');
   }
+}
+
+async function importCsv() {
+  const fileInput = document.getElementById('chCsvInput');
+  if (!fileInput.files || !fileInput.files[0]) { showToast('CSV 파일을 선택해주세요.', 'warning'); return; }
+  const text = await fileInput.files[0].text();
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  // 헤더 제거 (첫 줄에 "번호" 또는 숫자가 아닌 것이 있으면)
+  const rows = lines[0] && !/^\d/.test(lines[0].replace(/"/g, '')) ? lines.slice(1) : lines;
+  let success = 0, skip = 0;
+  for (const row of rows) {
+    const cols = row.split(',').map(c => c.replace(/"/g, '').trim());
+    if (cols.length < 4) { skip++; continue; }
+    const [rawId, name, school, parent] = cols;
+    const id = rawId.padStart(4, '0');
+    if (!/^\d{1,4}$/.test(rawId) || !name) { skip++; continue; }
+    if (_students.some(s => s.id === id)) { skip++; continue; }
+    try {
+      await createStudent({ id, name, school, parent });
+      success++;
+    } catch (e) { skip++; }
+  }
+  showToast(`${success}명 등록, ${skip}건 건너뜀`, success > 0 ? 'success' : 'warning');
+  fileInput.value = '';
+  setTimeout(() => loadStudents(), 500);
 }
 
 function startEdit(docId, studentId) {

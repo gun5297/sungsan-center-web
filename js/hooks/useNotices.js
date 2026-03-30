@@ -124,6 +124,8 @@ export async function addNotice() {
   document.getElementById('noticeContent').value = '';
   document.getElementById('fileName').textContent = '';
   fileInput.value = '';
+  localStorage.removeItem('noticeDraftTitle');
+  localStorage.removeItem('noticeDraftContent');
 }
 
 export async function deleteNotice(id) {
@@ -238,6 +240,16 @@ export function initNotices() {
       document.getElementById('fileName').textContent = file.name;
     }
   });
+
+  // 공지 임시저장 복원
+  const draftTitle = localStorage.getItem('noticeDraftTitle');
+  const draftContent = localStorage.getItem('noticeDraftContent');
+  if (draftTitle) { const el = document.getElementById('noticeTitle'); if (el) el.value = draftTitle; }
+  if (draftContent) { const el = document.getElementById('noticeContent'); if (el) el.value = draftContent; }
+
+  // 입력 시 자동 임시저장
+  document.getElementById('noticeTitle')?.addEventListener('input', (e) => localStorage.setItem('noticeDraftTitle', e.target.value));
+  document.getElementById('noticeContent')?.addEventListener('input', (e) => localStorage.setItem('noticeDraftContent', e.target.value));
 
   // 로딩 표시
   const list = document.getElementById('noticeList');

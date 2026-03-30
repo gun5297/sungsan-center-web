@@ -519,7 +519,14 @@ on('approveAccount', async (e, el) => {
     await approveUser(uid);
     logAction('approve', 'user', uid, '계정 승인');
     showToast('승인되었습니다.', 'success');
-    window.location.reload();
+    const row = el.closest('.pending-item');
+    if (row) row.remove();
+    const countEl = document.querySelector('.pending-count');
+    if (countEl) {
+      const n = Math.max(0, parseInt(countEl.textContent) - 1);
+      countEl.textContent = n;
+      if (n === 0) { const section = countEl.closest('.mypage-card'); if (section) section.style.display = 'none'; }
+    }
   } catch (e) {
     console.error('승인 실패:', e);
     showToast('승인 중 오류가 발생했습니다.', 'error');

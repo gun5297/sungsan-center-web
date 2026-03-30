@@ -3,6 +3,7 @@ import {
   subscribeInbox,
   addInboxItem as addInboxItemFS,
   deleteInboxItem as deleteInboxItemFS,
+  updateInboxStatus as updateInboxStatusFS,
   getMySubmissions as getMySubmissionsFS
 } from '../../firebase/services/inboxService.js';
 import { getCurrentUser, getUserRole, getIsAdmin } from '../state.js';
@@ -134,10 +135,17 @@ export function renderInbox() {
 
   const typeLabels = { absence: '결석/조퇴', medication: '투약 의뢰', register: '신규 등록', consult: '상담 신청' };
 
-  list.innerHTML = filtered.map((item) => {
+  const doneCount = filtered.filter(i => i.status === 'done').length;
+  const doneHeader = doneCount > 0
+    ? `<div class="inbox-bulk-bar"><span>처리 완료 ${doneCount}건</span><button class="delete-btn" data-action="bulkDeleteDone">완료 서류 일괄 삭제</button></div>`
+    : '';
+
+  list.innerHTML = doneHeader + filtered.map((item) => {
+    const isDone = item.status === 'done';
     const consentStr = item.consents ? item.consents.map(c => `<span class="inbox-consent-tag">✓ ${escapeHtml(c)}</span>`).join(' ') : '';
     return `
-      <div class="inbox-item" data-action="printInboxItem" data-id="${escapeHtml(item.id)}">
+      <div class="inbox-item${isDone ? ' inbox-done' : ''}">
+        <button class="inbox-check-btn${isDone ? ' checked' : ''}" data-action="toggleInboxStatus" data-id="${escapeHtml(item.id)}" title="${isDone ? '미처리로 변경' : '처리 완료'}">${isDone ? '✓' : '○'}</button>
         <span class="inbox-type ${escapeHtml(item.type)}">${escapeHtml(typeLabels[item.type])}</span>
         <div class="inbox-info">
           <div class="inbox-name">${escapeHtml(item.name)}</div>
@@ -419,3 +427,20 @@ on('sortInbox', (e, el) => sortInbox(el.value), 'change');
 on('openMySubmissions', () => openMySubmissions());
 on('closeMySubmissions', () => closeMySubmissions());
 on('switchMySubmitTab', (e, el) => switchMySubmitTab(el.dataset.tab));
+on('toggleInboxStatus', async (e, el) => {
+  e.stopPropagation();
+  const id = el.dataset.id;
+  const item = inboxItems.find(i => i.id === id);
+  if (!item) return;
+  const newStatus = item.status === 'done' ? 'pending' : 'done';
+  try { await updateInboxStatusFS(id, newStatus); } catch (err) { showToast('상태 변경 실패', 'error'); }
+});
+on('bulkDeleteDone', async () => {
+  const doneItems = inboxItems.filter(i => i.status === 'done');
+  if (doneItems.length === 0) return;
+  if (!await showConfirm(`처리 완료 ${doneItems.length}건을 삭제하시겠습니까?`)) return;
+  for (const item of doneItems) {
+    try { await deleteInboxItemFS(item.id); } catch (e) { console.warn('삭제 실패:', item.id); }
+  }
+  showToast(`${doneItems.length}건 삭제 완료`, 'success');
+});

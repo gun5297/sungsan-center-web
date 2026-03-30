@@ -14,26 +14,25 @@
 #schedule .month-btn,
 #meal .month-btn,
 #pickup .month-btn {
-  width: 40px;
-  height: 40px;
+  background: none;
   border: 1px solid var(--border);
-  border-radius: 50%;
-  background: var(--card);
-  font-size: 1rem;
-  color: var(--text);
+  border-radius: var(--radius-xs);
+  width: 36px;
+  height: 36px;
+  font-size: 0.85rem;
   cursor: pointer;
+  color: var(--text-sub);
+  font-family: var(--font);
   transition: all var(--transition);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-family: var(--font);
+  flex-shrink: 0;
 }
 
 #schedule .month-btn:hover,
 #meal .month-btn:hover,
 #pickup .month-btn:hover {
-  background: var(--bg-sub);
   border-color: var(--primary);
   color: var(--primary);
 }

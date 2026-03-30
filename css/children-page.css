@@ -8,27 +8,17 @@
 }
 
 #childrenRoot {
-  max-width: 600px;
+  max-width: 520px;
   margin: 0 auto;
 }
 
-/* mypage-card 너비 제한 해제 */
+/* mypage-card 너비 제한 해제 + 간격 통일 */
 #childrenRoot .mypage-card {
   max-width: none;
 }
 
-/* 헤더 재정의 (페이지 상단용) */
-#childrenRoot .mypage-header {
-  margin-bottom: 20px;
-  padding-bottom: 0;
-  border-bottom: none;
-}
-
-#childrenRoot .mypage-back-link {
-  display: inline-flex;
-  align-items: center;
-  text-align: left;
-  margin-top: 0;
+#childrenRoot .mypage-card + .mypage-card {
+  margin-top: 16px;
 }
 
 .ch-date-nav {

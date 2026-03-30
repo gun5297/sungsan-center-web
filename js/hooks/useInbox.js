@@ -31,6 +31,7 @@ export function updateInboxBadge() {
 
 export function openInbox() {
   document.getElementById('inboxModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
   // 검색/정렬 상태 초기화
   currentSearchKeyword = '';
   currentSortBy = 'newest';
@@ -49,6 +50,7 @@ function _inboxEscHandler(e) {
 
 export function closeInbox() {
   document.getElementById('inboxModal').classList.remove('active');
+  document.body.style.overflow = '';
   document.removeEventListener('keydown', _inboxEscHandler);
 }
 
@@ -265,6 +267,7 @@ export async function openMySubmissions() {
   }
 
   document.getElementById('mySubmissionsModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
   mySubmitFilter = 'all';
   // [UX] ESC 키로 모달 닫기
   document.addEventListener('keydown', _mySubmitEscHandler);
@@ -300,6 +303,7 @@ function _mySubmitEscHandler(e) {
 
 export function closeMySubmissions() {
   document.getElementById('mySubmissionsModal').classList.remove('active');
+  document.body.style.overflow = '';
   document.removeEventListener('keydown', _mySubmitEscHandler);
 }
 

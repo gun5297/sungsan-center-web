@@ -8,7 +8,7 @@
 }
 
 #recordsRoot {
-  max-width: 600px;
+  max-width: 520px;
   margin: 0 auto;
 }
 
@@ -17,19 +17,6 @@
   max-width: none;
 }
 
-/* 헤더 재정의 (페이지 상단용) */
-#recordsRoot .mypage-header {
-  margin-bottom: 20px;
-  padding-bottom: 0;
-  border-bottom: none;
-}
-
-#recordsRoot .mypage-back-link {
-  display: inline-flex;
-  align-items: center;
-  text-align: left;
-  margin-top: 0;
-}
 
 /* 날짜 네비게이션 카드 */
 .mypage-card.date-nav {
@@ -74,16 +61,22 @@
   display: flex;
   gap: 12px;
   margin-top: 16px;
-  margin-bottom: 16px;
 }
 
 .records-summary-card {
   flex: 1;
   text-align: center;
   padding: 16px 8px;
-  border-radius: var(--radius-sm);
-  background: var(--card);
-  box-shadow: var(--shadow);
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #ede6df;
+  box-shadow: 0 4px 20px rgba(45,35,25,0.06);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.records-summary-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .records-summary-num {
@@ -208,7 +201,53 @@
   color: var(--text-sub);
 }
 
+/* 필터 상태 */
+.records-summary-card.filter-active {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  background: var(--primary-light);
+}
+
+.records-summary-card.filter-dim {
+  opacity: 0.4;
+}
+
+.records-filter-reset-wrap {
+  text-align: center;
+  margin-top: 12px;
+}
+
+.records-filter-reset-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  padding: 6px 16px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-sub);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all var(--transition);
+}
+
+.records-filter-reset-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* 섹션 간격 통일 */
+.records-summary,
+#recordsList,
+.records-export-card {
+  margin-top: 16px;
+}
+
 /* 내보내기 */
 .records-export-card {
-  padding: 16px 20px !important;
+  padding: 20px !important;
+  text-align: center;
+}
+
+.records-export-card .btn-upload {
+  margin-top: 0;
 }

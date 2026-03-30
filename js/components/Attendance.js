@@ -9,16 +9,16 @@ export function Attendance() {
     </div>
     <p class="section-desc">출결 태블릿과 실시간 연동됩니다. (30초 자동 갱신)</p>
 
-    <!-- 내 아이 출결 (로그인 보호자 전용) -->
-    <div class="my-child-attendance logged-only" id="myChildAttendance">
-      <h3 class="my-child-title">내 아이 출결</h3>
-      <div class="my-child-list" id="myChildList">
-        <div class="empty-state">연결된 아동이 없습니다</div>
-      </div>
+    <div class="auth-wall" id="attAuthWall">
+      <div class="auth-wall-icon">🔒</div>
+      <div class="auth-wall-title">로그인 후 열람 가능합니다</div>
+      <p class="auth-wall-desc">아동 보호를 위해 출석 현황은 로그인한 사용자만 볼 수 있습니다.</p>
+      <a href="login.html" class="btn-upload" style="display:inline-flex;width:auto;padding:12px 40px;margin-top:12px;">로그인</a>
     </div>
-
-    <div class="attendance-summary" id="attendanceSummary"></div>
-    <div class="attendance-list" id="attendanceList"></div>
+    <div id="attLoggedContent" style="display:none;">
+      <div class="attendance-summary" id="attendanceSummary"></div>
+      <div class="attendance-list" id="attendanceList"></div>
+    </div>
   </section>
 
   <div class="divider"></div>

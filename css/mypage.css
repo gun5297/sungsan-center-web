@@ -15,8 +15,16 @@
   margin-top: 20px;
 }
 
-/* 프로필 헤더 */
+/* 페이지 헤더 (back-link + 제목) */
 .mypage-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+/* 프로필 헤더 */
+.mypage-profile-header {
   display: flex;
   align-items: center;
   gap: 20px;
@@ -164,17 +172,16 @@
 }
 
 .mypage-back-link {
-  display: block;
-  text-align: center;
-  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
   font-size: 0.85rem;
-  color: #8c7e72;
+  color: var(--text-sub);
   text-decoration: none;
-  transition: color 0.2s;
+  transition: color var(--transition);
 }
 
 .mypage-back-link:hover {
-  color: #ff7854;
+  color: var(--primary);
 }
 
 /* 페이지 제목 (출석기록/아동관리 등 별도 페이지용) */

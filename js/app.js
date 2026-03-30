@@ -142,22 +142,45 @@ let navTimeout = null;
 
 function updateActiveTab() {
   if (isNavigating) return; // 클릭 스크롤 이동 중 깜빡임 방지
+
+  // 갤러리 섹션 하단을 넘어가면 모든 탭 비활성화
+  const lastSection = document.getElementById('gallery');
+  if (lastSection) {
+    const sectionBottom = lastSection.offsetTop + lastSection.offsetHeight;
+    if (window.scrollY > sectionBottom) {
+      tabItems.forEach(tab => tab.classList.remove('active'));
+      return;
+    }
+  }
+
   const scrollY = window.scrollY + 200;
   let activeId = 'hero';
   for (const id of tabSections) {
     const el = document.getElementById(id);
     if (el && el.offsetTop <= scrollY) activeId = id;
   }
-  
+
   // id(hero)와 데이터 탭(home) 매칭 수정
   const tabName = activeId === 'hero' ? 'home' : activeId;
-  
+
   tabItems.forEach(tab => {
     tab.classList.toggle('active', tab.getAttribute('data-tab') === tabName);
   });
 }
 
-window.addEventListener('scroll', updateActiveTab, { passive: true });
+window.addEventListener('scroll', () => {
+  updateActiveTab();
+  // FAB 메뉴가 열려 있으면 스크롤 시 자동 닫기
+  const toolbar = document.getElementById('fixedToolbar');
+  if (toolbar && toolbar.classList.contains('open')) {
+    toolbar.classList.remove('open');
+    const fab = document.getElementById('toolbarFab');
+    if (fab) {
+      fab.setAttribute('aria-expanded', 'false');
+      fab.setAttribute('aria-label', '메뉴 열기');
+    }
+  }
+}, { passive: true });
 tabItems.forEach(tab => {
   tab.addEventListener('click', () => {
     isNavigating = true; // 이동 상태 진입

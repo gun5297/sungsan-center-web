@@ -161,14 +161,13 @@ function renderTimeline(students, records) {
 
   document.getElementById('adminList').innerHTML = targetIds.map(id => {
     const r = records[id];
-    const s = students.find(st => st.id === id) || { name: '미등록 아동', school: '' };
+    const s = students.find(st => st.id === id);
 
-    // 미출석 아동 (기록 없음)
-    if (!r) {
-      const avatarStatusClass = 'status-absent';
+    // 미출석 아동 (기록 없음) — 등록된 학생만
+    if (!r && s) {
       return `
         <div class="att-card">
-          <div class="att-card-avatar ${avatarStatusClass}">${escapeHtml(s.name.charAt(0))}</div>
+          <div class="att-card-avatar status-absent">${escapeHtml(s.name.charAt(0))}</div>
           <div class="att-card-body">
             <div class="att-card-name">${escapeHtml(s.name)} <span class="att-card-id">(${escapeHtml(id)})</span></div>
             <div class="att-card-status"><span class="att-row-status absent">미출석</span></div>
@@ -179,6 +178,9 @@ function renderTimeline(students, records) {
         </div>
       `;
     }
+
+    // 기록 없고 학생도 없으면 (미등록 + 미출석) — 표시하지 않음
+    if (!r) return '';
 
     const elapsed = r.inTs ? now - r.inTs : Infinity;
     const remaining = Math.max(0, 60 - Math.floor(elapsed / 1000));
@@ -194,15 +196,18 @@ function renderTimeline(students, records) {
     const avatarStatusClass = r.outTime ? 'status-out' : 'status-in';
 
     if (isAdminLogged) {
+      const displayName = s ? escapeHtml(s.name) : '미등록 번호';
+      const avatarChar = s ? escapeHtml(s.name.charAt(0)) : '?';
+      const schoolInfo = s ? `<div class="att-card-school">${escapeHtml(s.school)}</div>` : '';
       return `
         <div class="att-card">
-          <div class="att-card-avatar ${avatarStatusClass}">${escapeHtml(s.name.charAt(0))}</div>
+          <div class="att-card-avatar ${avatarStatusClass}">${avatarChar}</div>
           <div class="att-card-body">
-            <div class="att-card-name">${escapeHtml(s.name)} <span class="att-card-id">(${id})</span></div>
+            <div class="att-card-name">${displayName} <span class="att-card-id">(${id})</span></div>
             <div class="att-card-status"><span class="att-row-status ${statusClass}">${statusLabel}</span> ${timeDisplay}</div>
           </div>
           <div class="att-card-right">
-            <div class="att-card-school">${escapeHtml(s.school)}</div>
+            ${schoolInfo}
             <div class="timeline-actions">${cancelBtn}</div>
           </div>
         </div>

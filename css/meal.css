@@ -68,8 +68,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 24px;
   margin-bottom: 16px;
+}
+
+.meal-editor-nav .month-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  width: 36px;
+  height: 36px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: var(--text-sub);
+  font-family: var(--font);
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.meal-editor-nav .month-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .meal-editor-calendar {

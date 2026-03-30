@@ -21,10 +21,10 @@ export function Gallery() {
       </div>
     </div>
 
-    <div class="gallery-auth-wall" id="galleryAuthWall">
-      <div class="gallery-auth-icon">🔒</div>
-      <div class="gallery-auth-title">로그인 후 열람 가능합니다</div>
-      <p class="gallery-auth-desc">아동 보호를 위해 활동 사진은 로그인한 사용자만 볼 수 있습니다.</p>
+    <div class="auth-wall" id="galleryAuthWall">
+      <div class="auth-wall-icon">🔒</div>
+      <div class="auth-wall-title">로그인 후 열람 가능합니다</div>
+      <p class="auth-wall-desc">아동 보호를 위해 활동 사진은 로그인한 사용자만 볼 수 있습니다.</p>
       <a href="login.html" class="btn-upload" style="display:inline-flex;width:auto;padding:12px 40px;margin-top:12px;">로그인</a>
     </div>
     <div class="gallery-grid" id="galleryGrid" style="display:none;"></div>

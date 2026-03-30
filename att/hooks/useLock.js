@@ -12,6 +12,7 @@ import { showScreen } from './useScreen.js';
 import { on } from '../../js/events.js';
 
 let lockCode = '';
+const PIN_LENGTH = 6;
 
 // [보안] 익명 인증은 PIN 성공 후에만 실행 (잠금 화면에서 Firestore 접근 차단)
 // publicConfig는 allow read: if true 이므로 인증 없이 PIN 검증 가능
@@ -95,7 +96,7 @@ function formatLockTime(seconds) {
 // ===== 입력 핸들러 =====
 function pressLock(n) {
   if (isLockedOut()) return;
-  if (lockCode.length >= 4) return;
+  if (lockCode.length >= PIN_LENGTH) return;
   lockCode += n;
   updateLockDots();
 }

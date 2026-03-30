@@ -531,6 +531,7 @@ on('savePassword', async (e, el) => {
   const inputId = field === 'adminSignup' ? 'pwAdminSignup' : 'pwAttendance';
   const value = document.getElementById(inputId).value.trim();
   if (!value) { showToast('비밀번호를 입력해 주세요.', 'warning'); return; }
+  if (field === 'attendance' && value.length < 6) { showToast('출석 비밀번호는 6자리 이상이어야 합니다.', 'warning'); return; }
   try {
     await updatePasswords({ [field]: value });
     showToast('비밀번호가 변경되었습니다.', 'success');

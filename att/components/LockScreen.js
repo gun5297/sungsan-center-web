@@ -14,6 +14,8 @@ export function LockScreen() {
           <span class="dot"></span>
           <span class="dot"></span>
           <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
         </div>
         <div class="lock-error hidden" id="lockError">비밀번호가 틀렸습니다</div>
         <div class="numpad lock-numpad">

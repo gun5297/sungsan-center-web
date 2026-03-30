@@ -17,8 +17,8 @@ import {
 const passwordsRef = doc(db, 'settings', 'passwords');
 const attLockRef   = doc(db, 'publicConfig', 'attLock');
 
-// 기본 PIN (최초 배포 후 마이페이지에서 반드시 변경)
-const DEFAULTS = { adminSignup: '1234', attendance: '1234' };
+// 기본 PIN 6자리 (최초 배포 후 마이페이지에서 반드시 변경)
+const DEFAULTS = { adminSignup: '1234', attendance: '123456' };
 
 // pepper: Firestore에 저장되지 않아 해시 탈취 시 오프라인 브루트포스 방어
 // ⚠️ 변경 시 기존 PIN 재설정 필요

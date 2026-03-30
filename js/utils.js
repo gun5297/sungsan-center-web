@@ -84,6 +84,14 @@ export function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+// [보안] 이미지 src에 안전한 URL만 허용 (XSS 방어)
+export function safeImageSrc(url) {
+  if (!url) return '';
+  const s = String(url);
+  if (s.startsWith('data:image/') || s.startsWith('https://')) return s;
+  return '';
+}
+
 // ===== 이미지 리사이징 (업로드 전) =====
 export function resizeImage(file, maxWidth = 1200, quality = 0.85) {
   return new Promise((resolve) => {

@@ -39,7 +39,7 @@ export async function doSignup() {
   const consent = document.getElementById('signupConsent').checked;
 
   if (!name) { showError('이름을 입력해 주세요.'); return; }
-  if (!email || !email.includes('@')) { showError('올바른 이메일을 입력해 주세요.'); return; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('올바른 이메일을 입력해 주세요.'); return; }
   if (password.length < 6) { showError('비밀번호는 6자리 이상이어야 합니다.'); return; }
   if (password !== passwordConfirm) { showError('비밀번호가 일치하지 않습니다.'); document.getElementById('signupPasswordConfirm').value = ''; return; }
   if (!phone) { showError('연락처를 입력해 주세요.'); return; }

@@ -42,6 +42,12 @@ export async function deleteAbsence(id) {
 
 export async function submitAbsence() {
   if (!canSubmit('absence')) { showToast('잠시 후 다시 시도해 주세요.', 'warning'); return; }
+  const submitBtn = document.querySelector('[data-action="submitAbsence"]');
+  if (submitBtn) submitBtn.disabled = true;
+  try { await _doSubmitAbsence(); } finally { if (submitBtn) submitBtn.disabled = false; }
+}
+
+async function _doSubmitAbsence() {
   const type = document.getElementById('absType').value;
   const name = document.getElementById('absName').value.trim();
   const school = document.getElementById('absSchool').value.trim();

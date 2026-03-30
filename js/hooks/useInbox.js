@@ -7,7 +7,7 @@ import {
 } from '../../firebase/services/inboxService.js';
 import { getCurrentUser, getUserRole, getIsAdmin } from '../state.js';
 import { getMyChildren } from '../../firebase/services/childLinkService.js';
-import { escapeHtml } from '../utils.js';
+import { escapeHtml, safeImageSrc } from '../utils.js';
 import { on } from '../events.js';
 import { logAction } from '../../firebase/services/auditService.js';
 
@@ -29,11 +29,15 @@ export function updateInboxBadge() {
   const badge = document.getElementById('inboxBadge');
   if (!badge) return;
 
-  const lastSeen = parseInt(localStorage.getItem('inboxLastSeen') || '0', 10);
+  let lastSeen = parseInt(localStorage.getItem('inboxLastSeen') || '0', 10);
+  // localStorage 초기화 방어: lastSeen이 0이고 서류가 있으면 현재 시점으로 설정
+  if ((isNaN(lastSeen) || lastSeen === 0) && inboxItems.length > 0) {
+    lastSeen = Date.now();
+    localStorage.setItem('inboxLastSeen', String(lastSeen));
+  }
   const newCount = inboxItems.filter(item => {
-    if (!item.createdAt) return false;
-    const ts = item.createdAt.toMillis ? item.createdAt.toMillis() : item.createdAt;
-    return ts > lastSeen;
+    if (!item.createdAt || typeof item.createdAt.toMillis !== 'function') return false;
+    return item.createdAt.toMillis() > lastSeen;
   }).length;
 
   if (newCount > 0) {
@@ -188,7 +192,7 @@ export function printInboxItem(id) {
       </div>
       <div class="print-sign">
         <p>${escapeHtml(item.date)}</p>
-        <p>신청인(보호자): ${escapeHtml(item.data.guardian || '___________')} ${item.data.signature ? `<img src="${escapeHtml(item.data.signature)}" style="height:50px;vertical-align:middle;" />` : '(서명)'}</p>
+        <p>신청인(보호자): ${escapeHtml(item.data.guardian || '___________')} ${safeImageSrc(item.data.signature) ? `<img src="${safeImageSrc(item.data.signature)}" style="height:50px;vertical-align:middle;" />` : '(서명)'}</p>
       </div>
       <div class="print-to">성산지역아동센터장 귀하</div>
     `;
@@ -218,7 +222,7 @@ export function printInboxItem(id) {
       </div>
       <div class="print-sign">
         <p>${escapeHtml(item.date)}</p>
-        <p>의뢰인(보호자): ___________ ${item.data.signature ? `<img src="${escapeHtml(item.data.signature)}" style="height:50px;vertical-align:middle;" />` : '(서명)'}</p>
+        <p>의뢰인(보호자): ___________ ${safeImageSrc(item.data.signature) ? `<img src="${safeImageSrc(item.data.signature)}" style="height:50px;vertical-align:middle;" />` : '(서명)'}</p>
       </div>
       <div class="print-to">성산지역아동센터장 귀하</div>
     `;

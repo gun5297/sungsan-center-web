@@ -39,10 +39,11 @@ self.addEventListener('fetch', (event) => {
   const isCSS = url.pathname.endsWith('.css');
   const isImage = /\.(png|jpg|jpeg|svg|webp|ico)$/.test(url.pathname);
 
-  // JS/HTML: 네트워크 우선, 실패 시 캐시 (항상 최신 코드 보장)
+  // JS/HTML: 네트워크 우선 (5초 타임아웃), 실패 시 캐시
   if (isJS || isHTML) {
+    const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms));
     event.respondWith(
-      fetch(request)
+      Promise.race([fetch(request), timeout(5000)])
         .then((response) => {
           if (response && response.status === 200) {
             const clone = response.clone();

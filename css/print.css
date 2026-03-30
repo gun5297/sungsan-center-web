@@ -210,6 +210,19 @@
     width: auto;
   }
 
+  /* ── 개인정보 워터마크 ── */
+  .print-area::after {
+    content: '내부용 — 개인정보 포함';
+    position: fixed;
+    bottom: 10mm;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 8pt;
+    color: #ccc !important;
+    letter-spacing: 2px;
+  }
+
   /* ── 흑백 출력 최적화 ── */
   * {
     color: #000 !important;

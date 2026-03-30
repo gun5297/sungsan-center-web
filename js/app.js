@@ -168,17 +168,24 @@ function updateActiveTab() {
   });
 }
 
+let _scrollTicking = false;
 window.addEventListener('scroll', () => {
-  updateActiveTab();
-  // FAB 메뉴가 열려 있으면 스크롤 시 자동 닫기
-  const toolbar = document.getElementById('fixedToolbar');
-  if (toolbar && toolbar.classList.contains('open')) {
-    toolbar.classList.remove('open');
-    const fab = document.getElementById('toolbarFab');
-    if (fab) {
-      fab.setAttribute('aria-expanded', 'false');
-      fab.setAttribute('aria-label', '메뉴 열기');
-    }
+  if (!_scrollTicking) {
+    _scrollTicking = true;
+    requestAnimationFrame(() => {
+      updateActiveTab();
+      // FAB 메뉴가 열려 있으면 스크롤 시 자동 닫기
+      const toolbar = document.getElementById('fixedToolbar');
+      if (toolbar && toolbar.classList.contains('open')) {
+        toolbar.classList.remove('open');
+        const fab = document.getElementById('toolbarFab');
+        if (fab) {
+          fab.setAttribute('aria-expanded', 'false');
+          fab.setAttribute('aria-label', '메뉴 열기');
+        }
+      }
+      _scrollTicking = false;
+    });
   }
 }, { passive: true });
 tabItems.forEach(tab => {

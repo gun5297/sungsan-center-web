@@ -185,6 +185,12 @@ function changeAttDate(delta) {
 // ===== 등록/수정 =====
 
 async function saveStudent() {
+  const submitBtn = document.getElementById('chSubmitBtn');
+  if (submitBtn) submitBtn.disabled = true;
+  try { await _doSaveStudent(); } finally { if (submitBtn) submitBtn.disabled = false; }
+}
+
+async function _doSaveStudent() {
   const id = document.getElementById('chId').value.trim().padStart(4, '0');
   const name = document.getElementById('chName').value.trim();
   const school = document.getElementById('chSchool').value.trim();

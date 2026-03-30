@@ -47,6 +47,12 @@ export async function deleteMed(id) {
 
 export async function submitMedication() {
   if (!canSubmit('medication')) { showToast('잠시 후 다시 시도해 주세요.', 'warning'); return; }
+  const submitBtn = document.querySelector('[data-action="submitMedication"]');
+  if (submitBtn) submitBtn.disabled = true;
+  try { await _doSubmitMedication(); } finally { if (submitBtn) submitBtn.disabled = false; }
+}
+
+async function _doSubmitMedication() {
   const name = document.getElementById('medName').value.trim();
   const drug = document.getElementById('medDrug').value.trim();
   const dose = document.getElementById('medDose').value.trim();

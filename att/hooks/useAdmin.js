@@ -95,7 +95,10 @@ function renderTimelineFromCache() {
 function renderSummary(students, records) {
   let inCount = 0, outCount = 0;
 
-  Object.values(records).forEach(r => {
+  // 등록된 학생의 기록만 카운트 (미등록 번호 제외)
+  const registeredIds = new Set(students.map(st => st.id));
+  Object.entries(records).forEach(([id, r]) => {
+    if (!registeredIds.has(id)) return;
     if (r.outTime) outCount++;
     else inCount++;
   });

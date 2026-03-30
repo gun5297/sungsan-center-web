@@ -13,8 +13,8 @@ import { on } from '../../js/events.js';
 
 let lockCode = '';
 
-// 페이지 로드 시 즉시 익명 로그인 (publicConfig 읽기 권한 확보)
-loginAnonymously().catch(e => console.warn('[useLock] 초기 익명 인증 실패:', e));
+// [보안] 익명 인증은 PIN 성공 후에만 실행 (잠금 화면에서 Firestore 접근 차단)
+// publicConfig는 allow read: if true 이므로 인증 없이 PIN 검증 가능
 
 // ===== 누적 잠금 시스템 (localStorage 영속) =====
 const LOCK_STORAGE_KEY = 'attLockState';

@@ -127,8 +127,9 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // 픽업: 아동 이름+학교 포함 — 승인된 사용자만 읽기
     match /pickups/{pickupId} {
-      allow read: if true;
+      allow read: if isApproved();
       allow create, update, delete: if isAdmin();
     }
 
@@ -178,10 +179,11 @@ service cloud.firestore {
 
     // ===== 신규 등록/상담 — 민감정보 =====
     match /registrations/{id} {
-      allow create: if request.resource.data.keys().hasAll(['name', 'date'])
+      allow create: if request.resource.data.keys().hasAll(['name', 'date', 'createdAt'])
         && request.resource.data.keys().hasOnly(['name', 'date', 'type', 'summary', 'data', 'consents', 'createdAt'])
         && request.resource.data.name is string
         && request.resource.data.name.size() <= 50
+        && request.resource.data.createdAt == request.time
         && underSizeLimit();
       allow read, update, delete: if isAdmin();
     }
@@ -245,10 +247,12 @@ service cloud.firestore {
     // ===== 전자서명 메타데이터 =====
     match /signatures/{sigId} {
       allow read: if isApproved();
-      allow create: if request.resource.data.keys().hasAll(['path', 'createdAt'])
+      allow create: if isSignedIn()
+        && request.resource.data.keys().hasAll(['path', 'createdAt'])
         && request.resource.data.keys().hasOnly(['path', 'type', 'linkedTo', 'createdAt'])
         && request.resource.data.path is string
-        && request.resource.data.path.size() <= 200;
+        && request.resource.data.path.size() <= 200
+        && request.resource.data.createdAt == request.time;
       allow delete: if isAdmin();
     }
 

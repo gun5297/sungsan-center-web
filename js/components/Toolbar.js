@@ -8,7 +8,7 @@ export function Toolbar() {
     </button>
     <div class="toolbar-menu" id="toolbarMenu">
       <a href="attendance.html" class="toolbar-btn toolbar-att">출석</a>
-      <button class="toolbar-btn toolbar-inbox admin-only" data-action="openInbox">서류함 <span class="inbox-badge" id="inboxBadge">0</span></button>
+      <button class="toolbar-btn toolbar-inbox admin-only" data-action="openInbox">서류함 <span class="inbox-badge" id="inboxBadge" aria-live="polite">0</span></button>
       <button class="toolbar-btn toolbar-mysubmit logged-only" data-action="openMySubmissions">내 제출 이력</button>
       <a href="mypage.html" class="toolbar-btn toolbar-mypage logged-only">마이페이지</a>
       <a href="records.html" class="toolbar-btn admin-only">출석 기록</a>

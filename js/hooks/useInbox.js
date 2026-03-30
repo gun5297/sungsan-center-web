@@ -7,7 +7,7 @@ import {
 } from '../../firebase/services/inboxService.js';
 import { getCurrentUser, getUserRole, getIsAdmin } from '../state.js';
 import { getMyChildren } from '../../firebase/services/childLinkService.js';
-import { escapeHtml, safeImageSrc } from '../utils.js';
+import { escapeHtml, safeImageSrc, trapFocus } from '../utils.js';
 import { on } from '../events.js';
 import { logAction } from '../../firebase/services/auditService.js';
 
@@ -15,6 +15,7 @@ let inboxItems = [];
 let currentInboxFilter = 'all';
 let currentSearchKeyword = '';
 let currentSortBy = 'newest';
+let _releaseFocusTrap = null;
 
 // 외부(useAbsence, useMedication 등)에서 호출
 export async function addInboxItem(item) {
@@ -64,6 +65,9 @@ export function openInbox() {
   if (searchInput) searchInput.value = '';
   if (sortSelect) sortSelect.value = 'newest';
   renderInbox();
+  // [접근성] 포커스 트랩
+  const modal = document.getElementById('inboxModal');
+  if (modal) _releaseFocusTrap = trapFocus(modal);
   // [UX] ESC 키로 모달 닫기
   document.addEventListener('keydown', _inboxEscHandler);
 }
@@ -76,6 +80,7 @@ export function closeInbox() {
   document.getElementById('inboxModal').classList.remove('active');
   document.body.style.overflow = '';
   document.removeEventListener('keydown', _inboxEscHandler);
+  if (_releaseFocusTrap) { _releaseFocusTrap(); _releaseFocusTrap = null; }
 }
 
 export function switchInboxTab(type) {

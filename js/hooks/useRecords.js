@@ -17,8 +17,13 @@ let _filter = 'all';
 
 // todayKey 제거됨 — getDateKey(new Date())를 직접 사용
 
+function parseDateKey(dateKey) {
+  const [y, m, d] = dateKey.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
 function formatDateDisplay(dateKey) {
-  const d = new Date(dateKey + 'T00:00:00');
+  const d = parseDateKey(dateKey);
   const days = ['일', '월', '화', '수', '목', '금', '토'];
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
 }
@@ -89,7 +94,7 @@ async function loadAndRender() {
 }
 
 function changeDate(delta) {
-  const d = new Date(_currentDate + 'T00:00:00');
+  const d = parseDateKey(_currentDate);
   d.setDate(d.getDate() + delta);
   _currentDate = getDateKey(d);
   _filter = 'all';

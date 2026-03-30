@@ -11,6 +11,7 @@ function resetAuthState() {
   setIsAdmin(false);
   setCurrentUser(null);
   setUserRole(null);
+  cleanupDashboard();
   document.body.classList.remove('admin-mode', 'logged-in');
   const btn = document.getElementById('toolbarAdminBtn');
   if (btn) { btn.textContent = '로그인'; btn.classList.remove('logged-in'); }

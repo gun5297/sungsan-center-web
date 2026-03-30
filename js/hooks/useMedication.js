@@ -114,7 +114,7 @@ async function _doSubmitMedication() {
   try {
     const result = await addInboxItem({
       type: 'medication', name: `${name} (${drug})`, summary: `${dose} · ${time} · ${from}~${to || from}`, date: dateStr,
-      data: { name, birth, drug, dose, time, symptom, from, to: to || from, storage, hospital, note, signature: signatureData },
+      data: { name, birth, drug, dose, time, symptom, from, to: to || from, storage, hospital, note, signature: signatureData, consentAt: new Date().toISOString() },
       consents: ['건강정보(민감정보) 수집 동의', '부작용 안내 동의', '약 정보 책임 확인', '응급조치 동의']
     });
     receiptNo = result?.receiptNo || '';

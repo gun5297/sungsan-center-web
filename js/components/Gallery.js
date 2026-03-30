@@ -10,12 +10,12 @@ export function Gallery() {
       <div class="admin-form-card">
         <h4 class="admin-form-title">활동 추가</h4>
         <div class="form-row">
-          <div class="form-group"><label class="form-label">활동 제목</label><input type="text" id="galTitle" class="input-field" placeholder="봄맞이 미술 수업" /></div>
-          <div class="form-group"><label class="form-label">카테고리</label><input type="text" id="galCategory" class="input-field" placeholder="미술 활동" /></div>
+          <div class="form-group"><label class="form-label" for="galTitle">활동 제목</label><input type="text" id="galTitle" class="input-field" placeholder="봄맞이 미술 수업" /></div>
+          <div class="form-group"><label class="form-label" for="galCategory">카테고리</label><input type="text" id="galCategory" class="input-field" placeholder="미술 활동" /></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label class="form-label">날짜</label><input type="date" id="galDate" class="input-field" /></div>
-          <div class="form-group"><label class="form-label">사진 업로드</label><input type="file" id="galPhoto" accept="image/*" multiple class="input-field" /></div>
+          <div class="form-group"><label class="form-label" for="galDate">날짜</label><input type="date" id="galDate" class="input-field" /></div>
+          <div class="form-group"><label class="form-label" for="galPhoto">사진 업로드</label><input type="file" id="galPhoto" accept="image/*" multiple class="input-field" /></div>
         </div>
         <button class="btn-upload" data-action="addGalleryItem">추가</button>
       </div>

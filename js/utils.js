@@ -84,6 +84,25 @@ export function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+// [접근성] 모달 포커스 트랩
+export function trapFocus(modal) {
+  const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  if (focusable.length === 0) return () => {};
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  first.focus();
+  function handler(e) {
+    if (e.key !== 'Tab') return;
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }
+  modal.addEventListener('keydown', handler);
+  return () => modal.removeEventListener('keydown', handler);
+}
+
 // [보안] 이미지 src에 안전한 URL만 허용 (XSS 방어)
 export function safeImageSrc(url) {
   if (!url) return '';

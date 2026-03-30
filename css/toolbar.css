@@ -93,7 +93,7 @@
 /* 개별 버튼 */
 .toolbar-btn {
   padding: 10px 16px;
-  min-height: 40px;
+  min-height: 48px;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: rgba(255,255,255,0.97);

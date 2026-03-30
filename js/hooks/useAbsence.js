@@ -107,7 +107,7 @@ async function _doSubmitAbsence() {
   try {
     const result = await addInboxItem({
       type: 'absence', name: `${name} (${type})`, summary: `${reason} | ${from} ~ ${to || from}`, date: dateStr,
-      data: { type, name, school: school || '', guardian: guardian || '', phone: phone || '', reason, from, to: to || from, absDate: absDate || '', signature: signatureData },
+      data: { type, name, school: school || '', guardian: guardian || '', phone: phone || '', reason, from, to: to || from, absDate: absDate || '', signature: signatureData, consentAt: new Date().toISOString() },
       consents: ['건강정보(민감정보) 수집 동의', '운영규정 안내 동의']
     });
     receiptNo = result?.receiptNo || '';

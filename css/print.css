@@ -187,33 +187,6 @@
     font-size: 11pt;
   }
 
-  /* ── 도장/직인 영역 ── */
-  .print-area .print-stamp-area {
-    display: flex;
-    justify-content: flex-end;
-    gap: 40px;
-    margin-top: 32px;
-    font-size: 10pt;
-  }
-
-  .print-area .print-stamp-box {
-    text-align: center;
-    min-width: 80px;
-  }
-
-  .print-area .print-stamp-box .stamp-circle {
-    width: 60px;
-    height: 60px;
-    border: 2px solid #999;
-    border-radius: 50%;
-    margin: 8px auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 8pt;
-    color: #999;
-  }
-
   /* ── 페이지 나눔 제어 ── */
   .print-page-break {
     page-break-before: always;

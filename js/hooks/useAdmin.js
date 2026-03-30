@@ -108,11 +108,18 @@ function initDashboard() {
   cleanupDashboard();
   _dashboardCleanup = [];
 
-  // 오늘 출석 실시간 구독
+  // 오늘 출석 실시간 구독 (등록된 학생만 카운트)
+  let _dashStudentIds = new Set();
+  getAllStudents().then(students => {
+    _dashStudentIds = new Set(students.map(s => s.id));
+  }).catch(() => {});
+
   const unsubRecords = subscribeTodayRecords((records) => {
     const el = document.getElementById('dashAttVal');
     if (el) {
-      const count = Object.values(records).filter(r => r.inTime).length;
+      const count = Object.entries(records)
+        .filter(([id, r]) => r.inTime && (_dashStudentIds.size === 0 || _dashStudentIds.has(id)))
+        .length;
       el.textContent = count;
     }
   });

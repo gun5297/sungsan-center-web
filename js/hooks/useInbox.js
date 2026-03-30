@@ -173,10 +173,6 @@ export function printInboxItem(id) {
         <p>신청인(보호자): ${escapeHtml(item.data.guardian || '___________')} ${item.data.signature ? `<img src="${escapeHtml(item.data.signature)}" style="height:50px;vertical-align:middle;" />` : '(서명)'}</p>
       </div>
       <div class="print-to">성산지역아동센터장 귀하</div>
-      <div class="print-stamp-area">
-        <div class="print-stamp-box">담당<div class="stamp-circle"></div></div>
-        <div class="print-stamp-box">센터장<div class="stamp-circle"></div></div>
-      </div>
     `;
   } else if (item.type === 'medication') {
     html = `
@@ -207,10 +203,6 @@ export function printInboxItem(id) {
         <p>의뢰인(보호자): ___________ ${item.data.signature ? `<img src="${escapeHtml(item.data.signature)}" style="height:50px;vertical-align:middle;" />` : '(서명)'}</p>
       </div>
       <div class="print-to">성산지역아동센터장 귀하</div>
-      <div class="print-stamp-area">
-        <div class="print-stamp-box">담당<div class="stamp-circle"></div></div>
-        <div class="print-stamp-box">센터장<div class="stamp-circle"></div></div>
-      </div>
     `;
   } else if (item.type === 'register') {
     html = `
@@ -240,10 +232,6 @@ export function printInboxItem(id) {
         <p>신청인(보호자): ${escapeHtml(item.data.guardian || '___________')} (서명)</p>
       </div>
       <div class="print-to">성산지역아동센터장 귀하</div>
-      <div class="print-stamp-area">
-        <div class="print-stamp-box">담당<div class="stamp-circle"></div></div>
-        <div class="print-stamp-box">센터장<div class="stamp-circle"></div></div>
-      </div>
     `;
   } else if (item.type === 'consult') {
     html = `
@@ -267,10 +255,6 @@ export function printInboxItem(id) {
         <p>신청인(보호자): ${escapeHtml(item.data.guardian || '___________')} (서명)</p>
       </div>
       <div class="print-to">성산지역아동센터장 귀하</div>
-      <div class="print-stamp-area">
-        <div class="print-stamp-box">담당<div class="stamp-circle"></div></div>
-        <div class="print-stamp-box">센터장<div class="stamp-circle"></div></div>
-      </div>
     `;
   }
 

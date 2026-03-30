@@ -1,20 +1,22 @@
-/* ===== PRINT AREA ===== */
+/* ===== PRINT AREA (화면에서 숨김) ===== */
 .print-area {
   display: none;
 }
 
+/* ===== A4 행정 문서 수준 인쇄 스타일 ===== */
 @media print {
-  /* 불필요한 요소 숨기기 */
+  /* ── 불필요 UI 숨기기 ── */
   nav, .fixed-toolbar, .admin-bar, .bottom-tab-bar,
   .divider, .form-actions, .admin-only,
   .toolbar-fab, .toolbar-menu,
   .section-tag, .section-desc,
   #toast-container, .confirm-overlay,
-  .hero, .stats, .dashboard {
+  .hero, .stats, .dashboard,
+  .btn-refresh, .no-print {
     display: none !important;
   }
 
-  /* 전자서명 이미지 출력 보장 */
+  /* ── 전자서명 이미지 출력 보장 ── */
   #absSignImg, #medSignImg {
     display: inline !important;
     height: 50px !important;
@@ -22,18 +24,31 @@
     -webkit-print-color-adjust: exact;
   }
 
-  /* 폼 카드 출력 최적화 */
+  /* ── 폼 카드 출력 최적화 ── */
   .form-card {
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
   }
 
-  body {
-    padding: 0 !important;
+  /* ── 기본 페이지 설정 (A4) ── */
+  @page {
+    size: A4;
+    margin: 20mm 15mm 20mm 15mm;
   }
 
-  /* print-target 클래스가 있을 때: 해당 섹션만 표시 */
+  body {
+    padding: 0 !important;
+    margin: 0 !important;
+    font-family: 'Pretendard', '맑은 고딕', sans-serif;
+    font-size: 11pt;
+    color: #000;
+    line-height: 1.7;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ── print-target 방식 (섹션 격리) ── */
   body.printing #app > section:not(.print-target),
   body.printing #app > div:not(section) {
     display: none !important;
@@ -41,69 +56,200 @@
 
   body.printing .print-target {
     display: block !important;
-    padding: 40px;
+    padding: 0;
   }
 
   body.printing .print-target .section-title {
     display: none !important;
   }
 
-  /* .print-area 기반 인쇄 (기존 호환) */
+  /* ── .print-area 방식 (서류함 인쇄) ── */
   #app > *:not(.print-area) {
     display: none !important;
   }
+
   .print-area {
     display: block !important;
-    padding: 40px;
-    font-family: 'Pretendard', sans-serif;
+    padding: 0;
+    font-family: 'Pretendard', '맑은 고딕', sans-serif;
     color: #000;
-    font-size: 12pt;
-    line-height: 1.8;
+    font-size: 11pt;
+    line-height: 1.7;
   }
+
+  /* ── 문서 헤더 (기관명 + 제목) ── */
   .print-area .print-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 3px double #000;
   }
+
   .print-area .print-org {
-    font-size: 11pt;
-    margin-bottom: 4px;
+    font-size: 10pt;
+    color: #333;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
   }
+
   .print-area .print-title {
-    font-size: 18pt;
+    font-size: 20pt;
     font-weight: 900;
-    border-bottom: 2px solid #000;
-    padding-bottom: 10px;
+    letter-spacing: 2px;
   }
+
+  .print-area .print-receipt {
+    font-size: 9pt;
+    color: #555;
+    margin-top: 6px;
+  }
+
+  /* ── 테이블 (행정 문서 표준) ── */
   .print-area table {
     width: 100%;
     border-collapse: collapse;
-    margin: 16px 0;
+    margin: 20px 0;
+    border: 2px solid #000;
   }
-  .print-area th, .print-area td {
-    border: 1px solid #333;
-    padding: 8px 12px;
+
+  .print-area th,
+  .print-area td {
+    border: 1px solid #000;
+    padding: 10px 14px;
     text-align: left;
-    font-size: 11pt;
-  }
-  .print-area th {
-    background: #f5f5f5;
-    font-weight: 700;
-    width: 120px;
-  }
-  .print-area .print-notice {
-    margin-top: 30px;
-    font-size: 10pt;
+    font-size: 10.5pt;
     line-height: 1.6;
+    vertical-align: middle;
   }
+
+  .print-area th {
+    background: #f0f0f0 !important;
+    font-weight: 700;
+    width: 110px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .print-area td {
+    word-break: keep-all;
+  }
+
+  /* ── 동의/안내 사항 ── */
+  .print-area .print-notice {
+    margin-top: 24px;
+    padding: 14px 16px;
+    border: 1px solid #999;
+    border-radius: 4px;
+    font-size: 9pt;
+    line-height: 1.7;
+    color: #333;
+    background: #fafafa !important;
+    page-break-inside: avoid;
+  }
+
+  .print-area .print-notice strong {
+    font-weight: 800;
+  }
+
+  /* ── 서명 영역 ── */
   .print-area .print-sign {
     margin-top: 40px;
     text-align: right;
     font-size: 11pt;
+    line-height: 2.2;
   }
+
+  .print-area .print-sign-line {
+    display: inline-block;
+    min-width: 120px;
+    border-bottom: 1px solid #000;
+    margin-left: 8px;
+  }
+
+  .print-area .print-sign img {
+    height: 50px;
+    vertical-align: middle;
+  }
+
+  /* ── 제출 대상 (기관장) ── */
   .print-area .print-to {
-    margin-top: 20px;
+    margin-top: 32px;
     text-align: center;
-    font-size: 12pt;
-    font-weight: 700;
+    font-size: 13pt;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+
+  /* ── 날짜 표시 ── */
+  .print-area .print-date {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 11pt;
+  }
+
+  /* ── 도장/직인 영역 ── */
+  .print-area .print-stamp-area {
+    display: flex;
+    justify-content: flex-end;
+    gap: 40px;
+    margin-top: 32px;
+    font-size: 10pt;
+  }
+
+  .print-area .print-stamp-box {
+    text-align: center;
+    min-width: 80px;
+  }
+
+  .print-area .print-stamp-box .stamp-circle {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #999;
+    border-radius: 50%;
+    margin: 8px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8pt;
+    color: #999;
+  }
+
+  /* ── 페이지 나눔 제어 ── */
+  .print-page-break {
+    page-break-before: always;
+  }
+
+  .print-area table,
+  .print-area .print-sign,
+  .print-area .print-notice {
+    page-break-inside: avoid;
+  }
+
+  /* ── 출석부 전용 ── */
+  .print-area .att-table th,
+  .print-area .att-table td {
+    padding: 6px 10px;
+    font-size: 9.5pt;
+    text-align: center;
+  }
+
+  .print-area .att-table th {
+    width: auto;
+  }
+
+  /* ── 흑백 출력 최적화 ── */
+  * {
+    color: #000 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  .print-area th {
+    background: #f0f0f0 !important;
+  }
+
+  .print-area .print-notice {
+    background: #fafafa !important;
   }
 }

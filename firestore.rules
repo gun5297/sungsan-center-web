@@ -88,7 +88,7 @@ service cloud.firestore {
       // 가입 시: 반드시 role=general, approved=false 강제
       allow create: if isNamedUser() && request.auth.uid == userId
         && request.resource.data.keys().hasAll(['email', 'name', 'role', 'approved'])
-        && request.resource.data.keys().hasOnly(['email', 'name', 'role', 'approved', 'phone', 'photoConsent', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['email', 'name', 'role', 'approved', 'phone', 'photoConsent', 'consentAt', 'consentVersion', 'createdAt'])
         && request.resource.data.role == 'general'
         && request.resource.data.approved == false;
       // 본인: 이름·연락처·사진동의만 수정 가능 / 관리자: 전체 수정
@@ -152,33 +152,34 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // ===== 결석/조퇴 — 비로그인 제출 허용 (필드 검증) =====
+    // ===== 결석/조퇴 — 제출: 로그인 또는 App Check (필드 검증) =====
     match /absences/{absenceId} {
       allow read: if isApproved();
-      allow create: if validAbsenceCreate();
+      allow create: if validAbsenceCreate() && underSizeLimit();
       allow update, delete: if isAdmin();
     }
 
-    // ===== 투약 =====
+    // ===== 투약 — 민감정보: 관리자만 읽기 =====
     match /medications/{medId} {
-      allow read: if isApproved();
-      allow create: if validMedicationCreate();
+      allow read: if isAdmin();
+      allow create: if validMedicationCreate() && underSizeLimit();
       allow update, delete: if isAdmin();
     }
 
-    // ===== 서류함 =====
+    // ===== 서류함 — 관리자만 =====
     match /inbox/{inboxId} {
       allow read: if isAdmin();
-      allow create: if validInboxCreate();
+      allow create: if validInboxCreate() && underSizeLimit();
       allow update, delete: if isAdmin();
     }
 
-    // ===== 신규 등록/상담 =====
+    // ===== 신규 등록/상담 — 민감정보 =====
     match /registrations/{id} {
       allow create: if request.resource.data.keys().hasAll(['name', 'date'])
         && request.resource.data.keys().hasOnly(['name', 'date', 'type', 'summary', 'data', 'consents', 'createdAt'])
         && request.resource.data.name is string
-        && request.resource.data.name.size() <= 50;
+        && request.resource.data.name.size() <= 50
+        && underSizeLimit();
       allow read, update, delete: if isAdmin();
     }
 

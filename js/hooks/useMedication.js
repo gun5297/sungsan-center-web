@@ -125,7 +125,7 @@ export function printMedication() {
 let _unsubMedications = null;
 
 export function initMedication() {
-  if (!isLoggedIn()) {
+  if (!isLoggedIn() || !getIsAdmin()) {
     if (_unsubMedications) { _unsubMedications(); _unsubMedications = null; }
     medRecords = [];
     renderMedSchedule();

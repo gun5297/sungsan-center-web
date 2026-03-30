@@ -35,7 +35,7 @@ export async function logAction(action, target, targetId, summary) {
 
 // 최근 로그 조회 (관리자 전용 — Firestore rules에서 강제)
 export async function getRecentLogs(count = 20) {
-  const q = query(logsCol, orderBy('timestamp', 'desc'), limit(count));
+  const q = query(logsCol, orderBy('createdAt', 'desc'), limit(count));
   const snap = await getDocs(q);
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }

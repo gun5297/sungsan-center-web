@@ -34,6 +34,8 @@ export async function createUserDoc(uid, { email, name, role, phone }) {
       phone: phone || '',
       approved: false,
       photoConsent: true,
+      consentAt: serverTimestamp(),
+      consentVersion: '2026-03-30',
       createdAt: serverTimestamp()
     });
     return;

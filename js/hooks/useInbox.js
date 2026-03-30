@@ -9,6 +9,7 @@ import { getCurrentUser, getUserRole, getIsAdmin } from '../state.js';
 import { getMyChildren } from '../../firebase/services/childLinkService.js';
 import { escapeHtml } from '../utils.js';
 import { on } from '../events.js';
+import { logAction } from '../../firebase/services/auditService.js';
 
 let inboxItems = [];
 let currentInboxFilter = 'all';
@@ -32,6 +33,7 @@ export function updateInboxBadge() {
 export function openInbox() {
   document.getElementById('inboxModal').classList.add('active');
   document.body.style.overflow = 'hidden';
+  logAction('read', 'inbox', '', '서류함 열람');
   // 검색/정렬 상태 초기화
   currentSearchKeyword = '';
   currentSortBy = 'newest';
@@ -138,15 +140,19 @@ export async function deleteInboxItemById(id) {
 export function printInboxItem(id) {
   const item = inboxItems.find(i => i.id === id);
   if (!item) return;
+  logAction('export', 'inbox', id, `서류 출력: ${item.type} - ${item.name}`);
 
   const printArea = document.getElementById('printArea');
   let html = '';
+
+  const receiptNo = item.receiptNo || '';
 
   if (item.type === 'absence') {
     html = `
       <div class="print-header">
         <div class="print-org">성산지역아동센터</div>
         <div class="print-title">${escapeHtml(item.data.type)} 신청서</div>
+        ${receiptNo ? `<div class="print-receipt">접수번호: ${escapeHtml(receiptNo)}</div>` : ''}
       </div>
       <table>
         <tr><th>신청 구분</th><td>${escapeHtml(item.data.type)}</td></tr>
@@ -167,12 +173,17 @@ export function printInboxItem(id) {
         <p>신청인(보호자): ${escapeHtml(item.data.guardian || '___________')} ${item.data.signature ? `<img src="${escapeHtml(item.data.signature)}" style="height:50px;vertical-align:middle;" />` : '(서명)'}</p>
       </div>
       <div class="print-to">성산지역아동센터장 귀하</div>
+      <div class="print-stamp-area">
+        <div class="print-stamp-box">담당<div class="stamp-circle"></div></div>
+        <div class="print-stamp-box">센터장<div class="stamp-circle"></div></div>
+      </div>
     `;
   } else if (item.type === 'medication') {
     html = `
       <div class="print-header">
         <div class="print-org">성산지역아동센터</div>
         <div class="print-title">투약 의뢰서</div>
+        ${receiptNo ? `<div class="print-receipt">접수번호: ${escapeHtml(receiptNo)}</div>` : ''}
       </div>
       <table>
         <tr><th>아동 성명</th><td>${escapeHtml(item.data.name)}</td></tr>
@@ -196,6 +207,10 @@ export function printInboxItem(id) {
         <p>의뢰인(보호자): ___________ ${item.data.signature ? `<img src="${escapeHtml(item.data.signature)}" style="height:50px;vertical-align:middle;" />` : '(서명)'}</p>
       </div>
       <div class="print-to">성산지역아동센터장 귀하</div>
+      <div class="print-stamp-area">
+        <div class="print-stamp-box">담당<div class="stamp-circle"></div></div>
+        <div class="print-stamp-box">센터장<div class="stamp-circle"></div></div>
+      </div>
     `;
   } else if (item.type === 'register') {
     html = `
@@ -225,6 +240,10 @@ export function printInboxItem(id) {
         <p>신청인(보호자): ${escapeHtml(item.data.guardian || '___________')} (서명)</p>
       </div>
       <div class="print-to">성산지역아동센터장 귀하</div>
+      <div class="print-stamp-area">
+        <div class="print-stamp-box">담당<div class="stamp-circle"></div></div>
+        <div class="print-stamp-box">센터장<div class="stamp-circle"></div></div>
+      </div>
     `;
   } else if (item.type === 'consult') {
     html = `
@@ -248,6 +267,10 @@ export function printInboxItem(id) {
         <p>신청인(보호자): ${escapeHtml(item.data.guardian || '___________')} (서명)</p>
       </div>
       <div class="print-to">성산지역아동센터장 귀하</div>
+      <div class="print-stamp-area">
+        <div class="print-stamp-box">담당<div class="stamp-circle"></div></div>
+        <div class="print-stamp-box">센터장<div class="stamp-circle"></div></div>
+      </div>
     `;
   }
 

@@ -98,7 +98,8 @@ nav {
 }
 
 .nav-login-btn {
-  padding: 8px 20px;
+  padding: 12px 20px;
+  min-height: 44px;
   border-radius: var(--radius-xs);
   background: var(--primary);
   color: #fff;
@@ -106,6 +107,8 @@ nav {
   font-weight: 700;
   text-decoration: none;
   transition: all var(--transition);
+  display: inline-flex;
+  align-items: center;
 }
 
 .nav-login-btn:hover {

@@ -11,7 +11,7 @@
 
 import { inboxCol } from '../collections.js';
 import {
-  doc, getDocs, addDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp
+  doc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from '../config.js';
 
@@ -65,7 +65,6 @@ export async function getMySubmissions(childNames) {
 
 // 서류 상태 업데이트
 export async function updateInboxStatus(id, status) {
-  const { updateDoc } = await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js");
   const ref = doc(db, 'inbox', id);
   return await updateDoc(ref, { status });
 }

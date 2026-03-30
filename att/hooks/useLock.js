@@ -53,8 +53,9 @@ function getRemainingLockSeconds() {
 function recordFailure() {
   const state = loadLockState();
   state.totalFails++;
+  // 5회 이상이면 매 실패마다 잠금 (누적 단계에 따라 시간 증가)
   const duration = getLockDuration(state.totalFails);
-  if (duration > 0 && state.totalFails % 5 === 0) {
+  if (duration > 0 && state.totalFails >= 5) {
     state.lockedUntil = Date.now() + duration;
   }
   saveLockState(state);

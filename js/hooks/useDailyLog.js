@@ -260,8 +260,8 @@ on('openDailyLogFromList', (e, el) => {
 });
 on('copyYesterdayLog', async (e, el) => {
   const todayDate = el.dataset.date;
-  const d = new Date(todayDate.split('-').map(Number).reduce((a, v, i) => (i === 0 ? new Date(v, 0, 1) : i === 1 ? (a.setMonth(v - 1), a) : (a.setDate(v), a)), new Date()));
-  d.setDate(d.getDate() - 1);
+  const [y, m, day] = todayDate.split('-').map(Number);
+  const d = new Date(y, m - 1, day - 1);
   const yesterdayKey = getDateKey(d);
   try {
     const prev = await getDailyLog(yesterdayKey);

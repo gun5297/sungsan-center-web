@@ -31,16 +31,13 @@ export async function getPasswords() {
 
 // 비밀번호 변경
 export async function updatePasswords(data) {
-  // 출석 PIN은 Cloud Function으로 변경
+  // 출석 PIN은 Cloud Function으로 해시 변경 + Firestore에 평문도 저장 (관리자 조회용)
   if (data.attendance) {
     const changePinFn = httpsCallable(functions, 'changePin');
     await changePinFn({ pin: data.attendance });
-    delete data.attendance;
   }
-  // 나머지 설정 저장
-  if (Object.keys(data).length > 0) {
-    await setDoc(passwordsRef, data, { merge: true });
-  }
+  // 모든 설정 Firestore에 저장 (관리자만 읽기 가능)
+  await setDoc(passwordsRef, data, { merge: true });
 }
 
 // ===== 태블릿 잠금 화면 — Cloud Function으로 PIN 검증 =====

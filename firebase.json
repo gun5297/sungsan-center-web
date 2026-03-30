@@ -7,5 +7,9 @@
       "bucket": "sungsan-center.firebasestorage.app",
       "rules": "storage.rules"
     }
-  ]
+  ],
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs20"
+  }
 }

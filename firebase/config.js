@@ -37,6 +37,7 @@ if (RECAPTCHA_SITE_KEY && isProd) {
   }
 }
 
+export { app };
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);

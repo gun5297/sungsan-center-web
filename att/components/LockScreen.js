@@ -5,7 +5,7 @@ export function LockScreen() {
     <div class="lock-content">
       <div class="lock-left">
         <div class="lock-icon">🔒</div>
-        <div class="lock-title">출결 시스템</div>
+        <div class="lock-title">출석 시스템</div>
         <div class="lock-subtitle">비밀번호를 입력하세요</div>
       </div>
       <div class="lock-right">

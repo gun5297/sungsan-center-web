@@ -66,6 +66,10 @@ async function _doSubmitMedication() {
     showToast('아동 성명, 약 이름, 투약 기간을 입력해주세요.', 'warning');
     return;
   }
+  if (to && from > to) {
+    showToast('종료일이 시작일보다 빠릅니다.', 'warning');
+    return;
+  }
 
   if (!validateMaxLength(name, 20)) {
     showToast('입력값이 너무 깁니다 (이름: 최대 20자)', 'warning');
@@ -87,36 +91,44 @@ async function _doSubmitMedication() {
 
   try {
     await createMedication({ name, birth, drug, dose, time, symptom, hospital, from, to: to || from, storage, note });
+  } catch (e) {
+    console.error('투약 기록 저장 오류:', e);
+    showToast('제출 중 오류가 발생했습니다: ' + e.message, 'error');
+    return;
+  }
 
-    const dateStr = formatDate(new Date());
-    // 전자서명 이미지 가져오기 → Storage 업로드
-    const signImg = document.getElementById('medSignImg');
-    const signatureRaw = (signImg && signImg.style.display !== 'none') ? signImg.src : '';
-    let signatureData = signatureRaw;
-    try {
-      if (signatureRaw) {
-        const signatureUrl = await uploadSignature(signatureRaw);
-        if (signatureUrl) signatureData = signatureUrl;
-      }
-    } catch (e) {
-      console.warn('서명 업로드 실패, 원본 데이터 사용:', e);
+  const dateStr = formatDate(new Date());
+  const signImg = document.getElementById('medSignImg');
+  const signatureRaw = (signImg && signImg.style.display !== 'none') ? signImg.src : '';
+  let signatureData = signatureRaw;
+  try {
+    if (signatureRaw) {
+      const signatureUrl = await uploadSignature(signatureRaw);
+      if (signatureUrl) signatureData = signatureUrl;
     }
+  } catch (e) {
+    console.warn('서명 업로드 실패, 원본 데이터 사용:', e);
+  }
 
+  let receiptNo = '';
+  try {
     const result = await addInboxItem({
       type: 'medication', name: `${name} (${drug})`, summary: `${dose} · ${time} · ${from}~${to || from}`, date: dateStr,
       data: { name, birth, drug, dose, time, symptom, from, to: to || from, storage, hospital, note, signature: signatureData },
       consents: ['건강정보(민감정보) 수집 동의', '부작용 안내 동의', '약 정보 책임 확인', '응급조치 동의']
     });
-    const receiptNo = result?.receiptNo || '';
-
-    showToast(receiptNo ? `투약 의뢰서가 제출되었습니다.\n접수번호: ${receiptNo}` : '투약 의뢰서가 제출되었습니다.', 'success');
-    cHealth.checked = false; c1.checked = false; c2.checked = false; c3.checked = false;
-    // 폼 초기화
-    resetFields('medName', 'medBirth', 'medDrug', 'medDose', 'medSymptom', 'medHospital', 'medNote');
+    receiptNo = result?.receiptNo || '';
   } catch (e) {
-    console.error('제출 오류:', e);
-    showToast('제출 중 오류가 발생했습니다. 다시 시도해 주세요.', 'error');
+    console.warn('서류함 저장 오류 (투약 기록은 저장됨):', e);
+    showToast('투약 의뢰서는 제출되었으나 접수번호 발급에 실패했습니다.', 'warning');
+    cHealth.checked = false; c1.checked = false; c2.checked = false; c3.checked = false;
+    resetFields('medName', 'medBirth', 'medDrug', 'medDose', 'medSymptom', 'medHospital', 'medNote');
+    return;
   }
+
+  showToast(receiptNo ? `투약 의뢰서가 제출되었습니다.\n접수번호: ${receiptNo}` : '투약 의뢰서가 제출되었습니다.', 'success');
+  cHealth.checked = false; c1.checked = false; c2.checked = false; c3.checked = false;
+  resetFields('medName', 'medBirth', 'medDrug', 'medDose', 'medSymptom', 'medHospital', 'medNote');
 }
 
 export function printMedication() {

@@ -191,12 +191,17 @@ async function saveStudent() {
 }
 
 async function _doSaveStudent() {
-  const id = document.getElementById('chId').value.trim().padStart(4, '0');
+  const rawId = document.getElementById('chId').value.trim();
+  if (!/^\d{1,4}$/.test(rawId)) {
+    showToast('번호는 1~4자리 숫자만 입력 가능합니다.', 'warning');
+    return;
+  }
+  const id = rawId.padStart(4, '0');
   const name = document.getElementById('chName').value.trim();
   const school = document.getElementById('chSchool').value.trim();
   const parent = document.getElementById('chParent').value.trim();
 
-  if (!id || !name || !school || !parent) {
+  if (!name || !school || !parent) {
     showToast('모든 항목을 입력해주세요.', 'warning');
     return;
   }

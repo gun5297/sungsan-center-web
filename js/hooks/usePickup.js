@@ -58,6 +58,9 @@ export async function addPickupStudent() {
   const name = document.getElementById('pickupName').value.trim();
   const school = document.getElementById('pickupSchool').value.trim();
   if (!name || !school) { showToast('이름과 학교를 입력해주세요.', 'warning'); return; }
+  if (pickupStudents.some(s => s.name === name && s.school === school)) {
+    showToast('이미 등록된 아동입니다.', 'warning'); return;
+  }
 
   await createPickup({
     name, school,

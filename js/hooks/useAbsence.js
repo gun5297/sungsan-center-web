@@ -59,6 +59,10 @@ async function _doSubmitAbsence() {
     showToast('아동 성명, 사유, 기간을 모두 입력해주세요.', 'warning');
     return;
   }
+  if (to && from > to) {
+    showToast('종료일이 시작일보다 빠릅니다.', 'warning');
+    return;
+  }
 
   if (!validateMaxLength(name, 20)) {
     showToast('입력값이 너무 깁니다 (이름: 최대 20자)', 'warning');
@@ -109,6 +113,11 @@ async function _doSubmitAbsence() {
     receiptNo = result?.receiptNo || '';
   } catch (e) {
     console.warn('서류함 저장 오류 (결석 기록은 저장됨):', e);
+    showToast('신청서는 제출되었으나 접수번호 발급에 실패했습니다.', 'warning');
+    consentHealth.checked = false;
+    consent.checked = false;
+    resetFields('absName', 'absSchool', 'absGuardian', 'absReason', 'absPhone');
+    return;
   }
 
   showToast(receiptNo ? `신청서가 제출되었습니다.\n접수번호: ${receiptNo}` : '신청서가 제출되었습니다.', 'success');

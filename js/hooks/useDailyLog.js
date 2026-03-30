@@ -135,10 +135,12 @@ function removeProgramRow(el) {
 async function saveDailyLogForm() {
   const user = getCurrentUser();
   if (!user) return;
+  const saveBtn = document.querySelector('[data-action="saveDailyLogForm"]');
+  if (saveBtn) saveBtn.disabled = true;
 
   const dateKey = document.getElementById('logDate')?.value;
   const weather = document.getElementById('logWeather')?.value;
-  const totalChildren = parseInt(document.getElementById('logTotal')?.value) || 0;
+  const totalChildren = Math.max(0, parseInt(document.getElementById('logTotal')?.value) || 0);
   const specialNotes = document.getElementById('logNotes')?.value || '';
 
   const programRows = document.querySelectorAll('#logPrograms .program-row');
@@ -165,6 +167,8 @@ async function saveDailyLogForm() {
   } catch (e) {
     console.error('일지 저장 실패:', e);
     showToast('저장에 실패했습니다: ' + e.message, 'error');
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
   }
 }
 

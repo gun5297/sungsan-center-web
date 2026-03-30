@@ -113,12 +113,30 @@ function pressDelete() {
   updateDisplay();
 }
 
+let _submitting = false;
+let _lastSubmitTime = 0;
+const SUBMIT_COOLDOWN = 2000; // 2초 쿨다운
+
 async function pressConfirm() {
   if (inputCode.length === 0) return;
+  if (_submitting) return;
+  const now = Date.now();
+  if (now - _lastSubmitTime < SUBMIT_COOLDOWN) {
+    showInputError('잠시 후 다시 시도하세요');
+    inputCode = '';
+    updateDisplay();
+    return;
+  }
+  _submitting = true;
+  _lastSubmitTime = now;
   const code = inputCode.padStart(4, '0');
   inputCode = '';
   updateDisplay();
-  await recordAttendance(code);
+  try {
+    await recordAttendance(code);
+  } finally {
+    _submitting = false;
+  }
 }
 
 // 이벤트 위임 등록

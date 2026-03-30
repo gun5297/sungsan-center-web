@@ -95,13 +95,23 @@ export async function addGalleryItem() {
     const totalFiles = files ? files.length : 0;
 
     if (totalFiles > 1) {
+      let successCount = 0;
       for (let i = 0; i < totalFiles; i++) {
-        showToast(`${i + 1}/${totalFiles} 업로드 중...`, 'info');
-        const resized = await resizeImage(files[i]);
-        const { url: photoUrl, storagePath } = await uploadPhoto(resized);
-        await createGalleryItem({ title, category, date: dateStr, photoUrl, storagePath });
+        try {
+          showToast(`${i + 1}/${totalFiles} 업로드 중...`, 'info');
+          const resized = await resizeImage(files[i]);
+          const { url: photoUrl, storagePath } = await uploadPhoto(resized);
+          await createGalleryItem({ title, category, date: dateStr, photoUrl, storagePath });
+          successCount++;
+        } catch (err) {
+          console.warn(`갤러리 ${i + 1}번째 파일 업로드 실패:`, err);
+        }
       }
-      showToast(`${totalFiles}개 활동이 추가되었습니다.`, 'success');
+      if (successCount === totalFiles) {
+        showToast(`${totalFiles}개 활동이 추가되었습니다.`, 'success');
+      } else {
+        showToast(`${successCount}/${totalFiles}개 업로드 성공. ${totalFiles - successCount}개 실패.`, 'warning');
+      }
     } else {
       let photoUrl = null;
       let storagePath = null;

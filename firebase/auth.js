@@ -31,7 +31,11 @@ export async function login(email, password) {
 // 익명 로그인 (출결 태블릿 — PIN 인증 후 호출)
 // 이미 익명 세션이 있으면 기존 세션 유지
 export async function loginAnonymously() {
+  if (auth.authStateReady) {
+    await auth.authStateReady(); // 초기화 중인 세션 기다리기 (덮어쓰기 방지)
+  }
   if (auth.currentUser) return { success: true };
+  
   try {
     await signInAnonymously(auth);
     return { success: true };

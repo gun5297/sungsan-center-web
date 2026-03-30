@@ -52,14 +52,14 @@ function showSuccess(code, type, typeLabel, timeStr) {
 
   setTimeout(() => {
     showScreen('screenMain');
-  }, 3000);
+  }, 1200);
 }
 
 async function recordAttendance(code) {
   const now = new Date();
   const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
-  let records;
+  let records, students;
   try {
     records = await getTodayRecords();
   } catch (e) {
@@ -67,7 +67,6 @@ async function recordAttendance(code) {
     showInputError('서버 오류. 잠시 후 다시 시도하세요.');
     return;
   }
-
   let type, typeLabel;
   if (!records[code]) {
     records[code] = { inTime: timeStr, inTs: Date.now(), outTime: null, outTs: null };
@@ -101,6 +100,12 @@ function pressNum(n) {
   if (inputCode.length >= 4) return;
   inputCode += n;
   updateDisplay();
+  
+  if (inputCode.length === 4) {
+    setTimeout(() => {
+      pressConfirm();
+    }, 100);
+  }
 }
 
 function pressDelete() {

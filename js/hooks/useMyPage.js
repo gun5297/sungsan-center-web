@@ -6,8 +6,7 @@ import { getUserDoc, updateUserDoc, getPendingUsers, approveUser, rejectUser, is
 import { getPasswords, updatePasswords } from '../../firebase/services/settingsService.js';
 import { subscribeChildren, createChild, updateChild, deleteChild } from '../../firebase/services/childService.js';
 import { getMyChildren, linkChild, unlinkChild, subscribeMyChildren } from '../../firebase/services/childLinkService.js';
-import { getRecentLogs } from '../../firebase/services/auditService.js';
-import { logAction } from '../../firebase/services/auditService.js';
+import { getRecentLogs, logAction } from '../../firebase/services/auditService.js';
 
 const ROLE_LABELS = {
   admin: '관리자',

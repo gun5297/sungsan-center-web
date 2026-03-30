@@ -1,7 +1,7 @@
 // ===== useAttendance: 출석 현황 (메인 페이지 표시용) — Firestore 실시간 구독 =====
 
 import { on } from '../events.js';
-import { skeletonRows, escapeHtml } from '../utils.js';
+import { skeletonRows, escapeHtml, getDateKey } from '../utils.js';
 import { subscribeTodayRecords } from '../../firebase/services/attendanceService.js';
 import { subscribeStudents } from '../../firebase/services/studentService.js';
 import { getCurrentUser, getUserRole, isLoggedIn } from '../state.js';
@@ -193,7 +193,8 @@ export function initAttendance() {
     });
   } catch (e) {
     console.warn('[useAttendance] 출결 구독 실패:', e);
-    const key = `att_${new Date().toISOString().split('T')[0]}`;
+    // [보안] getDateKey로 로컬 시간대 기반 날짜 사용
+    const key = `att_${getDateKey(new Date())}`;
     cachedRecords = JSON.parse(localStorage.getItem(key) || '{}');
     renderFromCache();
   }

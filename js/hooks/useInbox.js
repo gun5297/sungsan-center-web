@@ -39,10 +39,17 @@ export function openInbox() {
   if (searchInput) searchInput.value = '';
   if (sortSelect) sortSelect.value = 'newest';
   renderInbox();
+  // [UX] ESC 키로 모달 닫기
+  document.addEventListener('keydown', _inboxEscHandler);
+}
+
+function _inboxEscHandler(e) {
+  if (e.key === 'Escape') closeInbox();
 }
 
 export function closeInbox() {
   document.getElementById('inboxModal').classList.remove('active');
+  document.removeEventListener('keydown', _inboxEscHandler);
 }
 
 export function switchInboxTab(type) {
@@ -259,6 +266,8 @@ export async function openMySubmissions() {
 
   document.getElementById('mySubmissionsModal').classList.add('active');
   mySubmitFilter = 'all';
+  // [UX] ESC 키로 모달 닫기
+  document.addEventListener('keydown', _mySubmitEscHandler);
 
   // 탭 초기화
   document.querySelectorAll('#mySubmitTabs .inbox-tab').forEach(t => {
@@ -285,8 +294,13 @@ export async function openMySubmissions() {
   }
 }
 
+function _mySubmitEscHandler(e) {
+  if (e.key === 'Escape') closeMySubmissions();
+}
+
 export function closeMySubmissions() {
   document.getElementById('mySubmissionsModal').classList.remove('active');
+  document.removeEventListener('keydown', _mySubmitEscHandler);
 }
 
 export function switchMySubmitTab(type) {

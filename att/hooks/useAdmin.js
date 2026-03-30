@@ -3,6 +3,7 @@
 import { getStudents, getTodayRecords, saveTodayRecords, deleteStudentRecord, resetTodayRecords, subscribeTodayRecords } from '../data.js';
 import { on } from '../../js/events.js';
 import { escapeHtml, escapeCSV } from '../../js/utils.js';
+import { getCurrentUser } from '../../firebase/auth.js';
 
 let adminRefreshInterval = null;
 let unsubscribeRecords = null;
@@ -42,11 +43,6 @@ export function stopAdminRefresh() {
 }
 
 export function switchAdminTab(tab) {
-  document.getElementById('tabRecords').classList.toggle('active', tab === 'records');
-  document.getElementById('tabManage').classList.toggle('active', tab === 'manage');
-  document.getElementById('panelRecords').classList.toggle('hidden', tab !== 'records');
-  document.getElementById('panelManage').classList.toggle('hidden', tab !== 'manage');
-
   if (tab === 'records') {
     renderAdmin();
   }
@@ -60,7 +56,7 @@ export async function renderAdmin() {
   const now = new Date();
   const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
   document.getElementById('adminDate').textContent =
-    `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${dayNames[now.getDay()]})`;
+    `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일 (${dayNames[now.getDay()]})`;
 
   try {
     const [students, records] = await Promise.all([getStudents(), getTodayRecords()]);
@@ -87,13 +83,14 @@ function renderTimelineFromCache() {
 }
 
 function renderSummary(students, records) {
-  let inCount = 0, outCount = 0, absentCount = 0;
-  students.forEach(s => {
-    const r = records[s.id];
-    if (!r) absentCount++;
-    else if (r.outTime) outCount++;
+  let inCount = 0, outCount = 0;
+
+  Object.values(records).forEach(r => {
+    if (r.outTime) outCount++;
     else inCount++;
   });
+
+  const absentCount = Math.max(0, students.length - (inCount + outCount));
 
   document.getElementById('adminSummary').innerHTML = `
     <div class="summary-card">
@@ -113,49 +110,72 @@ function renderSummary(students, records) {
 
 function renderTimeline(students, records) {
   const now = Date.now();
+  const user = getCurrentUser();
+  const isAdminLogged = user && !user.isAnonymous; // 익명이 아닌 정식 로그인
 
-  const checkedIn = students
-    .filter(s => records[s.id])
-    .sort((a, b) => (records[a.id].inTs || 0) - (records[b.id].inTs || 0));
+  const checkedInIds = Object.keys(records)
+    .sort((a, b) => (records[a].inTs || 0) - (records[b].inTs || 0));
 
-  if (checkedIn.length === 0) {
+  if (checkedInIds.length === 0) {
     document.getElementById('adminList').innerHTML =
-      '<div class="timeline-empty">아직 출석한 아동이 없습니다</div>';
+      '<div class="timeline-empty">오늘 출석한 아동이 없습니다</div>';
     return;
   }
 
-  document.getElementById('adminList').innerHTML = checkedIn.map(s => {
-    const r = records[s.id];
+  document.getElementById('adminList').innerHTML = checkedInIds.map(id => {
+    const r = records[id];
+    const s = students.find(st => st.id === id) || { name: '미등록 아동', school: '' };
+
     const elapsed = r.inTs ? now - r.inTs : Infinity;
     const remaining = Math.max(0, 60 - Math.floor(elapsed / 1000));
     const canCancel = elapsed < 60000;
 
-    const smsHtml = `<div class="timeline-sms pending">알림 서비스 준비 중</div>`;
-
     const cancelBtn = canCancel
-      ? `<button class="cancel-btn" data-action="cancelAttendance" data-id="${s.id}">출석 취소 (${remaining}초)</button>`
+      ? `<button class="cancel-btn" data-action="cancelAttendance" data-id="${id}">취소 (${remaining}초)</button>`
       : `<button class="cancel-btn disabled" disabled>취소 불가</button>`;
 
     const statusClass = r.outTime ? 'left' : 'present';
-    const statusLabel = r.outTime ? '하원' : '출석 중';
+    const statusLabel = r.outTime ? '하원' : '출석';
+    const timeDisplay = r.outTime ? `${r.inTime} - ${r.outTime}` : `${r.inTime}`;
 
-    return `
-      <div class="timeline-item">
-        <div class="timeline-time">${r.inTime}</div>
-        <div class="timeline-body">
-          <div class="timeline-top">
-            <div class="timeline-avatar">${s.id}</div>
-            <div class="timeline-info">
-              <div class="timeline-name">${escapeHtml(s.name)}</div>
-              <div class="timeline-school">${escapeHtml(s.school)}</div>
-            </div>
-            <span class="att-row-status ${statusClass}">${statusLabel}</span>
+    if (isAdminLogged) {
+      // 관리자 로그인 상태: 메인 화면과 같은 CSS 디자인 + 취소버튼(모든 기능)
+      const avatarBg = r.outTime ? 'var(--primary-light, #ffeae6)' : 'var(--success-light, #e8f5e9)';
+      const avatarColor = r.outTime ? 'var(--primary, #ff5722)' : 'var(--success, #4caf50)';
+
+      return `
+        <div class="timeline-item" style="display:flex; align-items:center; gap:16px; padding: 16px; background:var(--bg-card, #fff); border-radius:12px; margin-bottom:12px; border:1px solid var(--border, #eee); box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+          <div class="att-avatar" style="width:44px; height:44px; border-radius:50%; background:${avatarBg}; color:${avatarColor}; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:1.1rem; flex-shrink:0;">
+            ${escapeHtml(s.name.charAt(0))}
           </div>
-          ${smsHtml}
-          <div class="timeline-actions">${cancelBtn}</div>
+          <div class="att-info" style="flex:1; display:flex; flex-direction:column; gap:4px;">
+            <div class="att-name" style="font-weight:800; font-size:1.05rem; color:var(--text-main, #333);">${escapeHtml(s.name)} <span style="font-size:0.8rem; font-weight:600; color:var(--text-sub); margin-left:4px;">(${id})</span></div>
+            <div class="att-status" style="font-size:0.85rem; color:var(--text-sub, #666);">
+              <span class="att-row-status ${statusClass}" style="margin-right:4px;">${statusLabel}</span>
+              ${timeDisplay}
+            </div>
+          </div>
+          <div class="att-right-area" style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
+            <div class="att-school" style="font-size:0.8rem; font-weight:600; color:var(--text-sub);">${escapeHtml(s.school)}</div>
+            <div class="timeline-actions">${cancelBtn}</div>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    } else {
+      // 일반 기기 모드: 단순 시간 + 번호만 표시
+      return `
+        <div class="timeline-item">
+          <div class="timeline-time" style="font-size: 0.95rem;">${timeDisplay}</div>
+          <div class="timeline-body" style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; gap:12px; align-items:center;">
+              <div class="timeline-avatar">${id}</div>
+              <span class="att-row-status ${statusClass}">${statusLabel}</span>
+            </div>
+            <div class="timeline-actions">${cancelBtn}</div>
+          </div>
+        </div>
+      `;
+    }
   }).join('');
 }
 
@@ -174,52 +194,6 @@ async function cancelAttendance(studentId) {
   }
 }
 
-async function exportCSV() {
-  try {
-    const [students, records] = await Promise.all([getStudents(), getTodayRecords()]);
-    const today = new Date().toISOString().split('T')[0];
-
-    let csv = '번호,이름,학교,등원시간,하원시간,상태,보호자연락처\n';
-    students.forEach(s => {
-      const r = records[s.id];
-      let status, inTime, outTime;
-      if (!r) {
-        status = '미출석'; inTime = ''; outTime = '';
-      } else if (r.outTime) {
-        status = '하원완료'; inTime = r.inTime; outTime = r.outTime;
-      } else {
-        status = '출석중'; inTime = r.inTime; outTime = '';
-      }
-      csv += [s.id, s.name, s.school, inTime, outTime, status, s.parent]
-        .map(escapeCSV).join(',') + '\n';
-    });
-
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `출결기록_${today}.csv`;
-    link.click();
-  } catch (e) {
-    console.error('[useAdmin] exportCSV 실패:', e);
-    alert('CSV 내보내기에 실패했습니다.');
-  }
-}
-
-async function resetToday() {
-  if (confirm('오늘 출결 기록을 모두 삭제하시겠습니까?')) {
-    try {
-      await resetTodayRecords();
-      cachedRecords = {};
-      await renderAdmin();
-    } catch (e) {
-      console.error('[useAdmin] resetToday 실패:', e);
-      alert('초기화에 실패했습니다.');
-    }
-  }
-}
 
 // 이벤트 위임 등록
-on('switchAdminTab', (e, el) => switchAdminTab(el.dataset.tab));
 on('cancelAttendance', (e, el) => cancelAttendance(el.dataset.id));
-on('exportCSV', () => exportCSV());
-on('resetToday', () => resetToday());

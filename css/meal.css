@@ -186,3 +186,15 @@
   min-width: 120px;
   text-align: center;
 }
+
+/* 식단 에디터 버튼 행 */
+.meal-editor-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  align-items: center;
+}
+
+.meal-editor-actions .btn-upload {
+  margin-top: 0;
+}

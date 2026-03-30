@@ -198,7 +198,7 @@ export function renderDaySchedule() {
     html += '<div class="empty-state">등록된 시간표가 없습니다</div>';
   } else {
     if (hasDateOverride) {
-      html += '<div style="font-size:0.72rem;color:var(--primary);font-weight:700;margin-bottom:6px;">이 날짜에 별도 시간표가 적용되어 있습니다</div>';
+      html += '<div class="date-override-note">이 날짜에 별도 시간표가 적용되어 있습니다</div>';
     }
     html += schedule.map(s => `
       <div class="time-slot">
@@ -236,7 +236,7 @@ export function openScheduleEditor() {
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay active';
   overlay.innerHTML = `
-    <div class="modal" style="max-width:540px;">
+    <div class="modal schedule-editor-modal">
       <div class="modal-title">시간표 수정</div>
       <button class="modal-close-x" data-action="closeScheduleEditor"></button>
 
@@ -246,17 +246,17 @@ export function openScheduleEditor() {
       <button class="btn-secondary-sm" data-action="addScheduleRow" style="width:100%;">+ 시간 추가</button>
 
       <!-- 적용 범위 설정 -->
-      <div style="margin-top:16px;padding:16px;background:var(--bg-sub);border-radius:10px;">
-        <div style="font-size:0.82rem;font-weight:700;color:var(--text-sub);margin-bottom:10px;">적용 범위</div>
+      <div class="schedule-apply-box">
+        <div class="schedule-apply-title">적용 범위</div>
 
-        <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;font-weight:600;cursor:pointer;margin-bottom:8px;">
+        <label class="schedule-radio-label">
           <input type="radio" name="applyMode" value="weekday" checked data-action="toggleApplyMode" />
           요일별 기본 시간표로 적용
         </label>
-        <div id="applyWeekdayOptions" style="margin-left:22px;margin-bottom:12px;">
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div id="applyWeekdayOptions" class="schedule-weekday-options">
+          <div class="schedule-day-checks">
             ${[1,2,3,4,5].map(d => `
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.85rem;font-weight:600;cursor:pointer;">
+              <label class="schedule-day-check-label">
                 <input type="checkbox" class="apply-day-check" value="${d}" ${d === dayOfWeek ? 'checked' : ''} />
                 ${['','월','화','수','목','금'][d]}
               </label>
@@ -264,30 +264,30 @@ export function openScheduleEditor() {
           </div>
         </div>
 
-        <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;font-weight:600;cursor:pointer;margin-bottom:8px;">
+        <label class="schedule-radio-label">
           <input type="radio" name="applyMode" value="period" data-action="toggleApplyMode" />
           특정 기간에만 적용
         </label>
-        <div id="applyPeriodOptions" style="margin-left:22px;display:none;">
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <input type="date" id="scheduleFrom" class="input-field" value="${getDateKey(selectedDate)}" style="flex:1;margin-bottom:0;min-width:130px;" />
-            <span style="font-weight:600;color:var(--text-sub);">~</span>
-            <input type="date" id="scheduleTo" class="input-field" value="${getDateKey(selectedDate)}" style="flex:1;margin-bottom:0;min-width:130px;" />
+        <div id="applyPeriodOptions" class="schedule-period-options">
+          <div class="schedule-period-inputs">
+            <input type="date" id="scheduleFrom" class="input-field schedule-period-input" value="${getDateKey(selectedDate)}" />
+            <span class="schedule-period-sep">~</span>
+            <input type="date" id="scheduleTo" class="input-field schedule-period-input" value="${getDateKey(selectedDate)}" />
           </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+          <div class="schedule-period-day-checks">
             ${[1,2,3,4,5].map(d => `
-              <label style="display:flex;align-items:center;gap:4px;font-size:0.85rem;font-weight:600;cursor:pointer;">
+              <label class="schedule-day-check-label">
                 <input type="checkbox" class="period-day-check" value="${d}" ${d === dayOfWeek ? 'checked' : ''} />
                 ${['','월','화','수','목','금'][d]}
               </label>
             `).join('')}
           </div>
-          <div style="font-size:0.72rem;color:var(--text-sub);margin-top:4px;">체크한 요일에만 적용됩니다</div>
+          <div class="schedule-period-hint">체크한 요일에만 적용됩니다</div>
         </div>
       </div>
 
-      <div style="display:flex;gap:12px;margin-top:16px;align-items:center;">
-        <button class="btn-upload" style="margin-top:0;" data-action="saveScheduleEdit">저장</button>
+      <div class="schedule-editor-actions">
+        <button class="btn-upload" data-action="saveScheduleEdit">저장</button>
         <button class="modal-close" data-action="closeScheduleEditor">취소</button>
       </div>
     </div>
@@ -296,6 +296,14 @@ export function openScheduleEditor() {
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeScheduleEditor(overlay.querySelector('.modal-close'));
   });
+  // [UX] ESC 키로 모달 닫기
+  function onEsc(e) {
+    if (e.key === 'Escape') {
+      closeScheduleEditor(overlay.querySelector('.modal-close'));
+      document.removeEventListener('keydown', onEsc);
+    }
+  }
+  document.addEventListener('keydown', onEsc);
 }
 
 function scheduleRowHTML(s, i) {

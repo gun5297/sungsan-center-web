@@ -528,6 +528,8 @@ body.admin-mode .notice-actions {
 .modal-close-x::after {
   content: '';
   position: absolute;
+  top: 50%;
+  left: 50%;
   width: 14px;
   height: 2px;
   background: currentColor;
@@ -535,11 +537,11 @@ body.admin-mode .notice-actions {
 }
 
 .modal-close-x::before {
-  transform: rotate(45deg);
+  transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .modal-close-x::after {
-  transform: rotate(-45deg);
+  transform: translate(-50%, -50%) rotate(-45deg);
 }
 
 .modal-close-x:hover {

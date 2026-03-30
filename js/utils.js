@@ -11,8 +11,9 @@ export function formatDate(date) {
   return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
 }
 
+// [보안] UTC 기반 → 로컬 시간대 기반으로 변경 (KST 00:00~08:59 날짜 오류 방지)
 export function todayString() {
-  return new Date().toISOString().split('T')[0];
+  return getDateKey(new Date());
 }
 
 export function getWeekDates(offset) {

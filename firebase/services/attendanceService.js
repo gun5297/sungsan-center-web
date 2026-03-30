@@ -15,8 +15,13 @@ import {
   doc, getDoc, setDoc, deleteDoc, onSnapshot
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
+// [보안] UTC 기반 → 로컬 시간대 기반으로 수정 (출결 날짜 정확성)
 function todayKey() {
-  return new Date().toISOString().split('T')[0];
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 // 오늘 출결 조회

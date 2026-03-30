@@ -118,32 +118,36 @@
   font-weight: 800;
   color: var(--primary);
   font-variant-numeric: tabular-nums;
-  min-width: 44px;
+  min-width: 100px;
   padding-top: 3px;
+  white-space: nowrap;
 }
 
 #screenAdmin .timeline-body {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 #screenAdmin .timeline-top {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 8px;
 }
 
 #screenAdmin .timeline-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  padding: 4px 12px;
+  height: 28px;
+  border-radius: 14px;
   background: var(--primary-light);
   color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
-  font-size: 0.78rem;
+  font-weight: 900;
+  font-size: 0.85rem;
   flex-shrink: 0;
 }
 

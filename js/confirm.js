@@ -10,15 +10,17 @@ export function showConfirm(message) {
     const overlay = document.createElement('div');
     overlay.className = 'confirm-overlay';
 
+    // [보안] XSS 방지를 위해 message를 textContent로 삽입
     overlay.innerHTML = `
       <div class="confirm-modal">
-        <div class="confirm-message">${message}</div>
+        <div class="confirm-message"></div>
         <div class="confirm-actions">
           <button class="confirm-btn confirm-cancel">취소</button>
           <button class="confirm-btn confirm-ok">확인</button>
         </div>
       </div>
     `;
+    overlay.querySelector('.confirm-message').textContent = message;
 
     document.body.appendChild(overlay);
 

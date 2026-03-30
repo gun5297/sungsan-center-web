@@ -105,7 +105,13 @@ document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
 // --- FAB 메뉴 토글 (모바일) ---
 on('toggleToolbarMenu', () => {
-  document.getElementById('fixedToolbar').classList.toggle('open');
+  const toolbar = document.getElementById('fixedToolbar');
+  toolbar.classList.toggle('open');
+  // [접근성] aria-expanded 동적 토글
+  const fab = document.getElementById('toolbarFab');
+  const isOpen = toolbar.classList.contains('open');
+  fab.setAttribute('aria-expanded', String(isOpen));
+  fab.setAttribute('aria-label', isOpen ? '메뉴 닫기' : '메뉴 열기');
 });
 
 // 모바일에서 메뉴 버튼 클릭 시 메뉴 닫기
@@ -131,23 +137,35 @@ initSessionTimeout();
 // --- 5단계: 하단 탭 바 스크롤 추적 ---
 const tabSections = ['hero', 'notice', 'meal', 'schedule', 'gallery'];
 const tabItems = document.querySelectorAll('.tab-item');
+let isNavigating = false;
+let navTimeout = null;
 
 function updateActiveTab() {
+  if (isNavigating) return; // 클릭 스크롤 이동 중 깜빡임 방지
   const scrollY = window.scrollY + 200;
   let activeId = 'hero';
   for (const id of tabSections) {
     const el = document.getElementById(id);
     if (el && el.offsetTop <= scrollY) activeId = id;
   }
+  
+  // id(hero)와 데이터 탭(home) 매칭 수정
+  const tabName = activeId === 'hero' ? 'home' : activeId;
+  
   tabItems.forEach(tab => {
-    tab.classList.toggle('active', tab.getAttribute('data-tab') === activeId);
+    tab.classList.toggle('active', tab.getAttribute('data-tab') === tabName);
   });
 }
 
 window.addEventListener('scroll', updateActiveTab, { passive: true });
 tabItems.forEach(tab => {
   tab.addEventListener('click', () => {
+    isNavigating = true; // 이동 상태 진입
     tabItems.forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
+    tab.classList.add('active'); // 누른 즉시 대상 탭 활성화
+    
+    // 0.8초 후 이동완료로 간주하고 추적 재개
+    clearTimeout(navTimeout);
+    navTimeout = setTimeout(() => { isNavigating = false; }, 800);
   });
 });

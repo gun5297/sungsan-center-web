@@ -123,6 +123,14 @@ function renderMealEditorModal() {
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeMealEditor();
   });
+  // [UX] ESC 키로 모달 닫기
+  function onEsc(e) {
+    if (e.key === 'Escape') {
+      closeMealEditor();
+      document.removeEventListener('keydown', onEsc);
+    }
+  }
+  document.addEventListener('keydown', onEsc);
   renderMealEditorCalendar();
 }
 
@@ -203,8 +211,8 @@ export function openMealDayEditor(dateKey) {
         <textarea id="mealEditSnack" class="input-field textarea" rows="3" placeholder="메뉴를 줄바꿈으로 구분&#10;예: 우유&#10;고구마">${meal.snack}</textarea>
       </div>
 
-      <div style="display:flex;gap:12px;margin-top:16px;align-items:center;">
-        <button class="btn-upload" style="margin-top:0;" data-action="saveMealDay">저장</button>
+      <div class="meal-editor-actions">
+        <button class="btn-upload" data-action="saveMealDay">저장</button>
         <button class="btn-secondary-sm" data-action="backToMealCalendar">달력으로</button>
       </div>
     </div>

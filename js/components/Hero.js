@@ -3,7 +3,7 @@ export function Hero() {
   return `
   <div id="hero">
   <section class="hero">
-    <div class="hero-badge">2026년 3월</div>
+    <div class="hero-badge">${new Date().getFullYear()}년 ${new Date().getMonth() + 1}월</div>
     <h1>
       아이들의 하루를<br />
       한눈에<br />
@@ -47,7 +47,7 @@ export function Hero() {
     </div>
   </div>
 
-  <div style="height:40px;"></div>
+  <div class="hero-spacer"></div>
   <div class="divider"></div>
   </div>
   `;

@@ -1,11 +1,13 @@
 // ===== useDailyLog: 일일 활동 일지 =====
 import { getDailyLog, saveDailyLog, getRecentLogs } from '../../firebase/services/dailyLogService.js';
 import { getCurrentUser } from '../state.js';
-import { escapeHtml } from '../utils.js';
+// [개선] getDateKey import 추가 — UTC 기반 todayKey 대체
+import { escapeHtml, getDateKey } from '../utils.js';
 import { on, onAll } from '../events.js';
 
+// [보안] UTC → 로컬 시간대 기반으로 변경 (KST 00:00~08:59 날짜 오류 방지)
 function todayKey() {
-  return new Date().toISOString().split('T')[0];
+  return getDateKey(new Date());
 }
 
 function formatDisplayDate(key) {

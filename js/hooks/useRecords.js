@@ -3,15 +3,17 @@ import { onAuthChange } from '../../firebase/auth.js';
 import { getUserDoc, isAdminRole } from '../../firebase/services/userService.js';
 import { getRecordsByDate } from '../../firebase/services/attendanceService.js';
 import { getAllStudents } from '../../firebase/services/studentService.js';
-import { escapeHtml, escapeCSV } from '../utils.js';
+// [리뷰] 중복 todayKey 제거 → utils.js의 getDateKey 재사용
+import { escapeHtml, escapeCSV, getDateKey } from '../utils.js';
+// [보안] CSV 다운로드 감사 로그 기록
+import { logAction } from '../../firebase/services/auditService.js';
 
-let _currentDate = todayKey();
+// [보안] getDateKey로 로컬 시간대 기반 날짜 사용
+let _currentDate = getDateKey(new Date());
 let _students = [];
 let _records = {};
 
-function todayKey() {
-  return new Date().toISOString().split('T')[0];
-}
+// todayKey 제거됨 — getDateKey(new Date())를 직접 사용
 
 function formatDateDisplay(dateKey) {
   const d = new Date(dateKey + 'T00:00:00');
@@ -46,9 +48,10 @@ function renderPage(root) {
     </div>
 
     <div class="mypage-card date-nav">
-      <button class="records-date-btn" id="prevDate">◀</button>
+      <!-- [리뷰] 접근성: aria-label 추가 -->
+      <button class="records-date-btn" id="prevDate" aria-label="이전 날짜">◀</button>
       <span class="records-date-label" id="currentDateLabel">${formatDateDisplay(_currentDate)}</span>
-      <button class="records-date-btn" id="nextDate">▶</button>
+      <button class="records-date-btn" id="nextDate" aria-label="다음 날짜">▶</button>
     </div>
 
     <div id="recordsSummary" class="records-summary"></div>
@@ -86,7 +89,8 @@ async function loadAndRender() {
 function changeDate(delta) {
   const d = new Date(_currentDate + 'T00:00:00');
   d.setDate(d.getDate() + delta);
-  _currentDate = d.toISOString().split('T')[0];
+  // [보안] getDateKey로 로컬 시간대 기반 날짜 생성
+  _currentDate = getDateKey(d);
   document.getElementById('currentDateLabel').textContent = formatDateDisplay(_currentDate);
   loadAndRender();
 }
@@ -174,6 +178,9 @@ function renderTimeline() {
 }
 
 async function exportCSV() {
+  // [보안] 개인정보 다운로드 감사 로그 기록
+  logAction('export', 'attendance', _currentDate, `출석기록 CSV 다운로드 (${_currentDate})`);
+
   let csv = '번호,이름,학교,등원시간,하원시간,상태\n';
   _students.forEach(s => {
     const r = _records[s.id];
@@ -188,4 +195,6 @@ async function exportCSV() {
   link.href = URL.createObjectURL(blob);
   link.download = `출결기록_${_currentDate}.csv`;
   link.click();
+  // [보안] Blob URL 메모리 누수 방지
+  URL.revokeObjectURL(link.href);
 }

@@ -3,8 +3,8 @@ export function Toolbar() {
   return `
   <!-- 우상단 고정 버튼 (FAB 메뉴) -->
   <div class="fixed-toolbar" id="fixedToolbar">
-    <button class="toolbar-fab" id="toolbarFab" data-action="toggleToolbarMenu">
-      <span class="fab-icon" id="fabIcon">+</span>
+    <button class="toolbar-fab" id="toolbarFab" data-action="toggleToolbarMenu" aria-label="메뉴 열기" aria-expanded="false">
+      <span class="fab-icon" id="fabIcon" aria-hidden="true"></span>
     </button>
     <div class="toolbar-menu" id="toolbarMenu">
       <a href="attendance.html" class="toolbar-btn toolbar-att">출석</a>
@@ -18,9 +18,9 @@ export function Toolbar() {
   </div>
 
   <!-- 서류함 모달 -->
-  <div class="modal-overlay" id="inboxModal">
+  <div class="modal-overlay" id="inboxModal" role="dialog" aria-modal="true" aria-labelledby="inboxModalTitle">
     <div class="modal inbox-modal">
-      <div class="modal-title">제출 서류함</div>
+      <div class="modal-title" id="inboxModalTitle">제출 서류함</div>
       <button class="modal-close-x" data-action="closeInbox"></button>
 
       <div class="inbox-tabs">
@@ -52,9 +52,9 @@ export function Toolbar() {
   </div>
 
   <!-- 내 제출 이력 모달 -->
-  <div class="modal-overlay" id="mySubmissionsModal">
+  <div class="modal-overlay" id="mySubmissionsModal" role="dialog" aria-modal="true" aria-labelledby="mySubmissionsTitle">
     <div class="modal my-submissions-modal">
-      <div class="modal-title">내 제출 이력</div>
+      <div class="modal-title" id="mySubmissionsTitle">내 제출 이력</div>
       <button class="modal-close-x" data-action="closeMySubmissions"></button>
 
       <div class="inbox-tabs" id="mySubmitTabs">

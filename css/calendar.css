@@ -295,3 +295,107 @@
 .schedule-edit-row .input-field {
   padding: 0 12px;
 }
+
+/* ===== 시간표 수정 모달 레이아웃 ===== */
+.schedule-editor-modal {
+  max-width: 540px;
+}
+
+.schedule-apply-box {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--bg-sub);
+  border-radius: 10px;
+}
+
+.schedule-apply-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-bottom: 10px;
+}
+
+.schedule-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.schedule-day-checks {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.schedule-day-check-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.schedule-weekday-options {
+  margin-left: 22px;
+  margin-bottom: 12px;
+}
+
+.schedule-period-options {
+  margin-left: 22px;
+  display: none;
+}
+
+.schedule-period-inputs {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.schedule-period-input {
+  flex: 1;
+  margin-bottom: 0;
+  min-width: 130px;
+}
+
+.schedule-period-sep {
+  font-weight: 600;
+  color: var(--text-sub);
+}
+
+.schedule-period-day-checks {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.schedule-period-hint {
+  font-size: 0.72rem;
+  color: var(--text-sub);
+  margin-top: 4px;
+}
+
+.schedule-editor-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  align-items: center;
+}
+
+.schedule-editor-actions .btn-upload {
+  margin-top: 0;
+}
+
+/* 날짜별 오버라이드 안내 */
+.date-override-note {
+  font-size: 0.72rem;
+  color: var(--primary);
+  font-weight: 700;
+  margin-bottom: 6px;
+}

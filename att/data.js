@@ -22,7 +22,10 @@ import {
 // ATT_PASSWORD 제거됨 — Firestore publicConfig/attLock 해시로 대체 (settingsService.js 참조)
 // localStorage 키는 캐시 목적으로만 유지 (인증 우회 수단 아님)
 export const STUDENTS_KEY = 'att_students';
-export const TODAY_KEY = `att_${new Date().toISOString().split('T')[0]}`;
+// [보안] UTC 기반 → 로컬 시간대 기반으로 변경
+const _now = new Date();
+const _todayStr = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
+export const TODAY_KEY = `att_${_todayStr}`;
 
 export const DEFAULT_STUDENTS = [
   { id: '0001', name: '홍길동', school: '증산초 1학년', parent: '010-1234-5678' },

@@ -3,17 +3,14 @@ import { onAuthChange } from '../../firebase/auth.js';
 import { getUserDoc, isAdminRole } from '../../firebase/services/userService.js';
 import { getAllStudentsWithContacts, createStudent, updateStudent, deleteStudent } from '../../firebase/services/studentService.js';
 import { getRecordsByDate, getRecordsByMonth } from '../../firebase/services/attendanceService.js';
-import { escapeHtml } from '../utils.js';
+// [리뷰] 중복 todayKey 제거 → utils.js의 getDateKey 재사용
+import { escapeHtml, getDateKey } from '../utils.js';
 
 let _students = [];
 let _editingDocId = null;
-let _editingStudentId = null;
 let _selectedStudentId = null;
-let _attDate = todayKey();
-
-function todayKey() {
-  return new Date().toISOString().split('T')[0];
-}
+// [보안] getDateKey로 로컬 시간대 기반 날짜 사용
+let _attDate = getDateKey(new Date());
 
 function formatDateDisplay(dateKey) {
   const d = new Date(dateKey + 'T00:00:00');
@@ -80,9 +77,10 @@ function renderPage(root) {
 
     <!-- 날짜 선택 (출석 현황용) -->
     <div class="mypage-card date-nav ch-date-nav">
-      <button class="records-date-btn" id="chPrevDate">◀</button>
+      <!-- [리뷰] 접근성: aria-label 추가 -->
+      <button class="records-date-btn" id="chPrevDate" aria-label="이전 날짜">◀</button>
       <span class="records-date-label" id="chDateLabel">${formatDateDisplay(_attDate)}</span>
-      <button class="records-date-btn" id="chNextDate">▶</button>
+      <button class="records-date-btn" id="chNextDate" aria-label="다음 날짜">▶</button>
     </div>
 
     <!-- 아동 목록 -->
@@ -115,21 +113,6 @@ function renderPage(root) {
 
 async function loadStudents() {
   try {
-    _students = await getAllStudentsWithContacts();
-    const [, records] = await Promise.all([
-      Promise.resolve(),
-      getRecordsByDate(_attDate),
-    ]);
-    renderStudentList(records);
-  } catch (e) {
-    console.error('[useChildren] 학생 로드 실패:', e);
-    document.getElementById('chStudentList').innerHTML =
-      '<div class="empty-state">불러오기에 실패했습니다.</div>';
-  }
-}
-
-async function loadStudentsWithRecords() {
-  try {
     const [students, records] = await Promise.all([
       getAllStudentsWithContacts(),
       getRecordsByDate(_attDate),
@@ -138,6 +121,8 @@ async function loadStudentsWithRecords() {
     renderStudentList(records);
   } catch (e) {
     console.error('[useChildren] 데이터 로드 실패:', e);
+    document.getElementById('chStudentList').innerHTML =
+      '<div class="empty-state">불러오기에 실패했습니다.</div>';
   }
 }
 
@@ -191,7 +176,8 @@ function renderStudentList(records) {
 function changeAttDate(delta) {
   const d = new Date(_attDate + 'T00:00:00');
   d.setDate(d.getDate() + delta);
-  _attDate = d.toISOString().split('T')[0];
+  // [보안] getDateKey로 로컬 시간대 기반 날짜 생성
+  _attDate = getDateKey(d);
   document.getElementById('chDateLabel').textContent = formatDateDisplay(_attDate);
   loadStudentsWithRecords();
 }
@@ -227,7 +213,7 @@ async function saveStudent() {
       showToast('추가되었습니다.', 'success');
       clearForm();
     }
-    setTimeout(() => loadStudentsWithRecords(), 500);
+    setTimeout(() => loadStudents(), 500);
   } catch (e) {
     console.error('[useChildren] 저장 실패:', e);
     showToast('저장에 실패했습니다.', 'error');
@@ -238,7 +224,6 @@ function startEdit(docId, studentId) {
   const s = _students.find(st => st.docId === docId);
   if (!s) return;
   _editingDocId = docId;
-  _editingStudentId = studentId;
   document.getElementById('chId').value = s.id;
   document.getElementById('chName').value = s.name;
   document.getElementById('chSchool').value = s.school;
@@ -251,7 +236,6 @@ function startEdit(docId, studentId) {
 
 function cancelEdit() {
   _editingDocId = null;
-  _editingStudentId = null;
   clearForm();
   document.getElementById('chFormTitle').textContent = '아동 등록';
   document.getElementById('chSubmitBtn').textContent = '추가';
@@ -265,11 +249,11 @@ function clearForm() {
 }
 
 async function confirmDelete(docId, name) {
-  if (!await showConfirm(`'${name}' 아동을 삭제하시겠습니까?`)) return;
+  if (!await showConfirm(`'${escapeHtml(name)}' 아동을 삭제하시겠습니까?`)) return;
   try {
     await deleteStudent(docId);
     showToast('삭제되었습니다.', 'success');
-    setTimeout(() => loadStudentsWithRecords(), 500);
+    setTimeout(() => loadStudents(), 500);
   } catch (e) {
     console.error('[useChildren] 삭제 실패:', e);
     showToast('삭제에 실패했습니다.', 'error');

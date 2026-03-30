@@ -17,19 +17,15 @@ export async function logAction(action, target, targetId, summary) {
     // window.__currentUser 대신 Firebase Auth에서 직접 현재 사용자 가져옴
     const firebaseUser = auth.currentUser;
     const uid  = firebaseUser ? firebaseUser.uid : '';
-    // 익명 사용자는 감사 로그에서 "익명"으로 표시
-    const name = (firebaseUser && !firebaseUser.isAnonymous)
-      ? (firebaseUser.displayName || firebaseUser.email || uid)
-      : (firebaseUser?.isAnonymous ? '익명(태블릿)' : '시스템');
 
+    // [보안] Firestore Rules 필드명에 맞춤: target→resource, targetId→resourceId, summary→message, timestamp→createdAt
     await addDoc(logsCol, {
       action,
-      target,
-      targetId: targetId || '',
-      summary,
+      resource: target,
+      resourceId: targetId || '',
+      message: summary,
       userId: uid,
-      userName: name,
-      timestamp: serverTimestamp()
+      createdAt: serverTimestamp()
     });
   } catch (e) {
     // 로그 실패는 경고만 — 주 작업을 막지 않음

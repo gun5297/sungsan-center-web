@@ -27,7 +27,7 @@ export function SignupForm() {
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">비밀번호</label>
-              <input type="password" id="signupPassword" class="input-field" placeholder="4자리 이상" />
+              <input type="password" id="signupPassword" class="input-field" placeholder="6자리 이상" />
             </div>
             <div class="form-group">
               <label class="form-label">비밀번호 확인</label>

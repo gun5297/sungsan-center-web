@@ -1,6 +1,7 @@
 // ===== useSignup: 회원가입 (Firebase Auth + Firestore) =====
-import { auth } from '../../firebase/config.js';
+import { auth, db } from '../../firebase/config.js';
 import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { createUserDoc } from '../../firebase/services/userService.js';
 import { onAuthChange } from '../../firebase/auth.js';
 import { on } from '../../js/events.js';
@@ -52,6 +53,15 @@ export async function doSignup() {
 
     // Firestore 사용자 문서 생성 (모든 가입자는 승인 대기 상태)
     await createUserDoc(uid, { email, name, role, phone });
+
+    // 관리자에게 가입 알림 전송
+    try {
+      await addDoc(collection(db, 'notifications'), {
+        type: 'signup',
+        message: `${name}님이 가입 승인을 요청했습니다.`,
+        createdAt: serverTimestamp()
+      });
+    } catch (e) { console.warn('가입 알림 전송 실패:', e); }
 
     // 가입 완료 화면
     document.getElementById('signupFormFields').innerHTML = `

@@ -88,6 +88,52 @@ nav {
   display: block;
 }
 
+/* ===== 상단 로그인/프로필 ===== */
+.nav-auth {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.nav-login-btn {
+  padding: 8px 20px;
+  border-radius: var(--radius-xs);
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all var(--transition);
+}
+
+.nav-login-btn:hover {
+  background: var(--primary-dark);
+}
+
+/* 로그인 상태면 로그인 버튼 숨김 */
+body.logged-in .nav-login-btn { display: none; }
+
+.nav-profile-btn {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-sub);
+  align-items: center;
+  justify-content: center;
+  color: var(--text-sub);
+  transition: all var(--transition);
+}
+
+.nav-profile-btn:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+/* 로그인 상태면 프로필 버튼 표시 */
+body.logged-in .nav-profile-btn { display: flex; }
+
 @media (max-width: 768px) {
   .bottom-tab-bar {
     display: flex;

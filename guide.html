@@ -3,6 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:;
+    img-src 'self' data:;
+    object-src 'none';
+    base-uri 'self';
+  " />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <title>사용 가이드 - 성산지역아동센터</title>
   <link rel="stylesheet" href="guide.css" />

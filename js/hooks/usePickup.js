@@ -6,6 +6,7 @@ import { on, onAll } from '../events.js';
 
 let pickupWeekOffset = 0;
 let pickupStudents = [];
+let _unsubPickups = null;
 
 export function changePickupWeek(delta) {
   pickupWeekOffset += delta;
@@ -83,8 +84,8 @@ export async function deletePickupStudent(id) {
 }
 
 export function initPickup() {
-  // Firestore 실시간 구독
-  subscribePickups((data) => {
+  if (_unsubPickups) { _unsubPickups(); _unsubPickups = null; }
+  _unsubPickups = subscribePickups((data) => {
     pickupStudents = data;
     renderPickupTable();
   });

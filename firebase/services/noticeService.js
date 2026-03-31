@@ -3,7 +3,7 @@
 import { noticesCol } from '../collections.js';
 import {
   doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot,
-  query, orderBy, limit, startAfter, serverTimestamp
+  query, orderBy, limit, startAfter, serverTimestamp, deleteField
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import {
   ref, uploadBytes, getDownloadURL
@@ -12,11 +12,13 @@ import { db, storage } from '../config.js';
 
 const PAGE_SIZE = 10;
 
-// 최신 N개 실시간 구독 (홈 화면용 — 전체 로드 방지)
+// 최신 N개 실시간 구독 (soft delete된 항목 제외)
 export function subscribeNotices(callback, pageSize = PAGE_SIZE) {
-  const q = query(noticesCol, orderBy('createdAt', 'desc'), limit(pageSize));
+  const q = query(noticesCol, orderBy('createdAt', 'desc'), limit(pageSize + 10));
   return onSnapshot(q, (snapshot) => {
-    const notices = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    const notices = snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
+      .filter(n => !n.deletedAt)
+      .slice(0, pageSize);
     callback(notices);
   }, (error) => {
     console.error('공지 구독 오류:', error);
@@ -64,7 +66,24 @@ export async function updateNotice(id, data) {
   return await updateDoc(doc(db, 'notices', id), { ...data, updatedAt: serverTimestamp() });
 }
 
-// 삭제
+// 삭제 (soft delete)
 export async function deleteNotice(id) {
+  return await updateDoc(doc(db, 'notices', id), { deletedAt: serverTimestamp() });
+}
+
+// 복구
+export async function restoreNotice(id) {
+  return await updateDoc(doc(db, 'notices', id), { deletedAt: deleteField() });
+}
+
+// 영구 삭제
+export async function permanentDeleteNotice(id) {
   return await deleteDoc(doc(db, 'notices', id));
+}
+
+// 삭제된 공지 조회
+export async function getDeletedNotices() {
+  const q = query(noticesCol, orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(n => n.deletedAt);
 }

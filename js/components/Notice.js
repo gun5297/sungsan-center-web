@@ -3,7 +3,7 @@ export function Notice() {
   return `
   <section class="section fade-up" id="notice">
     <div class="section-tag">공지사항</div>
-    <h2 class="section-title">가정통신문 &<br>공지사항</h2>
+    <h2 class="section-title">가정통신문 &<br>공지사항 <button class="help-tooltip-btn" data-action="showHelp" data-section="notice">?</button></h2>
     <p class="section-desc">센터의 주요 안내사항과 가정통신문을 확인하세요.</p>
 
     <div class="upload-area admin-only" id="uploadArea">

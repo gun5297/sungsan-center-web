@@ -3,7 +3,7 @@ export function Calendar() {
   return `
   <section class="section fade-up" id="schedule">
     <div class="section-tag">시간표</div>
-    <h2 class="section-title">월별 & 일별<br>시간표</h2>
+    <h2 class="section-title">월별 & 일별<br>시간표 <button class="help-tooltip-btn" data-action="showHelp" data-section="schedule">?</button></h2>
     <p class="section-desc">이번 달 프로그램 일정을 한눈에 확인하세요.</p>
 
     <div class="month-nav">

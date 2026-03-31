@@ -1,0 +1,95 @@
+/* ===== 시스템 상태 ===== */
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.status-online { background: #2e7d32; }
+.status-offline { background: #c62828; }
+.status-warn { background: #e65100; }
+
+.dash-card-system {
+  cursor: pointer;
+}
+
+.dash-card-system:hover {
+  border-color: var(--primary);
+}
+
+/* 시스템 상태 모달 */
+.system-status-modal {
+  max-width: 480px;
+}
+
+.ss-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.ss-label {
+  color: var(--text-sub);
+  font-weight: 600;
+}
+
+.ss-value {
+  font-weight: 700;
+}
+
+.ss-error-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ss-error-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  background: #fef8f5;
+  border-radius: var(--radius);
+  border-left: 3px solid var(--primary);
+  font-size: 0.85rem;
+}
+
+.ss-error-time {
+  color: var(--text-sub);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.ss-error-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ss-error-desc {
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.ss-error-action {
+  font-size: 0.78rem;
+  color: var(--text-sub);
+}
+
+.ss-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}

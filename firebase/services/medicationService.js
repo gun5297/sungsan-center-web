@@ -8,15 +8,16 @@
 
 import { medicationsCol } from '../collections.js';
 import {
-  doc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, serverTimestamp
+  doc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, serverTimestamp, deleteField
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from '../config.js';
 
-// 실시간 구독
+// 실시간 구독 (soft delete된 항목 제외)
 export function subscribeMedications(callback) {
   const q = query(medicationsCol, orderBy('createdAt', 'desc'));
   return onSnapshot(q, (snapshot) => {
-    const records = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const records = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(r => !r.deletedAt);
     callback(records);
   }, (error) => {
     console.error('투약 구독 오류:', error);
@@ -38,10 +39,27 @@ export async function createMedication({ name, birth, drug, dose, time, symptom,
   });
 }
 
-// 삭제 (관리자)
+// 삭제 (soft delete)
 export async function deleteMedication(id) {
   const ref = doc(db, 'medications', id);
-  return await deleteDoc(ref);
+  return await updateDoc(ref, { deletedAt: serverTimestamp() });
+}
+
+// 복구
+export async function restoreMedication(id) {
+  return await updateDoc(doc(db, 'medications', id), { deletedAt: deleteField() });
+}
+
+// 영구 삭제
+export async function permanentDeleteMedication(id) {
+  return await deleteDoc(doc(db, 'medications', id));
+}
+
+// 삭제된 항목 조회
+export async function getDeletedMedications() {
+  const q = query(medicationsCol, orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => r.deletedAt);
 }
 
 // 투약 완료 체크 (관리자)

@@ -3,7 +3,7 @@ export function Medication() {
   return `
   <section class="section fade-up" id="medication">
     <div class="section-tag">투약 관리</div>
-    <h2 class="section-title">투약 의뢰서 &<br>투약 일정 <button class="help-tooltip-btn" data-action="showHelp" data-section="medication">?</button></h2>
+    <h2 class="section-title">투약 의뢰서 &<br>투약 일정</h2>
     <p class="section-desc">아이에게 약을 투여해야 할 경우 의뢰서를 작성해 주세요.</p>
 
     <div class="form-card">

@@ -40,8 +40,6 @@ import './hooks/useDailyLog.js';
 import './hooks/useAttReport.js';
 import './hooks/useMealUpload.js';
 import './hooks/useDataExport.js';
-import { captureError } from './hooks/useSystemStatus.js';
-import './hooks/useHelp.js';
 import { initGallery } from './hooks/useGallery.js';
 import { initInbox } from './hooks/useInbox.js';
 import { initSessionTimeout } from '../firebase/auth.js';
@@ -49,12 +47,10 @@ import { initSessionTimeout } from '../firebase/auth.js';
 // --- 글로벌 에러 핸들러 ---
 window.addEventListener('error', (e) => {
   console.error('Global error:', e.error || e.message);
-  captureError(e.error || e.message, 'global');
   if (window.showToast) showToast('예기치 않은 오류가 발생했습니다.', 'error');
 });
 window.addEventListener('unhandledrejection', (e) => {
   console.error('Unhandled rejection:', e.reason);
-  captureError(e.reason, 'promise');
   if (window.showToast) showToast('작업 중 오류가 발생했습니다.', 'error');
 });
 

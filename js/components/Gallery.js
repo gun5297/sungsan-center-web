@@ -3,7 +3,7 @@ export function Gallery() {
   return `
   <section class="section fade-up" id="gallery">
     <div class="section-tag">활동 갤러리</div>
-    <h2 class="section-title">우리 아이들의<br>즐거운 하루 <button class="help-tooltip-btn" data-action="showHelp" data-section="gallery">?</button></h2>
+    <h2 class="section-title">우리 아이들의<br>즐거운 하루</h2>
     <p class="section-desc">센터에서의 다양한 활동 사진을 확인하세요.</p>
 
     <div class="admin-only admin-section-bottom">

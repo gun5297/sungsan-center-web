@@ -94,19 +94,6 @@ export async function rejectUser(uid) {
   await updateDoc(ref, { approved: false, rejected: true });
 }
 
-// 승인된 모든 사용자 목록 (관리자용)
-export async function getAllApprovedUsers() {
-  const q = query(collection(db, 'users'), where('approved', '==', true));
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-}
-
-// 계정 비활성화 (삭제 대신 승인 철회)
-export async function deactivateUser(uid) {
-  const ref = doc(db, 'users', uid);
-  await updateDoc(ref, { approved: false });
-}
-
 // 관리자가 한 명도 없으면 true (첫 가입자 = 관리자)
 export async function hasNoDirector() {
   // publicConfig/adminExists sentinel 문서로 빠르게 확인

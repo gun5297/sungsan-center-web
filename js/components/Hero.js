@@ -40,11 +40,6 @@ export function Hero() {
         <div class="dash-value" id="dashMealVal">-</div>
         <div class="dash-label">오늘 식단</div>
       </div>
-      <div class="dash-card dash-card-system" data-action="openSystemStatusModal">
-        <div class="dash-icon">&#9889;</div>
-        <div class="dash-value" id="dashSystemVal"><span class="status-dot status-online"></span> 정상</div>
-        <div class="dash-label">시스템 상태</div>
-      </div>
     </div>
     <div class="dashboard-actions">
       <button class="btn-primary" data-action="openDailyLogEditor">활동 일지 작성</button>

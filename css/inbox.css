@@ -392,36 +392,3 @@
   border-color: var(--primary);
   color: var(--primary);
 }
-
-/* ===== 서류 수정 모달 ===== */
-.inbox-edit-modal {
-  max-width: 520px;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-.inbox-edit-form {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin: 16px 0;
-}
-
-.inbox-edit-form .form-group {
-  margin-bottom: 4px;
-}
-
-.inbox-edit-form .form-label {
-  font-size: 0.8rem;
-  margin-bottom: 2px;
-}
-
-.inbox-edit-form .input-field {
-  height: 40px;
-  font-size: 0.85rem;
-}
-
-.inbox-edit-form textarea.input-field {
-  height: auto;
-  min-height: 60px;
-}

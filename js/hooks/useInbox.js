@@ -4,14 +4,13 @@ import {
   addInboxItem as addInboxItemFS,
   deleteInboxItem as deleteInboxItemFS,
   updateInboxStatus as updateInboxStatusFS,
-  updateInboxItem as updateInboxItemFS,
   getMySubmissions as getMySubmissionsFS
 } from '../../firebase/services/inboxService.js';
 import { getCurrentUser, getUserRole, getIsAdmin } from '../state.js';
-import { logAction } from '../../firebase/services/auditService.js';
 import { getMyChildren } from '../../firebase/services/childLinkService.js';
 import { escapeHtml, safeImageSrc, trapFocus } from '../utils.js';
 import { on } from '../events.js';
+import { logAction } from '../../firebase/services/auditService.js';
 
 let inboxItems = [];
 let currentInboxFilter = 'all';
@@ -156,7 +155,6 @@ export function renderInbox() {
         </div>
         <span class="inbox-date">${escapeHtml(item.date)}</span>
         <button class="inbox-print-btn" data-action="printInboxItem" data-id="${escapeHtml(item.id)}">출력</button>
-        <button class="edit-btn" data-action="editInboxItem" data-id="${escapeHtml(item.id)}">수정</button>
         <button class="delete-btn" data-action="deleteInboxItemById" data-id="${escapeHtml(item.id)}">삭제</button>
       </div>
     `;
@@ -415,134 +413,6 @@ export function initInbox() {
   });
 }
 
-// ===== 서류 수정 모달 =====
-
-function getEditFormFields(type, data) {
-  if (type === 'absence') {
-    return `
-      <div class="form-group"><label class="form-label">구분</label>
-        <select id="editInbox_type" class="input-field"><option value="결석" ${data.type==='결석'?'selected':''}>결석</option><option value="조퇴" ${data.type==='조퇴'?'selected':''}>조퇴</option><option value="지각" ${data.type==='지각'?'selected':''}>지각</option></select></div>
-      <div class="form-group"><label class="form-label">아동 이름</label><input id="editInbox_name" class="input-field" value="${escapeHtml(data.name||'')}" /></div>
-      <div class="form-group"><label class="form-label">학교/학년</label><input id="editInbox_school" class="input-field" value="${escapeHtml(data.school||'')}" /></div>
-      <div class="form-group"><label class="form-label">보호자</label><input id="editInbox_guardian" class="input-field" value="${escapeHtml(data.guardian||'')}" /></div>
-      <div class="form-group"><label class="form-label">연락처</label><input id="editInbox_phone" class="input-field" value="${escapeHtml(data.phone||'')}" /></div>
-      <div class="form-group"><label class="form-label">사유</label><textarea id="editInbox_reason" class="input-field" rows="3">${escapeHtml(data.reason||'')}</textarea></div>
-      <div class="form-group"><label class="form-label">시작일</label><input id="editInbox_from" type="date" class="input-field" value="${escapeHtml(data.from||'')}" /></div>
-      <div class="form-group"><label class="form-label">종료일</label><input id="editInbox_to" type="date" class="input-field" value="${escapeHtml(data.to||'')}" /></div>`;
-  }
-  if (type === 'medication') {
-    return `
-      <div class="form-group"><label class="form-label">아동 이름</label><input id="editInbox_name" class="input-field" value="${escapeHtml(data.name||'')}" /></div>
-      <div class="form-group"><label class="form-label">증상</label><input id="editInbox_symptom" class="input-field" value="${escapeHtml(data.symptom||'')}" /></div>
-      <div class="form-group"><label class="form-label">병원</label><input id="editInbox_hospital" class="input-field" value="${escapeHtml(data.hospital||'')}" /></div>
-      <div class="form-group"><label class="form-label">약 이름</label><input id="editInbox_drug" class="input-field" value="${escapeHtml(data.drug||'')}" /></div>
-      <div class="form-group"><label class="form-label">용량</label><input id="editInbox_dose" class="input-field" value="${escapeHtml(data.dose||'')}" /></div>
-      <div class="form-group"><label class="form-label">투약 시간</label><input id="editInbox_time" class="input-field" value="${escapeHtml(data.time||'')}" /></div>
-      <div class="form-group"><label class="form-label">시작일</label><input id="editInbox_from" type="date" class="input-field" value="${escapeHtml(data.from||'')}" /></div>
-      <div class="form-group"><label class="form-label">종료일</label><input id="editInbox_to" type="date" class="input-field" value="${escapeHtml(data.to||'')}" /></div>
-      <div class="form-group"><label class="form-label">보관방법</label><input id="editInbox_storage" class="input-field" value="${escapeHtml(data.storage||'')}" /></div>
-      <div class="form-group"><label class="form-label">비고</label><textarea id="editInbox_note" class="input-field" rows="2">${escapeHtml(data.note||'')}</textarea></div>`;
-  }
-  if (type === 'register') {
-    return `
-      <div class="form-group"><label class="form-label">아동 이름</label><input id="editInbox_name" class="input-field" value="${escapeHtml(data.name||'')}" /></div>
-      <div class="form-group"><label class="form-label">생년월일</label><input id="editInbox_birth" class="input-field" value="${escapeHtml(data.birth||'')}" /></div>
-      <div class="form-group"><label class="form-label">성별</label><input id="editInbox_gender" class="input-field" value="${escapeHtml(data.gender||'')}" /></div>
-      <div class="form-group"><label class="form-label">학교/학년</label><input id="editInbox_school" class="input-field" value="${escapeHtml(data.school||'')}" /></div>
-      <div class="form-group"><label class="form-label">보호자</label><input id="editInbox_guardian" class="input-field" value="${escapeHtml(data.guardian||'')}" /></div>
-      <div class="form-group"><label class="form-label">관계</label><input id="editInbox_relation" class="input-field" value="${escapeHtml(data.relation||'')}" /></div>
-      <div class="form-group"><label class="form-label">연락처</label><input id="editInbox_phone" class="input-field" value="${escapeHtml(data.phone||'')}" /></div>
-      <div class="form-group"><label class="form-label">비상연락처</label><input id="editInbox_emergency" class="input-field" value="${escapeHtml(data.emergency||'')}" /></div>
-      <div class="form-group"><label class="form-label">주소</label><input id="editInbox_address" class="input-field" value="${escapeHtml(data.address||'')}" /></div>
-      <div class="form-group"><label class="form-label">이용 희망 요일</label><input id="editInbox_days" class="input-field" value="${escapeHtml(data.days||'')}" /></div>
-      <div class="form-group"><label class="form-label">특이사항</label><textarea id="editInbox_note" class="input-field" rows="2">${escapeHtml(data.note||'')}</textarea></div>`;
-  }
-  if (type === 'consult') {
-    return `
-      <div class="form-group"><label class="form-label">보호자</label><input id="editInbox_guardian" class="input-field" value="${escapeHtml(data.guardian||'')}" /></div>
-      <div class="form-group"><label class="form-label">연락처</label><input id="editInbox_phone" class="input-field" value="${escapeHtml(data.phone||'')}" /></div>
-      <div class="form-group"><label class="form-label">아동 이름</label><input id="editInbox_child" class="input-field" value="${escapeHtml(data.child||'')}" /></div>
-      <div class="form-group"><label class="form-label">희망 상담 일시</label><input id="editInbox_dateTime" class="input-field" value="${escapeHtml(data.dateTime||'')}" /></div>
-      <div class="form-group"><label class="form-label">상담 주제</label><input id="editInbox_topic" class="input-field" value="${escapeHtml(data.topic||'')}" /></div>
-      <div class="form-group"><label class="form-label">상담 내용</label><textarea id="editInbox_detail" class="input-field" rows="3">${escapeHtml(data.detail||'')}</textarea></div>`;
-  }
-  return '<div class="empty-state">수정할 수 없는 서류 유형입니다.</div>';
-}
-
-function collectEditFormData(type) {
-  const val = id => (document.getElementById(id)?.value || '').trim();
-  if (type === 'absence') return { type: val('editInbox_type'), name: val('editInbox_name'), school: val('editInbox_school'), guardian: val('editInbox_guardian'), phone: val('editInbox_phone'), reason: val('editInbox_reason'), from: val('editInbox_from'), to: val('editInbox_to') };
-  if (type === 'medication') return { name: val('editInbox_name'), symptom: val('editInbox_symptom'), hospital: val('editInbox_hospital'), drug: val('editInbox_drug'), dose: val('editInbox_dose'), time: val('editInbox_time'), from: val('editInbox_from'), to: val('editInbox_to'), storage: val('editInbox_storage'), note: val('editInbox_note') };
-  if (type === 'register') return { name: val('editInbox_name'), birth: val('editInbox_birth'), gender: val('editInbox_gender'), school: val('editInbox_school'), guardian: val('editInbox_guardian'), relation: val('editInbox_relation'), phone: val('editInbox_phone'), emergency: val('editInbox_emergency'), address: val('editInbox_address'), days: val('editInbox_days'), note: val('editInbox_note') };
-  if (type === 'consult') return { guardian: val('editInbox_guardian'), phone: val('editInbox_phone'), child: val('editInbox_child'), dateTime: val('editInbox_dateTime'), topic: val('editInbox_topic'), detail: val('editInbox_detail') };
-  return {};
-}
-
-let _editingInboxId = null;
-let _editingInboxType = null;
-
-function openEditInboxItem(id) {
-  const item = inboxItems.find(i => i.id === id);
-  if (!item || !item.data) return;
-
-  _editingInboxId = id;
-  _editingInboxType = item.type;
-  const typeLabels = { absence: '결석/조퇴 신청서', medication: '투약 의뢰서', register: '이용 신청서', consult: '상담 신청서' };
-
-  // 기존 수정 모달이 있으면 제거
-  const existing = document.getElementById('editInboxOverlay');
-  if (existing) existing.remove();
-
-  const overlay = document.createElement('div');
-  overlay.id = 'editInboxOverlay';
-  overlay.className = 'modal-overlay active';
-  overlay.innerHTML = `
-    <div class="modal inbox-edit-modal">
-      <div class="modal-title">${escapeHtml(typeLabels[item.type] || '서류')} 수정</div>
-      <button class="modal-close-x" data-action="closeEditInboxModal"></button>
-      <div class="inbox-edit-form">${getEditFormFields(item.type, item.data)}</div>
-      <div class="edit-modal-actions">
-        <button class="btn-upload" data-action="saveEditInbox">저장</button>
-        <button class="btn-secondary-sm" data-action="closeEditInboxModal">취소</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(overlay);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeEditInboxModal(); });
-}
-
-function closeEditInboxModal() {
-  const overlay = document.getElementById('editInboxOverlay');
-  if (overlay) overlay.remove();
-  _editingInboxId = null;
-  _editingInboxType = null;
-}
-
-async function saveEditInbox() {
-  if (!_editingInboxId || !_editingInboxType) return;
-
-  const newData = collectEditFormData(_editingInboxType);
-  const name = newData.name || newData.guardian || '-';
-  const typeLabels = { absence: '결석/조퇴', medication: '투약 의뢰', register: '신규 등록', consult: '상담 신청' };
-
-  // 간단한 요약 생성
-  let summary = '';
-  if (_editingInboxType === 'absence') summary = `${newData.type} ${newData.from}~${newData.to || newData.from}`;
-  else if (_editingInboxType === 'medication') summary = `${newData.drug} ${newData.dose} ${newData.time}`;
-  else if (_editingInboxType === 'register') summary = `${newData.school || ''} ${newData.guardian || ''}`;
-  else if (_editingInboxType === 'consult') summary = `${newData.topic || ''} ${newData.dateTime || ''}`;
-
-  try {
-    await updateInboxItemFS(_editingInboxId, { data: newData, name, summary: summary.trim() });
-    logAction('update', 'inbox', _editingInboxId, `서류 수정: ${typeLabels[_editingInboxType]} - ${name}`);
-    showToast('서류가 수정되었습니다.', 'success');
-    closeEditInboxModal();
-  } catch (e) {
-    console.error('서류 수정 실패:', e);
-    showToast('수정 중 오류가 발생했습니다.', 'error');
-  }
-}
-
 // 이벤트 위임 등록
 on('openInbox', () => openInbox());
 on('closeInbox', () => closeInbox());
@@ -554,9 +424,6 @@ on('deleteInboxItemById', (e, el) => {
 });
 on('searchInbox', (e, el) => searchInbox(el.value), 'keyup');
 on('sortInbox', (e, el) => sortInbox(el.value), 'change');
-on('editInboxItem', (e, el) => { e.stopPropagation(); openEditInboxItem(el.dataset.id); });
-on('saveEditInbox', () => saveEditInbox());
-on('closeEditInboxModal', () => closeEditInboxModal());
 on('openMySubmissions', () => openMySubmissions());
 on('closeMySubmissions', () => closeMySubmissions());
 on('switchMySubmitTab', (e, el) => switchMySubmitTab(el.dataset.tab));

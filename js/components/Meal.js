@@ -3,7 +3,7 @@ export function Meal() {
   return `
   <section class="section fade-up" id="meal">
     <div class="section-tag">식단표</div>
-    <h2 class="section-title">이번 주<br>식단표 <button class="help-tooltip-btn" data-action="showHelp" data-section="meal">?</button></h2>
+    <h2 class="section-title">이번 주<br>식단표</h2>
     <p class="section-desc">아이들의 건강한 식사를 확인하세요.</p>
 
     <div class="meal-week-nav">

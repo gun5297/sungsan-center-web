@@ -3,7 +3,7 @@ export function Absence() {
   return `
   <section class="section fade-up" id="absence">
     <div class="section-tag">조퇴 / 결석</div>
-    <h2 class="section-title">조퇴·결석<br>신청서 <button class="help-tooltip-btn" data-action="showHelp" data-section="absence">?</button></h2>
+    <h2 class="section-title">조퇴·결석<br>신청서</h2>
     <p class="section-desc">조퇴 또는 결석 사유를 작성하여 센터에 알려주세요.</p>
 
     <div class="form-card">

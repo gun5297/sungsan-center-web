@@ -2,9 +2,10 @@
 
 import { noticesCol } from '../collections.js';
 import {
-  doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot,
-  query, orderBy, limit, startAfter, serverTimestamp, deleteField
+  doc, getDoc, getDocs, addDoc, updateDoc, onSnapshot,
+  query, orderBy, limit, startAfter, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { makeSoftDelete } from './softDelete.js';
 import {
   ref, uploadBytes, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-storage.js";
@@ -66,24 +67,5 @@ export async function updateNotice(id, data) {
   return await updateDoc(doc(db, 'notices', id), { ...data, updatedAt: serverTimestamp() });
 }
 
-// 삭제 (soft delete)
-export async function deleteNotice(id) {
-  return await updateDoc(doc(db, 'notices', id), { deletedAt: serverTimestamp() });
-}
-
-// 복구
-export async function restoreNotice(id) {
-  return await updateDoc(doc(db, 'notices', id), { deletedAt: deleteField() });
-}
-
-// 영구 삭제
-export async function permanentDeleteNotice(id) {
-  return await deleteDoc(doc(db, 'notices', id));
-}
-
-// 삭제된 공지 조회
-export async function getDeletedNotices() {
-  const q = query(noticesCol, orderBy('createdAt', 'desc'));
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(n => n.deletedAt);
-}
+const { softDelete: deleteNotice, restore: restoreNotice, permanentDelete: permanentDeleteNotice, getDeleted: getDeletedNotices } = makeSoftDelete('notices', noticesCol);
+export { deleteNotice, restoreNotice, permanentDeleteNotice, getDeletedNotices };

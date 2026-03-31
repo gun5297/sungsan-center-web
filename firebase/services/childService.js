@@ -4,8 +4,9 @@
 
 import { db } from '../config.js';
 import {
-  collection, doc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp, deleteField
+  collection, doc, addDoc, updateDoc, onSnapshot, query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { makeSoftDelete } from './softDelete.js';
 
 const childrenCol = collection(db, 'children');
 
@@ -34,25 +35,5 @@ export async function updateChild(docId, data) {
   return await updateDoc(ref, data);
 }
 
-// 아동 삭제 (soft delete)
-export async function deleteChild(docId) {
-  const ref = doc(db, 'children', docId);
-  return await updateDoc(ref, { deletedAt: serverTimestamp() });
-}
-
-// 복구
-export async function restoreChild(docId) {
-  return await updateDoc(doc(db, 'children', docId), { deletedAt: deleteField() });
-}
-
-// 영구 삭제
-export async function permanentDeleteChild(docId) {
-  return await deleteDoc(doc(db, 'children', docId));
-}
-
-// 삭제된 아동 조회
-export async function getDeletedChildren() {
-  const q = query(childrenCol, orderBy('createdAt', 'desc'));
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(c => c.deletedAt);
-}
+const { softDelete: deleteChild, restore: restoreChild, permanentDelete: permanentDeleteChild, getDeleted: getDeletedChildren } = makeSoftDelete('children', childrenCol);
+export { deleteChild, restoreChild, permanentDeleteChild, getDeletedChildren };

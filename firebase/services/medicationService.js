@@ -8,9 +8,10 @@
 
 import { medicationsCol } from '../collections.js';
 import {
-  doc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, serverTimestamp, deleteField
+  doc, getDocs, addDoc, updateDoc, onSnapshot, query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from '../config.js';
+import { makeSoftDelete } from './softDelete.js';
 
 // 실시간 구독 (soft delete된 항목 제외)
 export function subscribeMedications(callback) {
@@ -39,28 +40,8 @@ export async function createMedication({ name, birth, drug, dose, time, symptom,
   });
 }
 
-// 삭제 (soft delete)
-export async function deleteMedication(id) {
-  const ref = doc(db, 'medications', id);
-  return await updateDoc(ref, { deletedAt: serverTimestamp() });
-}
-
-// 복구
-export async function restoreMedication(id) {
-  return await updateDoc(doc(db, 'medications', id), { deletedAt: deleteField() });
-}
-
-// 영구 삭제
-export async function permanentDeleteMedication(id) {
-  return await deleteDoc(doc(db, 'medications', id));
-}
-
-// 삭제된 항목 조회
-export async function getDeletedMedications() {
-  const q = query(medicationsCol, orderBy('createdAt', 'desc'));
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => r.deletedAt);
-}
+const { softDelete: deleteMedication, restore: restoreMedication, permanentDelete: permanentDeleteMedication, getDeleted: getDeletedMedications } = makeSoftDelete('medications', medicationsCol);
+export { deleteMedication, restoreMedication, permanentDeleteMedication, getDeletedMedications };
 
 // 투약 완료 체크 (관리자)
 export async function completeMedication(id, userName) {

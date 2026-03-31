@@ -8,9 +8,9 @@
 
 import { absencesCol } from '../collections.js';
 import {
-  getDocs, addDoc, deleteDoc, updateDoc, doc, onSnapshot, query, orderBy, serverTimestamp, deleteField
+  getDocs, addDoc, onSnapshot, query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-import { db } from '../config.js';
+import { makeSoftDelete } from './softDelete.js';
 
 // 실시간 구독 (soft delete된 항목 제외)
 export function subscribeAbsences(callback) {
@@ -31,27 +31,8 @@ export async function getAbsences() {
   return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-// 삭제 (soft delete)
-export async function deleteAbsence(id) {
-  return await updateDoc(doc(db, 'absences', id), { deletedAt: serverTimestamp() });
-}
-
-// 복구
-export async function restoreAbsence(id) {
-  return await updateDoc(doc(db, 'absences', id), { deletedAt: deleteField() });
-}
-
-// 영구 삭제
-export async function permanentDeleteAbsence(id) {
-  return await deleteDoc(doc(db, 'absences', id));
-}
-
-// 삭제된 항목 조회
-export async function getDeletedAbsences() {
-  const q = query(absencesCol, orderBy('createdAt', 'desc'));
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => r.deletedAt);
-}
+const { softDelete: deleteAbsence, restore: restoreAbsence, permanentDelete: permanentDeleteAbsence, getDeleted: getDeletedAbsences } = makeSoftDelete('absences', absencesCol);
+export { deleteAbsence, restoreAbsence, permanentDeleteAbsence, getDeletedAbsences };
 
 // 제출
 export async function createAbsence({ type, name, birth, school, guardian, reason, from, to, phone, date }) {

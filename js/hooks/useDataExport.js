@@ -66,8 +66,70 @@ export async function exportMedications() {
   showToast('투약 기록이 다운로드되었습니다.', 'success');
 }
 
+// 전체 데이터 백업 (Excel — SheetJS 사용)
+export async function exportFullBackup() {
+  if (!getIsAdmin()) return;
+  if (!window.XLSX) {
+    showToast('Excel 라이브러리를 불러올 수 없습니다. 페이지를 새로고침해 주세요.', 'error');
+    return;
+  }
+
+  showToast('전체 백업 준비 중...', 'info', 5000);
+
+  try {
+    const { getDocs, query, orderBy, collection } = await import("https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js");
+    const { db } = await import('../../firebase/config.js');
+
+    const wb = XLSX.utils.book_new();
+
+    const collections = [
+      { name: '아동목록', col: 'children' },
+      { name: '공지사항', col: 'notices' },
+      { name: '투약기록', col: 'medications' },
+      { name: '결석기록', col: 'absences' },
+      { name: '서류함', col: 'inbox' },
+      { name: '출석기록', col: 'attendance' },
+      { name: '활동일지', col: 'dailyLogs' },
+    ];
+
+    for (const c of collections) {
+      try {
+        const snap = await getDocs(query(collection(db, c.col)));
+        const data = snap.docs.map(d => {
+          const raw = d.data();
+          const flat = { id: d.id };
+          for (const [k, v] of Object.entries(raw)) {
+            if (v && typeof v === 'object' && v.seconds) {
+              flat[k] = new Date(v.seconds * 1000).toLocaleString('ko-KR');
+            } else if (typeof v === 'object' && v !== null) {
+              flat[k] = JSON.stringify(v);
+            } else {
+              flat[k] = v;
+            }
+          }
+          return flat;
+        });
+        if (data.length > 0) {
+          const ws = XLSX.utils.json_to_sheet(data);
+          XLSX.utils.book_append_sheet(wb, ws, c.name);
+        }
+      } catch (e) {
+        console.warn(`[backup] ${c.col} 컬렉션 백업 실패:`, e);
+      }
+    }
+
+    const dateStr = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(wb, `성산센터_전체백업_${dateStr}.xlsx`);
+    showToast('전체 데이터가 다운로드되었습니다.', 'success');
+  } catch (e) {
+    console.error('전체 백업 실패:', e);
+    showToast('백업 중 오류가 발생했습니다.', 'error');
+  }
+}
+
 // 이벤트 위임 등록
 import { on } from '../events.js';
 on('exportChildren', () => exportChildren());
 on('exportNotices', () => exportNotices());
 on('exportMedications', () => exportMedications());
+on('exportFullBackup', () => exportFullBackup());

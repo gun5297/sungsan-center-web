@@ -3,7 +3,7 @@ export function Pickup() {
   return `
   <section class="section fade-up" id="pickup">
     <div class="section-tag">하교 픽업</div>
-    <h2 class="section-title">저학년<br>픽업 일정표</h2>
+    <h2 class="section-title">저학년<br>픽업 일정표 <button class="help-tooltip-btn" data-action="showHelp" data-section="pickup">?</button></h2>
     <p class="section-desc">저학년 아동의 하교 픽업 일정을 확인하세요.</p>
 
     <div class="meal-week-nav">

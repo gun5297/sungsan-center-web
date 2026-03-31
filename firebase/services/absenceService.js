@@ -8,15 +8,16 @@
 
 import { absencesCol } from '../collections.js';
 import {
-  getDocs, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp
+  getDocs, addDoc, deleteDoc, updateDoc, doc, onSnapshot, query, orderBy, serverTimestamp, deleteField
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from '../config.js';
 
-// 실시간 구독
+// 실시간 구독 (soft delete된 항목 제외)
 export function subscribeAbsences(callback) {
   const q = query(absencesCol, orderBy('createdAt', 'desc'));
   return onSnapshot(q, (snapshot) => {
-    const records = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    const records = snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
+      .filter(r => !r.deletedAt);
     callback(records);
   }, (error) => {
     console.error('결석 구독 오류:', error);
@@ -30,9 +31,26 @@ export async function getAbsences() {
   return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-// 삭제
+// 삭제 (soft delete)
 export async function deleteAbsence(id) {
+  return await updateDoc(doc(db, 'absences', id), { deletedAt: serverTimestamp() });
+}
+
+// 복구
+export async function restoreAbsence(id) {
+  return await updateDoc(doc(db, 'absences', id), { deletedAt: deleteField() });
+}
+
+// 영구 삭제
+export async function permanentDeleteAbsence(id) {
   return await deleteDoc(doc(db, 'absences', id));
+}
+
+// 삭제된 항목 조회
+export async function getDeletedAbsences() {
+  const q = query(absencesCol, orderBy('createdAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => r.deletedAt);
 }
 
 // 제출

@@ -2,11 +2,15 @@
 import { escapeHtml } from '../utils.js';
 import { on } from '../events.js';
 import { onAuthChange, logout } from '../../firebase/auth.js';
-import { getUserDoc, updateUserDoc, getPendingUsers, approveUser, rejectUser, isAdminRole } from '../../firebase/services/userService.js';
+import { getUserDoc, updateUserDoc, getPendingUsers, approveUser, rejectUser, isAdminRole, getAllApprovedUsers, deactivateUser } from '../../firebase/services/userService.js';
 import { getPasswords, updatePasswords } from '../../firebase/services/settingsService.js';
-import { subscribeChildren, createChild, updateChild, deleteChild } from '../../firebase/services/childService.js';
+import { subscribeChildren, createChild, updateChild, deleteChild, getDeletedChildren, restoreChild, permanentDeleteChild } from '../../firebase/services/childService.js';
 import { getMyChildren, linkChild, unlinkChild, subscribeMyChildren } from '../../firebase/services/childLinkService.js';
 import { getRecentLogs, logAction } from '../../firebase/services/auditService.js';
+import { getDeletedInboxItems, restoreInboxItem, permanentDeleteInboxItem } from '../../firebase/services/inboxService.js';
+import { getDeletedAbsences, restoreAbsence, permanentDeleteAbsence } from '../../firebase/services/absenceService.js';
+import { getDeletedMedications, restoreMedication, permanentDeleteMedication } from '../../firebase/services/medicationService.js';
+import { getDeletedNotices, restoreNotice, permanentDeleteNotice } from '../../firebase/services/noticeService.js';
 
 const ROLE_LABELS = {
   admin: '관리자',
@@ -122,6 +126,17 @@ async function renderMyPage(root, user, userDoc) {
     }
   }
 
+  // 계정 관리 섹션 (관리자만)
+  let accountSection = '';
+  if (isAdmin) {
+    accountSection = `
+      <div class="mypage-card mt" id="accountMgmtCard">
+        <div class="mypage-section-title">계정 관리</div>
+        <div id="accountMgmtWrap"><div class="empty-state mypage-empty-sm">불러오는 중...</div></div>
+      </div>
+    `;
+  }
+
   // 동의 관리 섹션 (일반 사용자만)
   let consentSection = '';
   if (!isAdmin) {
@@ -203,6 +218,7 @@ async function renderMyPage(root, user, userDoc) {
 
       <div class="mypage-actions">
         <button class="btn-upload" data-action="openEditModal">정보 수정</button>
+        <a href="guide.html" class="btn-secondary-sm" style="text-align:center;text-decoration:none;">사용 가이드</a>
         <button class="btn-secondary-sm" data-action="doLogout">로그아웃</button>
       </div>
     </div>
@@ -210,6 +226,8 @@ async function renderMyPage(root, user, userDoc) {
     ${passwordSection}
 
     ${pendingSection}
+
+    ${accountSection}
 
     ${consentSection}
 
@@ -219,10 +237,24 @@ async function renderMyPage(root, user, userDoc) {
     <div class="mypage-card mt">
       <div class="mypage-section-title">데이터 내보내기</div>
       <div class="mypage-actions mypage-actions--wrap">
+        <button class="btn-upload" data-action="exportFullBackup">전체 데이터 백업 (Excel)</button>
         <button class="btn-secondary-sm" data-action="exportChildren">아동 목록 CSV</button>
         <button class="btn-secondary-sm" data-action="exportNotices">공지사항 CSV</button>
         <button class="btn-secondary-sm" data-action="exportMedications">투약 기록 CSV</button>
       </div>
+    </div>
+
+    <div class="mypage-card mt" id="trashCard">
+      <div class="mypage-section-title">휴지통</div>
+      <div class="trash-tabs">
+        <button class="trash-tab active" data-action="switchTrashTab" data-tab="all">전체</button>
+        <button class="trash-tab" data-action="switchTrashTab" data-tab="inbox">서류함</button>
+        <button class="trash-tab" data-action="switchTrashTab" data-tab="absence">결석</button>
+        <button class="trash-tab" data-action="switchTrashTab" data-tab="medication">투약</button>
+        <button class="trash-tab" data-action="switchTrashTab" data-tab="notice">공지</button>
+        <button class="trash-tab" data-action="switchTrashTab" data-tab="child">아동</button>
+      </div>
+      <div id="trashListWrap"><div class="empty-state mypage-empty-sm">불러오는 중...</div></div>
     </div>
     ` : ''}
 
@@ -381,9 +413,11 @@ async function renderMyPage(root, user, userDoc) {
     if (isAdmin) renderChildList();
   });
 
-  // 감사 로그 로드 (관리자만)
+  // 관리자 전용 데이터 로드
   if (isAdmin) {
+    loadAccountManagement();
     loadAuditLogs();
+    loadTrashItems();
   }
 
   // 일반 사용자: 내 아이 연결 실시간 구독
@@ -775,6 +809,236 @@ on('unlinkMyChild', async (e, el) => {
   } catch (e) {
     console.error('연결 해제 실패:', e);
     showToast('해제 중 오류가 발생했습니다.', 'error');
+  }
+});
+
+// ===== 계정 관리 (관리자) =====
+let _approvedUsers = [];
+
+async function loadAccountManagement() {
+  const wrap = document.getElementById('accountMgmtWrap');
+  if (!wrap) return;
+  try {
+    _approvedUsers = await getAllApprovedUsers();
+    renderAccountList();
+  } catch (e) {
+    console.error('계정 목록 조회 실패:', e);
+    wrap.innerHTML = '<div class="empty-state mypage-empty-sm">계정 목록을 불러올 수 없습니다</div>';
+  }
+}
+
+function renderAccountList() {
+  const wrap = document.getElementById('accountMgmtWrap');
+  if (!wrap) return;
+
+  if (_approvedUsers.length === 0) {
+    wrap.innerHTML = '<div class="empty-state mypage-empty-sm">승인된 계정이 없습니다</div>';
+    return;
+  }
+
+  const currentUid = _currentUser ? _currentUser.uid : '';
+
+  wrap.innerHTML = `
+    <div class="child-table-wrap">
+      <table class="child-table">
+        <thead>
+          <tr><th>이름</th><th>이메일</th><th>역할</th><th>관리</th></tr>
+        </thead>
+        <tbody>
+          ${_approvedUsers.map(u => {
+            const isSelf = u.id === currentUid;
+            const roleLabel = isAdminRole(u.role) ? '관리자' : '일반';
+            return `
+              <tr>
+                <td>${escapeHtml(u.name || '-')}</td>
+                <td>${escapeHtml(u.email || '-')}</td>
+                <td>
+                  <select class="input-field account-role-select" data-action="changeUserRole" data-id="${escapeHtml(u.id)}" ${isSelf ? 'disabled' : ''}>
+                    <option value="general" ${!isAdminRole(u.role) ? 'selected' : ''}>일반</option>
+                    <option value="admin" ${isAdminRole(u.role) ? 'selected' : ''}>관리자</option>
+                  </select>
+                </td>
+                <td class="child-action-cell">
+                  ${isSelf
+                    ? '<span class="account-self-badge">본인</span>'
+                    : `<button class="child-inactive-btn" data-action="deactivateAccount" data-id="${escapeHtml(u.id)}">비활성화</button>`}
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="child-count">총 ${_approvedUsers.length}명 (관리자 ${_approvedUsers.filter(u => isAdminRole(u.role)).length}명)</div>
+  `;
+}
+
+on('changeUserRole', async (e, el) => {
+  const uid = el.dataset.id;
+  const newRole = el.value;
+  const user = _approvedUsers.find(u => u.id === uid);
+  if (!user) return;
+
+  // 마지막 관리자 강등 방지
+  if (isAdminRole(user.role) && newRole === 'general') {
+    const adminCount = _approvedUsers.filter(u => isAdminRole(u.role)).length;
+    if (adminCount <= 1) {
+      showToast('관리자가 최소 1명은 있어야 합니다.', 'warning');
+      el.value = 'admin';
+      return;
+    }
+  }
+
+  const label = newRole === 'admin' ? '관리자' : '일반';
+  if (!await showConfirm(`${user.name}님의 역할을 '${label}'(으)로 변경하시겠습니까?`)) {
+    el.value = isAdminRole(user.role) ? 'admin' : 'general';
+    return;
+  }
+
+  try {
+    await updateUserDoc(uid, { role: newRole });
+    logAction('update', 'user', uid, `역할 변경: ${user.name} → ${label}`);
+    showToast(`${user.name}님의 역할이 '${label}'(으)로 변경되었습니다.`, 'success');
+    _approvedUsers = await getAllApprovedUsers();
+    renderAccountList();
+  } catch (e) {
+    console.error('역할 변경 실패:', e);
+    showToast('역할 변경 중 오류가 발생했습니다.', 'error');
+    el.value = isAdminRole(user.role) ? 'admin' : 'general';
+  }
+}, 'change');
+
+on('deactivateAccount', async (e, el) => {
+  const uid = el.dataset.id;
+  const user = _approvedUsers.find(u => u.id === uid);
+  if (!user) return;
+
+  // 마지막 관리자 비활성화 방지
+  if (isAdminRole(user.role)) {
+    const adminCount = _approvedUsers.filter(u => isAdminRole(u.role)).length;
+    if (adminCount <= 1) {
+      showToast('관리자가 최소 1명은 있어야 합니다.', 'warning');
+      return;
+    }
+  }
+
+  if (!await showConfirm(`${user.name}님의 계정을 비활성화하시겠습니까?\n\n비활성화된 계정은 로그인할 수 없습니다.`)) return;
+
+  try {
+    await deactivateUser(uid);
+    logAction('update', 'user', uid, `계정 비활성화: ${user.name}`);
+    showToast(`${user.name}님의 계정이 비활성화되었습니다.`, 'success');
+    _approvedUsers = await getAllApprovedUsers();
+    renderAccountList();
+  } catch (e) {
+    console.error('계정 비활성화 실패:', e);
+    showToast('비활성화 중 오류가 발생했습니다.', 'error');
+  }
+});
+
+// ===== 휴지통 =====
+let _trashItems = [];
+let _trashFilter = 'all';
+
+const TRASH_TYPE_LABELS = { inbox: '서류함', absence: '결석', medication: '투약', notice: '공지', child: '아동' };
+
+function normalizeTrashItem(item, type) {
+  const name = item.name || item.title || item.summary || '-';
+  const deletedAt = item.deletedAt;
+  const dateStr = deletedAt ? new Date(deletedAt.seconds * 1000).toLocaleDateString('ko-KR') : '-';
+  return { id: item.id, type, name, dateStr, deletedAt };
+}
+
+async function loadTrashItems() {
+  const wrap = document.getElementById('trashListWrap');
+  if (!wrap) return;
+  try {
+    const [inbox, absences, medications, notices, children] = await Promise.all([
+      getDeletedInboxItems(),
+      getDeletedAbsences(),
+      getDeletedMedications(),
+      getDeletedNotices(),
+      getDeletedChildren()
+    ]);
+    _trashItems = [
+      ...inbox.map(i => normalizeTrashItem(i, 'inbox')),
+      ...absences.map(i => normalizeTrashItem(i, 'absence')),
+      ...medications.map(i => normalizeTrashItem(i, 'medication')),
+      ...notices.map(i => normalizeTrashItem(i, 'notice')),
+      ...children.map(i => normalizeTrashItem(i, 'child'))
+    ].sort((a, b) => (b.deletedAt?.seconds || 0) - (a.deletedAt?.seconds || 0));
+    renderTrashList();
+  } catch (e) {
+    console.error('휴지통 로드 실패:', e);
+    wrap.innerHTML = '<div class="empty-state mypage-empty-sm">휴지통을 불러올 수 없습니다</div>';
+  }
+}
+
+function renderTrashList() {
+  const wrap = document.getElementById('trashListWrap');
+  if (!wrap) return;
+
+  const filtered = _trashFilter === 'all' ? _trashItems : _trashItems.filter(i => i.type === _trashFilter);
+
+  if (filtered.length === 0) {
+    wrap.innerHTML = '<div class="empty-state mypage-empty-sm">삭제된 항목이 없습니다</div>';
+    return;
+  }
+
+  wrap.innerHTML = `
+    <div class="trash-list">
+      ${filtered.map(item => `
+        <div class="trash-item">
+          <span class="trash-type ${escapeHtml(item.type)}">${escapeHtml(TRASH_TYPE_LABELS[item.type])}</span>
+          <div class="trash-info">
+            <div class="trash-name">${escapeHtml(item.name)}</div>
+            <div class="trash-date">삭제일: ${escapeHtml(item.dateStr)}</div>
+          </div>
+          <div class="trash-actions">
+            <button class="trash-restore-btn" data-action="restoreTrashItem" data-id="${escapeHtml(item.id)}" data-type="${escapeHtml(item.type)}">복구</button>
+            <button class="trash-perm-btn" data-action="permanentDeleteTrashItem" data-id="${escapeHtml(item.id)}" data-type="${escapeHtml(item.type)}">영구삭제</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="child-count">총 ${filtered.length}건</div>
+  `;
+}
+
+on('switchTrashTab', (e, el) => {
+  _trashFilter = el.dataset.tab;
+  document.querySelectorAll('.trash-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === _trashFilter));
+  renderTrashList();
+});
+
+const RESTORE_FNS = { inbox: restoreInboxItem, absence: restoreAbsence, medication: restoreMedication, notice: restoreNotice, child: restoreChild };
+const PERM_DELETE_FNS = { inbox: permanentDeleteInboxItem, absence: permanentDeleteAbsence, medication: permanentDeleteMedication, notice: permanentDeleteNotice, child: permanentDeleteChild };
+
+on('restoreTrashItem', async (e, el) => {
+  const { id, type } = el.dataset;
+  if (!await showConfirm('이 항목을 복구하시겠습니까?')) return;
+  try {
+    await RESTORE_FNS[type](id);
+    logAction('update', type, id, `${TRASH_TYPE_LABELS[type]} 복구`);
+    showToast('복구되었습니다.', 'success');
+    await loadTrashItems();
+  } catch (e) {
+    console.error('복구 실패:', e);
+    showToast('복구 중 오류가 발생했습니다.', 'error');
+  }
+});
+
+on('permanentDeleteTrashItem', async (e, el) => {
+  const { id, type } = el.dataset;
+  if (!await showConfirm('영구 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.')) return;
+  try {
+    await PERM_DELETE_FNS[type](id);
+    logAction('delete', type, id, `${TRASH_TYPE_LABELS[type]} 영구 삭제`);
+    showToast('영구 삭제되었습니다.', 'success');
+    await loadTrashItems();
+  } catch (e) {
+    console.error('영구 삭제 실패:', e);
+    showToast('삭제 중 오류가 발생했습니다.', 'error');
   }
 });
 

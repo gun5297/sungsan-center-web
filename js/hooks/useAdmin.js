@@ -1,5 +1,6 @@
 // ===== useAdmin: Firebase Auth + Firestore 역할 기반 관리자 =====
 import { getIsAdmin, setIsAdmin, setCurrentUser, setUserRole, canManage } from '../state.js';
+import { showWelcomeModal } from './useHelp.js';
 import { on } from '../events.js';
 import { logout, onAuthChange } from '../../firebase/auth.js';
 import { getUserDoc, createUserDoc, hasNoDirector, isAdminRole } from '../../firebase/services/userService.js';
@@ -81,6 +82,28 @@ export function initAdmin() {
         if (btn) {
           btn.textContent = `${userDoc.name} 로그아웃`;
           btn.classList.add('logged-in');
+        }
+
+        // 월간 백업 알림 (매월 1일, 관리자만)
+        if (admin) {
+          const today = new Date();
+          if (today.getDate() === 1) {
+            const key = `lastBackupReminder`;
+            const thisMonth = `${today.getFullYear()}-${today.getMonth()}`;
+            if (localStorage.getItem(key) !== thisMonth) {
+              localStorage.setItem(key, thisMonth);
+              setTimeout(() => {
+                if (window.showToast) showToast('월간 데이터 백업을 권장합니다. 마이페이지에서 전체 백업을 진행해 주세요.', 'info', 8000);
+              }, 3000);
+            }
+          }
+        }
+
+        // 첫 로그인 웰컴 모달
+        const visitedKey = `visited_${user.uid}`;
+        if (!localStorage.getItem(visitedKey)) {
+          localStorage.setItem(visitedKey, 'true');
+          setTimeout(() => showWelcomeModal(userDoc.name, admin), 1500);
         }
       } catch (e) {
         console.error('관리자 상태 확인 실패:', e);

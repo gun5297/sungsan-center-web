@@ -11,15 +11,16 @@
 
 import { inboxCol } from '../collections.js';
 import {
-  doc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, serverTimestamp
+  doc, getDocs, addDoc, deleteDoc, updateDoc, onSnapshot, query, orderBy, serverTimestamp, deleteField
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { db } from '../config.js';
 
-// 실시간 구독
+// 실시간 구독 (soft delete된 항목 제외)
 export function subscribeInbox(callback) {
   const q = query(inboxCol, orderBy('createdAt', 'desc'));
   return onSnapshot(q, (snapshot) => {
-    const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(item => !item.deletedAt);
     callback(items);
   }, (error) => {
     console.error('서류함 구독 오류:', error);
@@ -69,8 +70,34 @@ export async function updateInboxStatus(id, status) {
   return await updateDoc(ref, { status });
 }
 
-// 서류 삭제
+// 서류 삭제 (soft delete — 휴지통으로 이동)
 export async function deleteInboxItem(id) {
   const ref = doc(db, 'inbox', id);
+  return await updateDoc(ref, { deletedAt: serverTimestamp() });
+}
+
+// 서류 수정 (관리자)
+export async function updateInboxItem(id, data) {
+  const ref = doc(db, 'inbox', id);
+  return await updateDoc(ref, { ...data, updatedAt: serverTimestamp() });
+}
+
+// 서류 복구 (휴지통에서)
+export async function restoreInboxItem(id) {
+  const ref = doc(db, 'inbox', id);
+  return await updateDoc(ref, { deletedAt: deleteField() });
+}
+
+// 서류 영구 삭제
+export async function permanentDeleteInboxItem(id) {
+  const ref = doc(db, 'inbox', id);
   return await deleteDoc(ref);
+}
+
+// 삭제된 서류 조회 (휴지통용)
+export async function getDeletedInboxItems() {
+  const q = query(inboxCol, orderBy('createdAt', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
+    .filter(item => item.deletedAt);
 }
